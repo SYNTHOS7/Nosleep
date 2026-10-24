@@ -3,15 +3,34 @@ import React, { useState } from 'react'
 /**
  * Ingested documents list component.
  * Displays all processed documents staying in the workspace, with search filter,
- * chunk counts, revision badges, and inspection triggers.
+ * chunk counts, revision badges, inline revision editing, and deletion.
  */
-export default function DocumentList({ documents, onSelectDocument, onDeleteDocument }) {
+export default function DocumentList({ documents, onSelectDocument, onEditDocument, onDeleteDocument }) {
   const [filterQuery, setFilterQuery] = useState('')
   const [isExpanded, setIsExpanded] = useState(true)
+  const [editingDocId, setEditingDocId] = useState(null)
+  const [editContent, setEditContent] = useState('')
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
 
   const filteredDocs = (documents || []).filter((doc) =>
     (doc.source_name || doc.id).toLowerCase().includes(filterQuery.toLowerCase())
   )
+
+  const handleStartEdit = (doc) => {
+    setEditingDocId(doc.id)
+    setEditContent(`Updated specification for ${doc.source_name}: System operating under revised high-availability protocol.`)
+  }
+
+  const handleSaveEdit = async (doc) => {
+    if (!editContent.trim()) return
+    setIsSavingEdit(true)
+    try {
+      await onEditDocument(doc.id, doc.revision, editContent, doc.source_name)
+      setEditingDocId(null)
+    } finally {
+      setIsSavingEdit(false)
+    }
+  }
 
   return (
     <div className="glass-card" id="documents-panel">
@@ -64,7 +83,7 @@ export default function DocumentList({ documents, onSelectDocument, onDeleteDocu
           ) : (
             <div
               style={{
-                maxHeight: '160px',
+                maxHeight: '180px',
                 overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
@@ -73,84 +92,154 @@ export default function DocumentList({ documents, onSelectDocument, onDeleteDocu
               id="documents-list-container"
             >
               {filteredDocs.slice(0, 100).map((doc) => (
-                <div
-                  key={doc.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '6px 8px',
-                    borderRadius: '6px',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                    fontSize: '0.75rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onClick={() =>
-                    onSelectDocument &&
-                    onSelectDocument({
-                      id: `doc:${doc.id}`,
-                      label: 'Document',
-                      name: doc.source_name,
-                      type: 'document',
-                      properties: {
-                        revision: doc.revision,
-                        source_type: doc.source_type,
-                        chunk_count: doc.chunk_count,
-                      },
-                      elementType: 'node',
-                    })
-                  }
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                    <span style={{ color: '#f59e0b' }}>📄</span>
-                    <span
-                      style={{
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        maxWidth: '160px',
-                        color: 'var(--text-primary)',
-                      }}
-                      title={doc.source_name}
-                    >
-                      {doc.source_name}
-                    </span>
+                <div key={doc.id}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '6px 8px',
+                      borderRadius: '6px',
+                      background: editingDocId === doc.id ? 'rgba(56, 189, 248, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                      border: editingDocId === doc.id ? '1px solid var(--accent-cyan)' : '1px solid rgba(255, 255, 255, 0.06)',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onClick={() =>
+                      onSelectDocument &&
+                      onSelectDocument({
+                        id: `doc:${doc.id}`,
+                        label: 'Document',
+                        name: doc.source_name,
+                        type: 'document',
+                        properties: {
+                          revision: doc.revision,
+                          source_type: doc.source_type,
+                          chunk_count: doc.chunk_count,
+                        },
+                        elementType: 'node',
+                      })
+                    }
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                      <span style={{ color: '#f59e0b' }}>📄</span>
+                      <span
+                        style={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '140px',
+                          color: 'var(--text-primary)',
+                        }}
+                        title={doc.source_name}
+                      >
+                        {doc.source_name}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          color: '#38bdf8',
+                          background: 'rgba(56, 189, 248, 0.12)',
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                        }}
+                        title="Document Revision"
+                      >
+                        rev {doc.revision}
+                      </span>
+
+                      {/* Edit without rebuild button */}
+                      {onEditDocument && (
+                        <button
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            padding: '2px 4px',
+                            fontSize: '0.75rem',
+                          }}
+                          title="Edit Document without Rebuild"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (editingDocId === doc.id) {
+                              setEditingDocId(null)
+                            } else {
+                              handleStartEdit(doc)
+                            }
+                          }}
+                        >
+                          ✏
+                        </button>
+                      )}
+
+                      {/* Delete button */}
+                      {onDeleteDocument && (
+                        <button
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--text-muted)',
+                            cursor: 'pointer',
+                            padding: '2px 4px',
+                            fontSize: '0.75rem',
+                          }}
+                          title="Delete Document"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onDeleteDocument(doc.id)
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span
+                  {/* Inline edit drawer */}
+                  {editingDocId === doc.id && (
+                    <div
                       style={{
-                        fontSize: '0.68rem',
-                        color: 'var(--text-muted)',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        padding: '1px 5px',
-                        borderRadius: '4px',
+                        padding: '8px',
+                        margin: '4px 0 6px 0',
+                        background: 'rgba(15, 23, 42, 0.8)',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                       }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      rev {doc.revision}
-                    </span>
-                    {onDeleteDocument && (
-                      <button
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--text-muted)',
-                          cursor: 'pointer',
-                          padding: '2px 4px',
-                          fontSize: '0.75rem',
-                        }}
-                        title="Delete Document"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onDeleteDocument(doc.id)
-                        }}
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', marginBottom: '4px' }}>
+                        Edit prose (will produce rev {doc.revision + 1} without rebuild):
+                      </div>
+                      <textarea
+                        className="chat-input"
+                        style={{ width: '100%', height: '55px', fontSize: '0.75rem', resize: 'vertical' }}
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                      />
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', marginTop: '6px' }}>
+                        <button
+                          className="btn-secondary"
+                          style={{ fontSize: '0.7rem', padding: '4px 8px' }}
+                          onClick={() => setEditingDocId(null)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="btn-primary"
+                          style={{ fontSize: '0.7rem', padding: '4px 8px' }}
+                          disabled={isSavingEdit || !editContent.trim()}
+                          onClick={() => handleSaveEdit(doc)}
+                        >
+                          {isSavingEdit ? 'Updating...' : `Save as Rev ${doc.revision + 1}`}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
               {filteredDocs.length > 100 && (

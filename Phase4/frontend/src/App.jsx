@@ -13,6 +13,7 @@ import {
   getChunkSource,
   getWorkspaceDocuments,
   deleteDocument,
+  editDocument,
 } from './services/api'
 
 export default function App() {
@@ -105,6 +106,17 @@ export default function App() {
     }
   }
 
+  // Handle Document Edit without Rebuild
+  const handleEditDocument = async (docId, currentRev, newText, filename) => {
+    try {
+      await editDocument(workspaceId, docId, currentRev, { rawText: newText, filename })
+      await refreshWorkspace()
+    } catch (err) {
+      alert(`Edit failed: ${err.message}`)
+      throw err
+    }
+  }
+
   // Toggle Topic Filter
   const handleToggleTopic = topicId => {
     if (topicId === 'ALL') {
@@ -181,6 +193,7 @@ export default function App() {
             <DocumentList
               documents={documents}
               onSelectDocument={setSelectedElement}
+              onEditDocument={handleEditDocument}
               onDeleteDocument={handleDeleteDocument}
             />
 
