@@ -98,7 +98,13 @@ class LifecycleService:
             # Publish into VectorStore
             self.vector_store.upsert_vectors(ws, batch.vectors)
 
-            # Phase 3 Incremental centroid topic assignment (if topics exist in workspace)
+            # Persist into Chroma persistent database
+            try:
+                from backend.storage.db_manager import get_db_manager
+                get_db_manager().sync_vectors_to_chroma(ws, batch.vectors)
+            except Exception:
+                pass
+
             # Phase 3 Incremental centroid topic assignment (if topics exist in workspace)
             ws_topics = self.graph_store.topics.get(ws, {})
             if ws_topics:

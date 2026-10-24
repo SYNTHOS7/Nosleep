@@ -111,11 +111,28 @@ export async function getOperation(operationId) {
   return res.json()
 }
 
-export async function pollOperation(operationId, intervalMs = 150, maxAttempts = 100) {
+export async function getDatabaseStatus() {
+  const res = await fetch(`${BASE_URL}/v1/database/status`)
+  if (!res.ok) throw new Error('Failed to fetch database status')
+  return res.json()
+}
+
+export async function configureDatabase(config) {
+  const res = await fetch(`${BASE_URL}/v1/database/configure`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(config),
+  })
+  if (!res.ok) throw new Error('Failed to configure database')
+  return res.json()
+}
+
+export async function pollOperation(operationId, intervalMs = 150, maxAttempts = 150) {
   for (let i = 0; i < maxAttempts; i++) {
     const op = await getOperation(operationId)
-    if (op.status === 'COMPLETED') return op
-    if (op.status === 'FAILED') throw new Error(op.error_message || 'Operation failed')
+    const st = (op.status || '').toUpperCase()
+    if (st === 'COMPLETED' || st === 'STAGED') return op
+    if (st === 'FAILED') throw new Error(op.error_message || 'Operation failed')
     await new Promise((r) => setTimeout(r, intervalMs))
   }
   throw new Error('Operation polling timed out')

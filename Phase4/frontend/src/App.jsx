@@ -5,6 +5,7 @@ import TopicPicker from './components/TopicPicker'
 import ChatPanel from './components/ChatPanel'
 import GraphCanvas from './components/GraphCanvas'
 import InspectorModal from './components/InspectorModal'
+import DatabaseModal from './components/DatabaseModal'
 import {
   getWorkspaceGraph,
   getTopics,
@@ -14,6 +15,7 @@ import {
   getWorkspaceDocuments,
   deleteDocument,
   editDocument,
+  getDatabaseStatus,
 } from './services/api'
 
 export default function App() {
@@ -26,18 +28,22 @@ export default function App() {
   const [selectedElement, setSelectedElement] = useState(null)
   const [isQuerying, setIsQuerying] = useState(false)
   const [isDiscovering, setIsDiscovering] = useState(false)
+  const [dbStatus, setDbStatus] = useState(null)
+  const [showDbModal, setShowDbModal] = useState(false)
 
-  // Refresh all workspace data (graph, topics, and documents)
+  // Refresh all workspace data (graph, topics, documents, and database status)
   const refreshWorkspace = async () => {
     try {
-      const [gData, topData, docsData] = await Promise.all([
+      const [gData, topData, docsData, dStatus] = await Promise.all([
         getWorkspaceGraph(workspaceId).catch(() => ({ nodes: [], edges: [], highlighted_path_ids: [] })),
         getTopics(workspaceId).catch(() => ({ topics: [] })),
         getWorkspaceDocuments(workspaceId).catch(() => ({ documents: [] })),
+        getDatabaseStatus().catch(() => null),
       ])
       setGraphData(gData)
       setTopics(topData.topics || [])
       setDocuments(docsData.documents || [])
+      if (dStatus) setDbStatus(dStatus)
     } catch (err) {
       console.error('Error refreshing workspace:', err)
     }
@@ -158,6 +164,19 @@ export default function App() {
         </div>
 
         <div className="header-controls">
+          {/* Database Connection Pill */}
+          <div
+            className="workspace-badge"
+            id="db-status-badge"
+            onClick={() => setShowDbModal(true)}
+            title="Click to view Database connection details and configure Neo4j"
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <span style={{ color: dbStatus?.chromadb?.status === 'connected_persistent' ? '#10b981' : '#06b6d4' }}>●</span>
+            <span>DB: {dbStatus?.neo4j?.status === 'connected' ? 'Neo4j Aura' : 'Chroma + Embedded'}</span>
+            <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>⚙</span>
+          </div>
+
           <div className="workspace-badge" id="workspace-badge">
             <div className="status-dot"></div>
             <span>Workspace:</span>
@@ -227,6 +246,15 @@ export default function App() {
             element={selectedElement}
             onClose={() => setSelectedElement(null)}
           />
+
+          {/* Database Connection & Settings Modal */}
+          {showDbModal && (
+            <DatabaseModal
+              dbStatus={dbStatus}
+              onClose={() => setShowDbModal(false)}
+              onRefresh={refreshWorkspace}
+            />
+          )}
         </main>
       </div>
     </div>

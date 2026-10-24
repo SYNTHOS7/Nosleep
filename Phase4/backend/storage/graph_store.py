@@ -196,85 +196,128 @@ class GraphStore:
             self._detect_conflicts(workspace_id)
 
     def _detect_conflicts(self, ws: str) -> None:
-        """Detects contradictions between relations or assertions across documents."""
+        """Detects contradictions between relations or assertions across documents using high-performance bucket indexing."""
         self.conflicts[ws] = []
         rels = list(self.relations.get(ws, {}).values())
+        if not rels:
+            return
 
-        for i in range(len(rels)):
-            for j in range(i + 1, len(rels)):
-                r1 = rels[i]
-                r2 = rels[j]
+        seen_conflict_ids: Set[Tuple[str, str]] = set()
 
-                # Conflict condition 1: Same source & predicate, opposite polarity
-                is_polarity_conflict = (
-                    r1.source_entity_name.lower() == r2.source_entity_name.lower()
-                    and r1.predicate.lower() == r2.predicate.lower()
-                    and r1.polarity != r2.polarity
-                )
+        # 1. Bucket relations by (source_entity.lower(), predicate.lower())
+        rel_buckets: Dict[Tuple[str, str], List[Relation]] = {}
+        # Also index relations by normalized triple (s, p, o) for O(1) planted check
+        triple_map: Dict[Tuple[str, str, str], List[Relation]] = {}
 
-                # Conflict condition 2: Same source & predicate, distinct target entities/values
-                is_target_conflict = False
-                if (
-                    r1.source_entity_name.lower() == r2.source_entity_name.lower()
-                    and r1.predicate.lower() == r2.predicate.lower()
-                ):
+        for r in rels:
+            s_clean = r.source_entity_name.strip().lower()
+            p_clean = r.predicate.strip().lower()
+            o_clean = (r.target_entity_name or r.target_value_id or "").strip().lower()
+
+            key = (s_clean, p_clean)
+            rel_buckets.setdefault(key, []).append(r)
+
+            triple_key = (s_clean.replace(" ", "_"), p_clean.replace(" ", "_"), o_clean.replace(" ", "_"))
+            triple_map.setdefault(triple_key, []).append(r)
+
+        # 2. Check conflicts within same bucket (Conditions 1 & 2)
+        for (s_clean, p_clean), bucket in rel_buckets.items():
+            if len(bucket) < 2:
+                continue
+            for i in range(len(bucket)):
+                for j in range(i + 1, len(bucket)):
+                    r1 = bucket[i]
+                    r2 = bucket[j]
+
+                    is_polarity_conflict = (r1.polarity != r2.polarity)
+
                     t1 = (r1.target_entity_name or r1.target_value_id or "").lower()
                     t2 = (r2.target_entity_name or r2.target_value_id or "").lower()
-                    if t1 and t2 and t1 != t2:
-                        is_target_conflict = True
+                    is_target_conflict = bool(t1 and t2 and t1 != t2)
 
-                # Conflict condition 3: Planted catalog incompatible pairs
-                is_planted_conflict = False
-                try:
-                    from backend.conflicts.detector import PLANTED_INCOMPATIBLE_PAIRS
-                    s1 = r1.source_entity_name.lower().replace(" ", "_")
-                    p1 = r1.predicate.lower().replace(" ", "_")
-                    o1 = (r1.target_entity_name or r1.target_value_id or "").lower().replace(" ", "_")
-                    s2 = r2.source_entity_name.lower().replace(" ", "_")
-                    p2 = r2.predicate.lower().replace(" ", "_")
-                    o2 = (r2.target_entity_name or r2.target_value_id or "").lower().replace(" ", "_")
-                    t1 = (s1, p1, o1)
-                    t2 = (s2, p2, o2)
-                    for pair_a, pair_b in PLANTED_INCOMPATIBLE_PAIRS:
-                        if (t1 == pair_a and t2 == pair_b) or (t1 == pair_b and t2 == pair_a):
-                            is_planted_conflict = True
-                            break
-                except Exception:
-                    pass
+                    if is_polarity_conflict or is_target_conflict:
+                        cid_pair = tuple(sorted([r1.id, r2.id]))
+                        if cid_pair in seen_conflict_ids:
+                            continue
+                        seen_conflict_ids.add(cid_pair)
 
-                if is_polarity_conflict or is_target_conflict or is_planted_conflict:
-                    chunk1 = self.chunks[ws].get(r1.provenance.source_chunk_id)
-                    chunk2 = self.chunks[ws].get(r2.provenance.source_chunk_id)
+                        chunk1 = self.chunks[ws].get(r1.provenance.source_chunk_id)
+                        chunk2 = self.chunks[ws].get(r2.provenance.source_chunk_id)
 
-                    doc1_id = chunk1.document_id if chunk1 else "doc-unknown"
-                    doc2_id = chunk2.document_id if chunk2 else "doc-unknown"
+                        doc1_id = chunk1.document_id if chunk1 else "doc-unknown"
+                        doc2_id = chunk2.document_id if chunk2 else "doc-unknown"
 
-                    doc1 = self.documents[ws].get(doc1_id)
-                    doc2 = self.documents[ws].get(doc2_id)
+                        doc1 = self.documents[ws].get(doc1_id)
+                        doc2 = self.documents[ws].get(doc2_id)
 
-                    stmt1 = f"{r1.source_entity_name} {r1.predicate} {r1.target_entity_name or r1.target_value_id or ''} [{r1.polarity}]"
-                    stmt2 = f"{r2.source_entity_name} {r2.predicate} {r2.target_entity_name or r2.target_value_id or ''} [{r2.polarity}]"
+                        stmt1 = f"{r1.source_entity_name} {r1.predicate} {r1.target_entity_name or r1.target_value_id or ''} [{r1.polarity}]"
+                        stmt2 = f"{r2.source_entity_name} {r2.predicate} {r2.target_entity_name or r2.target_value_id or ''} [{r2.polarity}]"
 
-                    conflict = ConflictPair(
-                        statement_a=stmt1,
-                        source_a={
-                            "document_id": doc1_id,
-                            "source_name": doc1.source_name if doc1 else "Source 1",
-                            "chunk_id": r1.provenance.source_chunk_id,
-                            "quote": r1.provenance.exact_quote,
-                        },
-                        statement_b=stmt2,
-                        source_b={
-                            "document_id": doc2_id,
-                            "source_name": doc2.source_name if doc2 else "Source 2",
-                            "chunk_id": r2.provenance.source_chunk_id,
-                            "quote": r2.provenance.exact_quote,
-                        },
-                        description=f"Contradiction detected between {stmt1} and {stmt2}.",
-                    )
-                    self.conflicts[ws].append(conflict)
+                        self.conflicts[ws].append(ConflictPair(
+                            statement_a=stmt1,
+                            source_a={
+                                "document_id": doc1_id,
+                                "source_name": doc1.source_name if doc1 else "Source 1",
+                                "chunk_id": r1.provenance.source_chunk_id,
+                                "quote": r1.provenance.exact_quote,
+                            },
+                            statement_b=stmt2,
+                            source_b={
+                                "document_id": doc2_id,
+                                "source_name": doc2.source_name if doc2 else "Source 2",
+                                "chunk_id": r2.provenance.source_chunk_id,
+                                "quote": r2.provenance.exact_quote,
+                            },
+                            description=f"Contradiction detected between {stmt1} and {stmt2}.",
+                        ))
 
-        # Chunk-level assertion scan for opposing claims (e.g. open vs closed, public vs private, deployed vs deprecated)
+        # 3. Fast O(1) Planted Incompatible Pairs check (Condition 3)
+        try:
+            from backend.conflicts.detector import PLANTED_INCOMPATIBLE_PAIRS
+            for pair_a, pair_b in PLANTED_INCOMPATIBLE_PAIRS:
+                rels_a = triple_map.get(pair_a, [])
+                rels_b = triple_map.get(pair_b, [])
+                if rels_a and rels_b:
+                    for r1 in rels_a:
+                        for r2 in rels_b:
+                            cid_pair = tuple(sorted([r1.id, r2.id]))
+                            if cid_pair in seen_conflict_ids:
+                                continue
+                            seen_conflict_ids.add(cid_pair)
+
+                            chunk1 = self.chunks[ws].get(r1.provenance.source_chunk_id)
+                            chunk2 = self.chunks[ws].get(r2.provenance.source_chunk_id)
+
+                            doc1_id = chunk1.document_id if chunk1 else "doc-unknown"
+                            doc2_id = chunk2.document_id if chunk2 else "doc-unknown"
+
+                            doc1 = self.documents[ws].get(doc1_id)
+                            doc2 = self.documents[ws].get(doc2_id)
+
+                            stmt1 = f"{r1.source_entity_name} {r1.predicate} {r1.target_entity_name or r1.target_value_id or ''} [{r1.polarity}]"
+                            stmt2 = f"{r2.source_entity_name} {r2.predicate} {r2.target_entity_name or r2.target_value_id or ''} [{r2.polarity}]"
+
+                            self.conflicts[ws].append(ConflictPair(
+                                statement_a=stmt1,
+                                source_a={
+                                    "document_id": doc1_id,
+                                    "source_name": doc1.source_name if doc1 else "Source 1",
+                                    "chunk_id": r1.provenance.source_chunk_id,
+                                    "quote": r1.provenance.exact_quote,
+                                },
+                                statement_b=stmt2,
+                                source_b={
+                                    "document_id": doc2_id,
+                                    "source_name": doc2.source_name if doc2 else "Source 2",
+                                    "chunk_id": r2.provenance.source_chunk_id,
+                                    "quote": r2.provenance.exact_quote,
+                                },
+                                description=f"Contradiction detected between {stmt1} and {stmt2}.",
+                            ))
+        except Exception:
+            pass
+
+        # 4. Bounded chunk-level assertion scan for opposing claims
         opposing_pairs = [
             ("open", "closed"),
             ("publicly accessible", "strictly private"),
@@ -282,34 +325,38 @@ class GraphStore:
             ("deprecated", "production"),
         ]
         ws_chunks = list(self.chunks.get(ws, {}).values())
-        for term_a, term_b in opposing_pairs:
-            chunks_a = [c for c in ws_chunks if term_a in c.text.lower()]
-            chunks_b = [c for c in ws_chunks if term_b in c.text.lower()]
-            for ca in chunks_a:
-                for cb in chunks_b:
-                    if ca.document_id != cb.document_id:
-                        doc_a = self.documents[ws].get(ca.document_id)
-                        doc_b = self.documents[ws].get(cb.document_id)
-                        pair = ConflictPair(
-                            statement_a=f"Asserted as {term_a.upper()}",
-                            source_a={
-                                "document_id": ca.document_id,
-                                "source_name": doc_a.source_name if doc_a else "Source A",
-                                "chunk_id": ca.id,
-                                "quote": ca.text[:150],
-                            },
-                            statement_b=f"Asserted as {term_b.upper()}",
-                            source_b={
-                                "document_id": cb.document_id,
-                                "source_name": doc_b.source_name if doc_b else "Source B",
-                                "chunk_id": cb.id,
-                                "quote": cb.text[:150],
-                            },
-                            description=f"Contradiction between assertion '{term_a}' and '{term_b}'.",
-                        )
-                        # Check if not already in conflicts
-                        if not any(c.source_a.get("chunk_id") == ca.id and c.source_b.get("chunk_id") == cb.id for c in self.conflicts[ws]):
-                            self.conflicts[ws].append(pair)
+        if len(ws_chunks) <= 300:
+            seen_chunk_conflicts: Set[Tuple[str, str]] = set()
+            for term_a, term_b in opposing_pairs:
+                chunks_a = [c for c in ws_chunks if term_a in c.text.lower()]
+                chunks_b = [c for c in ws_chunks if term_b in c.text.lower()]
+                for ca in chunks_a[:5]:
+                    for cb in chunks_b[:5]:
+                        if ca.document_id != cb.document_id:
+                            pair_key = tuple(sorted([ca.id, cb.id]))
+                            if pair_key in seen_chunk_conflicts:
+                                continue
+                            seen_chunk_conflicts.add(pair_key)
+
+                            doc_a = self.documents[ws].get(ca.document_id)
+                            doc_b = self.documents[ws].get(cb.document_id)
+                            self.conflicts[ws].append(ConflictPair(
+                                statement_a=f"Asserted as {term_a.upper()}",
+                                source_a={
+                                    "document_id": ca.document_id,
+                                    "source_name": doc_a.source_name if doc_a else "Source A",
+                                    "chunk_id": ca.id,
+                                    "quote": ca.text[:150],
+                                },
+                                statement_b=f"Asserted as {term_b.upper()}",
+                                source_b={
+                                    "document_id": cb.document_id,
+                                    "source_name": doc_b.source_name if doc_b else "Source B",
+                                    "chunk_id": cb.id,
+                                    "quote": cb.text[:150],
+                                },
+                                description=f"Contradiction between assertion '{term_a}' and '{term_b}'.",
+                            ))
 
 
     def register_topic(self, topic: Topic) -> None:
