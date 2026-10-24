@@ -1,0 +1,13 @@
+# Benchmark Document 0310 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_310 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_310_Alpha uses Microservice_Cybersecurity_310_Beta.
+
+Service_Cybersecurity_310_Alpha depends on Infrastructure_Cybersecurity_310.
+
+Module_Cybersecurity_310 has status ACTIVE.
+
+Facility_Cybersecurity_310 is located in Region_0.
+
+Subsystem_Cybersecurity_310 does not depend on Legacy_Cybersecurity_310.

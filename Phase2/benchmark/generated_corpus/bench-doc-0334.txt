@@ -1,0 +1,11 @@
+# Benchmark Document 0334 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_334 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_334_Alpha uses Microservice_Cybersecurity_334_Beta.
+
+Service_Cybersecurity_334_Alpha depends on Infrastructure_Cybersecurity_334.
+
+Module_Cybersecurity_334 has status ACTIVE.
+
+Facility_Cybersecurity_334 is located in Region_4.

@@ -1,0 +1,11 @@
+# Benchmark Document 0338 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_338 is a part of Global Core_Aerospace.
+
+Service_Aerospace_338_Alpha uses Microservice_Aerospace_338_Beta.
+
+Service_Aerospace_338_Alpha depends on Infrastructure_Aerospace_338.
+
+Module_Aerospace_338 has status ACTIVE.
+
+Facility_Aerospace_338 is located in Region_3.

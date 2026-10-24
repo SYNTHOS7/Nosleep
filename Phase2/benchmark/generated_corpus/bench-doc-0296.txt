@@ -1,0 +1,11 @@
+# Benchmark Document 0296 - Finance Architecture Overview
+
+Enterprise System_Finance_296 is a part of Global Core_Finance.
+
+Service_Finance_296_Alpha uses Microservice_Finance_296_Beta.
+
+Service_Finance_296_Alpha depends on Infrastructure_Finance_296.
+
+Module_Finance_296 has status ACTIVE.
+
+Facility_Finance_296 is located in Region_1.

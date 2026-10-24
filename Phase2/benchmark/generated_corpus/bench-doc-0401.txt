@@ -1,0 +1,11 @@
+# Benchmark Document 0401 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_401 is a part of Global Core_Healthcare.
+
+Service_Healthcare_401_Alpha uses Microservice_Healthcare_401_Beta.
+
+Service_Healthcare_401_Alpha depends on Infrastructure_Healthcare_401.
+
+Module_Healthcare_401 has status ACTIVE.
+
+Facility_Healthcare_401 is located in Region_1.

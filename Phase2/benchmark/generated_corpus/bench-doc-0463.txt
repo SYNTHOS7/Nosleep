@@ -1,0 +1,11 @@
+# Benchmark Document 0463 - Automotive Architecture Overview
+
+Enterprise System_Automotive_463 is a part of Global Core_Automotive.
+
+Service_Automotive_463_Alpha uses Microservice_Automotive_463_Beta.
+
+Service_Automotive_463_Alpha depends on Infrastructure_Automotive_463.
+
+Module_Automotive_463 has status ACTIVE.
+
+Facility_Automotive_463 is located in Region_3.

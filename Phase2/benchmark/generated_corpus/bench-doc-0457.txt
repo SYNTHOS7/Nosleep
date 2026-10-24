@@ -1,0 +1,11 @@
+# Benchmark Document 0457 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_457 is a part of Global Core_Healthcare.
+
+Service_Healthcare_457_Alpha uses Microservice_Healthcare_457_Beta.
+
+Service_Healthcare_457_Alpha depends on Infrastructure_Healthcare_457.
+
+Module_Healthcare_457 has status ACTIVE.
+
+Facility_Healthcare_457 is located in Region_2.

@@ -1,0 +1,11 @@
+# Benchmark Document 0104 - Finance Architecture Overview
+
+Enterprise System_Finance_104 is a part of Global Core_Finance.
+
+Service_Finance_104_Alpha uses Microservice_Finance_104_Beta.
+
+Service_Finance_104_Alpha depends on Infrastructure_Finance_104.
+
+Module_Finance_104 has status ACTIVE.
+
+Facility_Finance_104 is located in Region_4.

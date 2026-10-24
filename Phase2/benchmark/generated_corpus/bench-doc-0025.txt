@@ -1,0 +1,13 @@
+# Benchmark Document 0025 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_25 is a part of Global Core_Healthcare.
+
+Service_Healthcare_25_Alpha uses Microservice_Healthcare_25_Beta.
+
+Service_Healthcare_25_Alpha depends on Infrastructure_Healthcare_25.
+
+Module_Healthcare_25 has status ACTIVE.
+
+Facility_Healthcare_25 is located in Region_0.
+
+Subsystem_Healthcare_25 does not depend on Legacy_Healthcare_25.

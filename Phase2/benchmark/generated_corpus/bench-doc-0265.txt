@@ -1,0 +1,13 @@
+# Benchmark Document 0265 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_265 is a part of Global Core_Healthcare.
+
+Service_Healthcare_265_Alpha uses Microservice_Healthcare_265_Beta.
+
+Service_Healthcare_265_Alpha depends on Infrastructure_Healthcare_265.
+
+Module_Healthcare_265 has status ACTIVE.
+
+Facility_Healthcare_265 is located in Region_0.
+
+Subsystem_Healthcare_265 does not depend on Legacy_Healthcare_265.

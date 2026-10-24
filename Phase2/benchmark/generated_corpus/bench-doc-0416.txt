@@ -1,0 +1,11 @@
+# Benchmark Document 0416 - Finance Architecture Overview
+
+Enterprise System_Finance_416 is a part of Global Core_Finance.
+
+Service_Finance_416_Alpha uses Microservice_Finance_416_Beta.
+
+Service_Finance_416_Alpha depends on Infrastructure_Finance_416.
+
+Module_Finance_416 has status ACTIVE.
+
+Facility_Finance_416 is located in Region_1.

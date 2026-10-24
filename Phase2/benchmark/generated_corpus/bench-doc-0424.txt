@@ -1,0 +1,11 @@
+# Benchmark Document 0424 - Finance Architecture Overview
+
+Enterprise System_Finance_424 is a part of Global Core_Finance.
+
+Service_Finance_424_Alpha uses Microservice_Finance_424_Beta.
+
+Service_Finance_424_Alpha depends on Infrastructure_Finance_424.
+
+Module_Finance_424 has status ACTIVE.
+
+Facility_Finance_424 is located in Region_4.

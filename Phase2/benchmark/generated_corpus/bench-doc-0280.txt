@@ -1,0 +1,15 @@
+# Benchmark Document 0280 - Finance Architecture Overview
+
+Enterprise System_Finance_280 is a part of Global Core_Finance.
+
+Service_Finance_280_Alpha uses Microservice_Finance_280_Beta.
+
+Service_Finance_280_Alpha depends on Infrastructure_Finance_280.
+
+Module_Finance_280 has status ACTIVE.
+
+Facility_Finance_280 is located in Region_0.
+
+Subsystem_Finance_280 does not depend on Legacy_Finance_280.
+
+Service_Finance_280_Alpha uses Cache_280 only if high availability is enabled.

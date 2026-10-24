@@ -1,0 +1,11 @@
+# Benchmark Document 0191 - Automotive Architecture Overview
+
+Enterprise System_Automotive_191 is a part of Global Core_Automotive.
+
+Service_Automotive_191_Alpha uses Microservice_Automotive_191_Beta.
+
+Service_Automotive_191_Alpha depends on Infrastructure_Automotive_191.
+
+Module_Automotive_191 has status ACTIVE.
+
+Facility_Automotive_191 is located in Region_1.

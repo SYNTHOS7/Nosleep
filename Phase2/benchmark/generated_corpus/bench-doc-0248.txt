@@ -1,0 +1,11 @@
+# Benchmark Document 0248 - Finance Architecture Overview
+
+Enterprise System_Finance_248 is a part of Global Core_Finance.
+
+Service_Finance_248_Alpha uses Microservice_Finance_248_Beta.
+
+Service_Finance_248_Alpha depends on Infrastructure_Finance_248.
+
+Module_Finance_248 has status ACTIVE.
+
+Facility_Finance_248 is located in Region_3.

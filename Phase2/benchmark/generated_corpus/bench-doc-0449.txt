@@ -1,0 +1,11 @@
+# Benchmark Document 0449 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_449 is a part of Global Core_Healthcare.
+
+Service_Healthcare_449_Alpha uses Microservice_Healthcare_449_Beta.
+
+Service_Healthcare_449_Alpha depends on Infrastructure_Healthcare_449.
+
+Module_Healthcare_449 has status ACTIVE.
+
+Facility_Healthcare_449 is located in Region_4.

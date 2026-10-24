@@ -1,0 +1,11 @@
+# Benchmark Document 0277 - Retail Architecture Overview
+
+Enterprise System_Retail_277 is a part of Global Core_Retail.
+
+Service_Retail_277_Alpha uses Microservice_Retail_277_Beta.
+
+Service_Retail_277_Alpha depends on Infrastructure_Retail_277.
+
+Module_Retail_277 has status ACTIVE.
+
+Facility_Retail_277 is located in Region_2.

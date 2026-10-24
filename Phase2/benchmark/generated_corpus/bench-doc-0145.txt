@@ -1,0 +1,13 @@
+# Benchmark Document 0145 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_145 is a part of Global Core_Healthcare.
+
+Service_Healthcare_145_Alpha uses Microservice_Healthcare_145_Beta.
+
+Service_Healthcare_145_Alpha depends on Infrastructure_Healthcare_145.
+
+Module_Healthcare_145 has status ACTIVE.
+
+Facility_Healthcare_145 is located in Region_0.
+
+Subsystem_Healthcare_145 does not depend on Legacy_Healthcare_145.

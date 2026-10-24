@@ -1,0 +1,11 @@
+# Benchmark Document 0286 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_286 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_286_Alpha uses Microservice_Cybersecurity_286_Beta.
+
+Service_Cybersecurity_286_Alpha depends on Infrastructure_Cybersecurity_286.
+
+Module_Cybersecurity_286 has status ACTIVE.
+
+Facility_Cybersecurity_286 is located in Region_1.

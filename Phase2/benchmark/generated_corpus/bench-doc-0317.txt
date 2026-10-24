@@ -1,0 +1,11 @@
+# Benchmark Document 0317 - Retail Architecture Overview
+
+Enterprise System_Retail_317 is a part of Global Core_Retail.
+
+Service_Retail_317_Alpha uses Microservice_Retail_317_Beta.
+
+Service_Retail_317_Alpha depends on Infrastructure_Retail_317.
+
+Module_Retail_317 has status ACTIVE.
+
+Facility_Retail_317 is located in Region_2.

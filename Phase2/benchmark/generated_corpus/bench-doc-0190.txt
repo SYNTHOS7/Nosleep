@@ -1,0 +1,13 @@
+# Benchmark Document 0190 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_190 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_190_Alpha uses Microservice_Cybersecurity_190_Beta.
+
+Service_Cybersecurity_190_Alpha depends on Infrastructure_Cybersecurity_190.
+
+Module_Cybersecurity_190 has status ACTIVE.
+
+Facility_Cybersecurity_190 is located in Region_0.
+
+Subsystem_Cybersecurity_190 does not depend on Legacy_Cybersecurity_190.

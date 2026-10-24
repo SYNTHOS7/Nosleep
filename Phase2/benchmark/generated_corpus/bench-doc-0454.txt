@@ -1,0 +1,11 @@
+# Benchmark Document 0454 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_454 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_454_Alpha uses Microservice_Cybersecurity_454_Beta.
+
+Service_Cybersecurity_454_Alpha depends on Infrastructure_Cybersecurity_454.
+
+Module_Cybersecurity_454 has status ACTIVE.
+
+Facility_Cybersecurity_454 is located in Region_4.

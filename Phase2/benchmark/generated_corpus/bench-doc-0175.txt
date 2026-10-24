@@ -1,0 +1,15 @@
+# Benchmark Document 0175 - Automotive Architecture Overview
+
+Enterprise System_Automotive_175 is a part of Global Core_Automotive.
+
+Service_Automotive_175_Alpha uses Microservice_Automotive_175_Beta.
+
+Service_Automotive_175_Alpha depends on Infrastructure_Automotive_175.
+
+Module_Automotive_175 has status ACTIVE.
+
+Facility_Automotive_175 is located in Region_0.
+
+Subsystem_Automotive_175 does not depend on Legacy_Automotive_175.
+
+Service_Automotive_175_Alpha uses Cache_175 only if high availability is enabled.

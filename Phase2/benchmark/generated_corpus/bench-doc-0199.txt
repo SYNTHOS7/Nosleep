@@ -1,0 +1,11 @@
+# Benchmark Document 0199 - Automotive Architecture Overview
+
+Enterprise System_Automotive_199 is a part of Global Core_Automotive.
+
+Service_Automotive_199_Alpha uses Microservice_Automotive_199_Beta.
+
+Service_Automotive_199_Alpha depends on Infrastructure_Automotive_199.
+
+Module_Automotive_199 has status ACTIVE.
+
+Facility_Automotive_199 is located in Region_4.

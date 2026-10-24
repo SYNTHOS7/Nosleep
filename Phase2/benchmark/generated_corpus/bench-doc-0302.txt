@@ -1,0 +1,11 @@
+# Benchmark Document 0302 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_302 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_302_Alpha uses Microservice_Cybersecurity_302_Beta.
+
+Service_Cybersecurity_302_Alpha depends on Infrastructure_Cybersecurity_302.
+
+Module_Cybersecurity_302 has status ACTIVE.
+
+Facility_Cybersecurity_302 is located in Region_2.

@@ -1,0 +1,11 @@
+# Benchmark Document 0262 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_262 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_262_Alpha uses Microservice_Cybersecurity_262_Beta.
+
+Service_Cybersecurity_262_Alpha depends on Infrastructure_Cybersecurity_262.
+
+Module_Cybersecurity_262 has status ACTIVE.
+
+Facility_Cybersecurity_262 is located in Region_2.

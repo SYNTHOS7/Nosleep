@@ -1,0 +1,11 @@
+# Benchmark Document 0136 - Finance Architecture Overview
+
+Enterprise System_Finance_136 is a part of Global Core_Finance.
+
+Service_Finance_136_Alpha uses Microservice_Finance_136_Beta.
+
+Service_Finance_136_Alpha depends on Infrastructure_Finance_136.
+
+Module_Finance_136 has status ACTIVE.
+
+Facility_Finance_136 is located in Region_1.

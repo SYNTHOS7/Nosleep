@@ -1,0 +1,11 @@
+# Benchmark Document 0206 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_206 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_206_Alpha uses Microservice_Cybersecurity_206_Beta.
+
+Service_Cybersecurity_206_Alpha depends on Infrastructure_Cybersecurity_206.
+
+Module_Cybersecurity_206 has status ACTIVE.
+
+Facility_Cybersecurity_206 is located in Region_1.

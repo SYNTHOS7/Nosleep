@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: interactive-knowledge-base
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python run_app.py"
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.16
+      - key: STORAGE_BACKEND
+        value: in_memory
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USERNAME
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: NEO4J_DATABASE
+        value: neo4j

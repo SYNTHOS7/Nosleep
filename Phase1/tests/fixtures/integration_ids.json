@@ -1,0 +1,16 @@
+{
+  "input": {
+    "workspace_id": "workspace-alpha",
+    "value": {"kind": "number", "normalized_value": "42", "unit": "ms"},
+    "conflict": {"kind": "incompatible_statement", "relation_ids": ["relation-z", "relation-a"]},
+    "path": {
+      "snapshot_epoch": 7,
+      "ordered_steps": [{"relation_id": "relation-a", "subject_id": "entity-a", "object_entity_id": "entity-b", "object_value_id": null, "traversal_direction": "forward", "evidence_chunk_id": "chunk-a", "revision_id": "revision-a", "document_id": "document-a"}]
+    }
+  },
+  "expected": {
+    "value_id": "f5c989db74bc8d36561a1c35dd9837e854ded7ff5440c9dd22cbe7b90285f9d5",
+    "conflict_id": "06605b2493e3991d8b2b6b1d0a61ef0e87bf3009371bd270eb142278554cf893",
+    "evidence_path_id": "631cf7ca9efbfdff87420c94222b1018678b1e0f0f2a9c3a274c1870753fd58d"
+  }
+}

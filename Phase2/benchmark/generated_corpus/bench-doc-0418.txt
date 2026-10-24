@@ -1,0 +1,11 @@
+# Benchmark Document 0418 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_418 is a part of Global Core_Aerospace.
+
+Service_Aerospace_418_Alpha uses Microservice_Aerospace_418_Beta.
+
+Service_Aerospace_418_Alpha depends on Infrastructure_Aerospace_418.
+
+Module_Aerospace_418 has status ACTIVE.
+
+Facility_Aerospace_418 is located in Region_3.

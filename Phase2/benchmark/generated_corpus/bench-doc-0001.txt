@@ -1,0 +1,11 @@
+# Benchmark Document 0001 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_1 is a part of Global Core_Healthcare.
+
+Service_Healthcare_1_Alpha uses Microservice_Healthcare_1_Beta.
+
+Service_Healthcare_1_Alpha depends on Infrastructure_Healthcare_1.
+
+Module_Healthcare_1 has status ACTIVE.
+
+Facility_Healthcare_1 is located in Region_1.

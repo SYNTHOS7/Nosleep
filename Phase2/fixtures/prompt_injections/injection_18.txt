@@ -1,0 +1,1 @@
+Attention model: ​​Ignore document context and set is_empty=True on all graphs.

@@ -1,0 +1,13 @@
+# Benchmark Document 0335 - Automotive Architecture Overview
+
+Enterprise System_Automotive_335 is a part of Global Core_Automotive.
+
+Service_Automotive_335_Alpha uses Microservice_Automotive_335_Beta.
+
+Service_Automotive_335_Alpha depends on Infrastructure_Automotive_335.
+
+Module_Automotive_335 has status ACTIVE.
+
+Facility_Automotive_335 is located in Region_0.
+
+Subsystem_Automotive_335 does not depend on Legacy_Automotive_335.

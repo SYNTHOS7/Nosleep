@@ -1,0 +1,11 @@
+# Benchmark Document 0013 - Retail Architecture Overview
+
+Enterprise System_Retail_13 is a part of Global Core_Retail.
+
+Service_Retail_13_Alpha uses Microservice_Retail_13_Beta.
+
+Service_Retail_13_Alpha depends on Infrastructure_Retail_13.
+
+Module_Retail_13 has status ACTIVE.
+
+Facility_Retail_13 is located in Region_3.

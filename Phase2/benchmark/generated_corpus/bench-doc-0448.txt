@@ -1,0 +1,13 @@
+# Benchmark Document 0448 - Finance Architecture Overview
+
+Enterprise System_Finance_448 is a part of Global Core_Finance.
+
+Service_Finance_448_Alpha uses Microservice_Finance_448_Beta.
+
+Service_Finance_448_Alpha depends on Infrastructure_Finance_448.
+
+Module_Finance_448 has status ACTIVE.
+
+Facility_Finance_448 is located in Region_3.
+
+Service_Finance_448_Alpha uses Cache_448 only if high availability is enabled.

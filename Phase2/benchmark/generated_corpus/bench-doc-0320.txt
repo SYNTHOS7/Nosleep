@@ -1,0 +1,13 @@
+# Benchmark Document 0320 - Finance Architecture Overview
+
+Enterprise System_Finance_320 is a part of Global Core_Finance.
+
+Service_Finance_320_Alpha uses Microservice_Finance_320_Beta.
+
+Service_Finance_320_Alpha depends on Infrastructure_Finance_320.
+
+Module_Finance_320 has status ACTIVE.
+
+Facility_Finance_320 is located in Region_0.
+
+Subsystem_Finance_320 does not depend on Legacy_Finance_320.

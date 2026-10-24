@@ -1,0 +1,11 @@
+# Benchmark Document 0472 - Finance Architecture Overview
+
+Enterprise System_Finance_472 is a part of Global Core_Finance.
+
+Service_Finance_472_Alpha uses Microservice_Finance_472_Beta.
+
+Service_Finance_472_Alpha depends on Infrastructure_Finance_472.
+
+Module_Finance_472 has status ACTIVE.
+
+Facility_Finance_472 is located in Region_2.

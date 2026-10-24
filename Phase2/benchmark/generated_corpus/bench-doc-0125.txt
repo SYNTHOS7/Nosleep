@@ -1,0 +1,13 @@
+# Benchmark Document 0125 - Retail Architecture Overview
+
+Enterprise System_Retail_125 is a part of Global Core_Retail.
+
+Service_Retail_125_Alpha uses Microservice_Retail_125_Beta.
+
+Service_Retail_125_Alpha depends on Infrastructure_Retail_125.
+
+Module_Retail_125 has status ACTIVE.
+
+Facility_Retail_125 is located in Region_0.
+
+Subsystem_Retail_125 does not depend on Legacy_Retail_125.

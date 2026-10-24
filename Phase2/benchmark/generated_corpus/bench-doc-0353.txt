@@ -1,0 +1,11 @@
+# Benchmark Document 0353 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_353 is a part of Global Core_Healthcare.
+
+Service_Healthcare_353_Alpha uses Microservice_Healthcare_353_Beta.
+
+Service_Healthcare_353_Alpha depends on Infrastructure_Healthcare_353.
+
+Module_Healthcare_353 has status ACTIVE.
+
+Facility_Healthcare_353 is located in Region_3.

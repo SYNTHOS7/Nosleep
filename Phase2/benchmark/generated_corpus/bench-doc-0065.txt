@@ -1,0 +1,13 @@
+# Benchmark Document 0065 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_65 is a part of Global Core_Healthcare.
+
+Service_Healthcare_65_Alpha uses Microservice_Healthcare_65_Beta.
+
+Service_Healthcare_65_Alpha depends on Infrastructure_Healthcare_65.
+
+Module_Healthcare_65 has status ACTIVE.
+
+Facility_Healthcare_65 is located in Region_0.
+
+Subsystem_Healthcare_65 does not depend on Legacy_Healthcare_65.

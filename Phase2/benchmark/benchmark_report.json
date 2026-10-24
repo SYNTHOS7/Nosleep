@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "timestamp": "2026-10-24T15:19:18Z",
+    "host_os": "Windows 10",
+    "cpu_count": 16,
+    "concurrency": 8,
+    "corpus_size": 500,
+    "pdf_count": 167,
+    "txt_count": 333,
+    "sla_target_seconds": 60.0
+  },
+  "throughput": {
+    "cold_total_seconds": 8.41,
+    "cold_docs_per_second": 59.43,
+    "warm_total_seconds": 5.61,
+    "warm_docs_per_second": 89.14,
+    "cache_speedup_factor": 1.5
+  },
+  "latency_percentiles_seconds": {
+    "p50": 0.1215,
+    "p90": 0.163,
+    "p95": 0.1722,
+    "p99": 0.1962,
+    "within_60s_sla": true
+  },
+  "stage_durations_mean_seconds": {
+    "parsing": 0.0123,
+    "chunk_cache": 0.011,
+    "extraction": 0.0243,
+    "embeddings": 0.0019,
+    "stage_batch": 0.022
+  },
+  "resource_totals": {
+    "successful_documents": 500,
+    "failed_documents": 0,
+    "total_chunks": 500,
+    "total_entities": 4191,
+    "total_relations": 2609,
+    "total_vectors": 500
+  }
+}

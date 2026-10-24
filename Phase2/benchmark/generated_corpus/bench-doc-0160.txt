@@ -1,0 +1,13 @@
+# Benchmark Document 0160 - Finance Architecture Overview
+
+Enterprise System_Finance_160 is a part of Global Core_Finance.
+
+Service_Finance_160_Alpha uses Microservice_Finance_160_Beta.
+
+Service_Finance_160_Alpha depends on Infrastructure_Finance_160.
+
+Module_Finance_160 has status ACTIVE.
+
+Facility_Finance_160 is located in Region_0.
+
+Subsystem_Finance_160 does not depend on Legacy_Finance_160.

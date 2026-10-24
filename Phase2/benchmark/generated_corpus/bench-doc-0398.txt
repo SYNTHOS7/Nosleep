@@ -1,0 +1,11 @@
+# Benchmark Document 0398 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_398 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_398_Alpha uses Microservice_Cybersecurity_398_Beta.
+
+Service_Cybersecurity_398_Alpha depends on Infrastructure_Cybersecurity_398.
+
+Module_Cybersecurity_398 has status ACTIVE.
+
+Facility_Cybersecurity_398 is located in Region_3.

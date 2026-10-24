@@ -1,0 +1,13 @@
+# Benchmark Document 0196 - Energy Architecture Overview
+
+Enterprise System_Energy_196 is a part of Global Core_Energy.
+
+Service_Energy_196_Alpha uses Microservice_Energy_196_Beta.
+
+Service_Energy_196_Alpha depends on Infrastructure_Energy_196.
+
+Module_Energy_196 has status ACTIVE.
+
+Facility_Energy_196 is located in Region_1.
+
+Service_Energy_196_Alpha uses Cache_196 only if high availability is enabled.

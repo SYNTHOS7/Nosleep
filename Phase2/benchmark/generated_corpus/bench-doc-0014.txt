@@ -1,0 +1,13 @@
+# Benchmark Document 0014 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_14 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_14_Alpha uses Microservice_Cybersecurity_14_Beta.
+
+Service_Cybersecurity_14_Alpha depends on Infrastructure_Cybersecurity_14.
+
+Module_Cybersecurity_14 has status ACTIVE.
+
+Facility_Cybersecurity_14 is located in Region_4.
+
+Service_Cybersecurity_14_Alpha uses Cache_14 only if high availability is enabled.

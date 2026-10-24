@@ -1,0 +1,13 @@
+# Benchmark Document 0200 - Finance Architecture Overview
+
+Enterprise System_Finance_200 is a part of Global Core_Finance.
+
+Service_Finance_200_Alpha uses Microservice_Finance_200_Beta.
+
+Service_Finance_200_Alpha depends on Infrastructure_Finance_200.
+
+Module_Finance_200 has status ACTIVE.
+
+Facility_Finance_200 is located in Region_0.
+
+Subsystem_Finance_200 does not depend on Legacy_Finance_200.

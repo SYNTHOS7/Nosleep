@@ -1,0 +1,11 @@
+# Benchmark Document 0202 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_202 is a part of Global Core_Aerospace.
+
+Service_Aerospace_202_Alpha uses Microservice_Aerospace_202_Beta.
+
+Service_Aerospace_202_Alpha depends on Infrastructure_Aerospace_202.
+
+Module_Aerospace_202 has status ACTIVE.
+
+Facility_Aerospace_202 is located in Region_2.

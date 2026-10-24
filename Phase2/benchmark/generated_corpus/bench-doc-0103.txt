@@ -1,0 +1,11 @@
+# Benchmark Document 0103 - Automotive Architecture Overview
+
+Enterprise System_Automotive_103 is a part of Global Core_Automotive.
+
+Service_Automotive_103_Alpha uses Microservice_Automotive_103_Beta.
+
+Service_Automotive_103_Alpha depends on Infrastructure_Automotive_103.
+
+Module_Automotive_103 has status ACTIVE.
+
+Facility_Automotive_103 is located in Region_3.

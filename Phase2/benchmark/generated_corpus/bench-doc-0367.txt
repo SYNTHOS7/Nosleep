@@ -1,0 +1,11 @@
+# Benchmark Document 0367 - Automotive Architecture Overview
+
+Enterprise System_Automotive_367 is a part of Global Core_Automotive.
+
+Service_Automotive_367_Alpha uses Microservice_Automotive_367_Beta.
+
+Service_Automotive_367_Alpha depends on Infrastructure_Automotive_367.
+
+Module_Automotive_367 has status ACTIVE.
+
+Facility_Automotive_367 is located in Region_2.

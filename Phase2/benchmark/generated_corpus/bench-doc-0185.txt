@@ -1,0 +1,13 @@
+# Benchmark Document 0185 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_185 is a part of Global Core_Healthcare.
+
+Service_Healthcare_185_Alpha uses Microservice_Healthcare_185_Beta.
+
+Service_Healthcare_185_Alpha depends on Infrastructure_Healthcare_185.
+
+Module_Healthcare_185 has status ACTIVE.
+
+Facility_Healthcare_185 is located in Region_0.
+
+Subsystem_Healthcare_185 does not depend on Legacy_Healthcare_185.

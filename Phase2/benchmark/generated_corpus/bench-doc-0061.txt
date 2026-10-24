@@ -1,0 +1,11 @@
+# Benchmark Document 0061 - Retail Architecture Overview
+
+Enterprise System_Retail_61 is a part of Global Core_Retail.
+
+Service_Retail_61_Alpha uses Microservice_Retail_61_Beta.
+
+Service_Retail_61_Alpha depends on Infrastructure_Retail_61.
+
+Module_Retail_61 has status ACTIVE.
+
+Facility_Retail_61 is located in Region_1.

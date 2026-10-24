@@ -1,0 +1,13 @@
+# Benchmark Document 0091 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_91 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_91_Alpha uses Microservice_Telecommunications_91_Beta.
+
+Service_Telecommunications_91_Alpha depends on Infrastructure_Telecommunications_91.
+
+Module_Telecommunications_91 has status ACTIVE.
+
+Facility_Telecommunications_91 is located in Region_1.
+
+Service_Telecommunications_91_Alpha uses Cache_91 only if high availability is enabled.

@@ -1,0 +1,13 @@
+# Benchmark Document 0238 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_238 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_238_Alpha uses Microservice_Cybersecurity_238_Beta.
+
+Service_Cybersecurity_238_Alpha depends on Infrastructure_Cybersecurity_238.
+
+Module_Cybersecurity_238 has status ACTIVE.
+
+Facility_Cybersecurity_238 is located in Region_3.
+
+Service_Cybersecurity_238_Alpha uses Cache_238 only if high availability is enabled.

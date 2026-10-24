@@ -1,0 +1,11 @@
+# Benchmark Document 0478 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_478 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_478_Alpha uses Microservice_Cybersecurity_478_Beta.
+
+Service_Cybersecurity_478_Alpha depends on Infrastructure_Cybersecurity_478.
+
+Module_Cybersecurity_478 has status ACTIVE.
+
+Facility_Cybersecurity_478 is located in Region_3.

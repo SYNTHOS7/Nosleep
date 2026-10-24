@@ -1,0 +1,11 @@
+# Benchmark Document 0341 - Retail Architecture Overview
+
+Enterprise System_Retail_341 is a part of Global Core_Retail.
+
+Service_Retail_341_Alpha uses Microservice_Retail_341_Beta.
+
+Service_Retail_341_Alpha depends on Infrastructure_Retail_341.
+
+Module_Retail_341 has status ACTIVE.
+
+Facility_Retail_341 is located in Region_1.

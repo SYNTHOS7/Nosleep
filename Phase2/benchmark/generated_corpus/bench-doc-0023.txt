@@ -1,0 +1,11 @@
+# Benchmark Document 0023 - Automotive Architecture Overview
+
+Enterprise System_Automotive_23 is a part of Global Core_Automotive.
+
+Service_Automotive_23_Alpha uses Microservice_Automotive_23_Beta.
+
+Service_Automotive_23_Alpha depends on Infrastructure_Automotive_23.
+
+Module_Automotive_23 has status ACTIVE.
+
+Facility_Automotive_23 is located in Region_3.

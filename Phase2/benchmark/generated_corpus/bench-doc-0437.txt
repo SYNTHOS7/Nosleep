@@ -1,0 +1,11 @@
+# Benchmark Document 0437 - Retail Architecture Overview
+
+Enterprise System_Retail_437 is a part of Global Core_Retail.
+
+Service_Retail_437_Alpha uses Microservice_Retail_437_Beta.
+
+Service_Retail_437_Alpha depends on Infrastructure_Retail_437.
+
+Module_Retail_437 has status ACTIVE.
+
+Facility_Retail_437 is located in Region_2.

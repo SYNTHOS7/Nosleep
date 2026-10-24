@@ -1,0 +1,11 @@
+# Benchmark Document 0254 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_254 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_254_Alpha uses Microservice_Cybersecurity_254_Beta.
+
+Service_Cybersecurity_254_Alpha depends on Infrastructure_Cybersecurity_254.
+
+Module_Cybersecurity_254 has status ACTIVE.
+
+Facility_Cybersecurity_254 is located in Region_4.

@@ -1,0 +1,11 @@
+# Benchmark Document 0032 - Finance Architecture Overview
+
+Enterprise System_Finance_32 is a part of Global Core_Finance.
+
+Service_Finance_32_Alpha uses Microservice_Finance_32_Beta.
+
+Service_Finance_32_Alpha depends on Infrastructure_Finance_32.
+
+Module_Finance_32 has status ACTIVE.
+
+Facility_Finance_32 is located in Region_2.

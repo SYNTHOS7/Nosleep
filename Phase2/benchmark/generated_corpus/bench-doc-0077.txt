@@ -1,0 +1,13 @@
+# Benchmark Document 0077 - Retail Architecture Overview
+
+Enterprise System_Retail_77 is a part of Global Core_Retail.
+
+Service_Retail_77_Alpha uses Microservice_Retail_77_Beta.
+
+Service_Retail_77_Alpha depends on Infrastructure_Retail_77.
+
+Module_Retail_77 has status ACTIVE.
+
+Facility_Retail_77 is located in Region_2.
+
+Service_Retail_77_Alpha uses Cache_77 only if high availability is enabled.

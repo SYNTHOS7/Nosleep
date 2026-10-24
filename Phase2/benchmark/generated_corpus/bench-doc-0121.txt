@@ -1,0 +1,11 @@
+# Benchmark Document 0121 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_121 is a part of Global Core_Healthcare.
+
+Service_Healthcare_121_Alpha uses Microservice_Healthcare_121_Beta.
+
+Service_Healthcare_121_Alpha depends on Infrastructure_Healthcare_121.
+
+Module_Healthcare_121 has status ACTIVE.
+
+Facility_Healthcare_121 is located in Region_1.

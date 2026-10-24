@@ -1,0 +1,13 @@
+# Benchmark Document 0497 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_497 is a part of Global Core_Healthcare.
+
+Service_Healthcare_497_Alpha uses Microservice_Healthcare_497_Beta.
+
+Service_Healthcare_497_Alpha depends on Infrastructure_Healthcare_497.
+
+Module_Healthcare_497 has status ACTIVE.
+
+Facility_Healthcare_497 is located in Region_2.
+
+Service_Healthcare_497_Alpha uses Cache_497 only if high availability is enabled.

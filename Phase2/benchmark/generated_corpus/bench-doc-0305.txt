@@ -1,0 +1,13 @@
+# Benchmark Document 0305 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_305 is a part of Global Core_Healthcare.
+
+Service_Healthcare_305_Alpha uses Microservice_Healthcare_305_Beta.
+
+Service_Healthcare_305_Alpha depends on Infrastructure_Healthcare_305.
+
+Module_Healthcare_305 has status ACTIVE.
+
+Facility_Healthcare_305 is located in Region_0.
+
+Subsystem_Healthcare_305 does not depend on Legacy_Healthcare_305.

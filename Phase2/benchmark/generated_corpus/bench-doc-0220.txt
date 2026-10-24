@@ -1,0 +1,13 @@
+# Benchmark Document 0220 - Energy Architecture Overview
+
+Enterprise System_Energy_220 is a part of Global Core_Energy.
+
+Service_Energy_220_Alpha uses Microservice_Energy_220_Beta.
+
+Service_Energy_220_Alpha depends on Infrastructure_Energy_220.
+
+Module_Energy_220 has status ACTIVE.
+
+Facility_Energy_220 is located in Region_0.
+
+Subsystem_Energy_220 does not depend on Legacy_Energy_220.

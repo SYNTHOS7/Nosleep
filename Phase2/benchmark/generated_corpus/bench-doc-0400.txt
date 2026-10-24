@@ -1,0 +1,13 @@
+# Benchmark Document 0400 - Finance Architecture Overview
+
+Enterprise System_Finance_400 is a part of Global Core_Finance.
+
+Service_Finance_400_Alpha uses Microservice_Finance_400_Beta.
+
+Service_Finance_400_Alpha depends on Infrastructure_Finance_400.
+
+Module_Finance_400 has status ACTIVE.
+
+Facility_Finance_400 is located in Region_0.
+
+Subsystem_Finance_400 does not depend on Legacy_Finance_400.

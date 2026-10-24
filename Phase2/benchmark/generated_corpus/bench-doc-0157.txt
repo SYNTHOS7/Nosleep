@@ -1,0 +1,11 @@
+# Benchmark Document 0157 - Retail Architecture Overview
+
+Enterprise System_Retail_157 is a part of Global Core_Retail.
+
+Service_Retail_157_Alpha uses Microservice_Retail_157_Beta.
+
+Service_Retail_157_Alpha depends on Infrastructure_Retail_157.
+
+Module_Retail_157 has status ACTIVE.
+
+Facility_Retail_157 is located in Region_2.

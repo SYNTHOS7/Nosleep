@@ -1,0 +1,11 @@
+# Benchmark Document 0326 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_326 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_326_Alpha uses Microservice_Cybersecurity_326_Beta.
+
+Service_Cybersecurity_326_Alpha depends on Infrastructure_Cybersecurity_326.
+
+Module_Cybersecurity_326 has status ACTIVE.
+
+Facility_Cybersecurity_326 is located in Region_1.

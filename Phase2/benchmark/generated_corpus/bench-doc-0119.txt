@@ -1,0 +1,13 @@
+# Benchmark Document 0119 - Automotive Architecture Overview
+
+Enterprise System_Automotive_119 is a part of Global Core_Automotive.
+
+Service_Automotive_119_Alpha uses Microservice_Automotive_119_Beta.
+
+Service_Automotive_119_Alpha depends on Infrastructure_Automotive_119.
+
+Module_Automotive_119 has status ACTIVE.
+
+Facility_Automotive_119 is located in Region_4.
+
+Service_Automotive_119_Alpha uses Cache_119 only if high availability is enabled.

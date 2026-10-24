@@ -1,0 +1,11 @@
+# Benchmark Document 0086 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_86 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_86_Alpha uses Microservice_Cybersecurity_86_Beta.
+
+Service_Cybersecurity_86_Alpha depends on Infrastructure_Cybersecurity_86.
+
+Module_Cybersecurity_86 has status ACTIVE.
+
+Facility_Cybersecurity_86 is located in Region_1.

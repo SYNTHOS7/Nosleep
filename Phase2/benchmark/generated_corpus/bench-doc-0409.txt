@@ -1,0 +1,11 @@
+# Benchmark Document 0409 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_409 is a part of Global Core_Healthcare.
+
+Service_Healthcare_409_Alpha uses Microservice_Healthcare_409_Beta.
+
+Service_Healthcare_409_Alpha depends on Infrastructure_Healthcare_409.
+
+Module_Healthcare_409 has status ACTIVE.
+
+Facility_Healthcare_409 is located in Region_4.

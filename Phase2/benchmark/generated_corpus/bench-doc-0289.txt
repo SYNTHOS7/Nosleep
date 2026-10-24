@@ -1,0 +1,11 @@
+# Benchmark Document 0289 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_289 is a part of Global Core_Healthcare.
+
+Service_Healthcare_289_Alpha uses Microservice_Healthcare_289_Beta.
+
+Service_Healthcare_289_Alpha depends on Infrastructure_Healthcare_289.
+
+Module_Healthcare_289 has status ACTIVE.
+
+Facility_Healthcare_289 is located in Region_4.

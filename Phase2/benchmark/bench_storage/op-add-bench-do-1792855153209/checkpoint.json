@@ -1,0 +1,49 @@
+{
+  "id": "op-add-bench-do-1792855153209",
+  "workspace_id": "benchmark-ws",
+  "document_id": "bench-doc-0038",
+  "operation_type": "ADD",
+  "source_ref": "D:\\Phase2\\benchmark\\generated_corpus\\bench-doc-0038.txt",
+  "source_type": "txt",
+  "status": "STAGED",
+  "stage_timings": {
+    "parsing": 0.0043,
+    "chunk_cache": 0.0107,
+    "extraction": 0.0002,
+    "embeddings": 0.0003,
+    "stage_batch": 0.0225
+  },
+  "metrics": {
+    "operation_id": "op-add-bench-do-1792855153209",
+    "accepted_time": 1792855153.2098968,
+    "ready_time": 1792855153.2802372,
+    "total_latency_seconds": 0.0703,
+    "stage_durations": {
+      "parsing": 0.0043,
+      "chunk_cache": 0.0107,
+      "extraction": 0.0002,
+      "embeddings": 0.0003,
+      "stage_batch": 0.0225
+    },
+    "byte_count": 393,
+    "page_count": 1,
+    "chunk_count": 1,
+    "entity_count": 8,
+    "relation_count": 5,
+    "value_count": 1,
+    "vector_count": 1,
+    "llm_calls": 0,
+    "llm_tokens": 0,
+    "retries_count": 0,
+    "cache_hits": 0,
+    "failure_reason": null
+  },
+  "checkpoint_path": "D:\\Phase2\\benchmark\\bench_storage\\op-add-bench-do-1792855153209\\checkpoint.json",
+  "error_message": null,
+  "accepted_at": 1792855153.2098968,
+  "ready_at": 1792855153.2802372,
+  "current_revision": 1,
+  "new_revision": 1,
+  "old_affected_records": {},
+  "new_affected_records": {}
+}

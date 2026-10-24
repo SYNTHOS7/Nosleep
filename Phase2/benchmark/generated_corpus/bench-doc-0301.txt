@@ -1,0 +1,13 @@
+# Benchmark Document 0301 - Retail Architecture Overview
+
+Enterprise System_Retail_301 is a part of Global Core_Retail.
+
+Service_Retail_301_Alpha uses Microservice_Retail_301_Beta.
+
+Service_Retail_301_Alpha depends on Infrastructure_Retail_301.
+
+Module_Retail_301 has status ACTIVE.
+
+Facility_Retail_301 is located in Region_1.
+
+Service_Retail_301_Alpha uses Cache_301 only if high availability is enabled.

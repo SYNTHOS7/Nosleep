@@ -1,0 +1,11 @@
+# Benchmark Document 0473 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_473 is a part of Global Core_Healthcare.
+
+Service_Healthcare_473_Alpha uses Microservice_Healthcare_473_Beta.
+
+Service_Healthcare_473_Alpha depends on Infrastructure_Healthcare_473.
+
+Module_Healthcare_473 has status ACTIVE.
+
+Facility_Healthcare_473 is located in Region_3.

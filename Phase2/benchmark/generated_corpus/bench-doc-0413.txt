@@ -1,0 +1,13 @@
+# Benchmark Document 0413 - Retail Architecture Overview
+
+Enterprise System_Retail_413 is a part of Global Core_Retail.
+
+Service_Retail_413_Alpha uses Microservice_Retail_413_Beta.
+
+Service_Retail_413_Alpha depends on Infrastructure_Retail_413.
+
+Module_Retail_413 has status ACTIVE.
+
+Facility_Retail_413 is located in Region_3.
+
+Service_Retail_413_Alpha uses Cache_413 only if high availability is enabled.

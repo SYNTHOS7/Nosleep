@@ -1,0 +1,11 @@
+# Benchmark Document 0446 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_446 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_446_Alpha uses Microservice_Cybersecurity_446_Beta.
+
+Service_Cybersecurity_446_Alpha depends on Infrastructure_Cybersecurity_446.
+
+Module_Cybersecurity_446 has status ACTIVE.
+
+Facility_Cybersecurity_446 is located in Region_1.

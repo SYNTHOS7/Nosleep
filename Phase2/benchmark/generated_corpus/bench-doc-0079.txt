@@ -1,0 +1,11 @@
+# Benchmark Document 0079 - Automotive Architecture Overview
+
+Enterprise System_Automotive_79 is a part of Global Core_Automotive.
+
+Service_Automotive_79_Alpha uses Microservice_Automotive_79_Beta.
+
+Service_Automotive_79_Alpha depends on Infrastructure_Automotive_79.
+
+Module_Automotive_79 has status ACTIVE.
+
+Facility_Automotive_79 is located in Region_4.

@@ -1,0 +1,13 @@
+# Benchmark Document 0020 - Energy Architecture Overview
+
+Enterprise System_Energy_20 is a part of Global Core_Energy.
+
+Service_Energy_20_Alpha uses Microservice_Energy_20_Beta.
+
+Service_Energy_20_Alpha depends on Infrastructure_Energy_20.
+
+Module_Energy_20 has status ACTIVE.
+
+Facility_Energy_20 is located in Region_0.
+
+Subsystem_Energy_20 does not depend on Legacy_Energy_20.

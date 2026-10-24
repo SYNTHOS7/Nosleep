@@ -1,0 +1,11 @@
+# Benchmark Document 0373 - Retail Architecture Overview
+
+Enterprise System_Retail_373 is a part of Global Core_Retail.
+
+Service_Retail_373_Alpha uses Microservice_Retail_373_Beta.
+
+Service_Retail_373_Alpha depends on Infrastructure_Retail_373.
+
+Module_Retail_373 has status ACTIVE.
+
+Facility_Retail_373 is located in Region_3.

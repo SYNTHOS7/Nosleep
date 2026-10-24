@@ -1,0 +1,11 @@
+# Benchmark Document 0004 - Energy Architecture Overview
+
+Enterprise System_Energy_4 is a part of Global Core_Energy.
+
+Service_Energy_4_Alpha uses Microservice_Energy_4_Beta.
+
+Service_Energy_4_Alpha depends on Infrastructure_Energy_4.
+
+Module_Energy_4 has status ACTIVE.
+
+Facility_Energy_4 is located in Region_4.

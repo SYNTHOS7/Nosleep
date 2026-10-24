@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "interactive-knowledge-base"
+version = "0.1.0"
+description = "Interactive Knowledge Base canonical contracts"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.13,<3",
+  "neo4j>=5.0",
+  "chromadb>=0.4",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0,<9",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend"]

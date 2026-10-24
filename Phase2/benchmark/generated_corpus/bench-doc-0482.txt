@@ -1,0 +1,11 @@
+# Benchmark Document 0482 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_482 is a part of Global Core_Aerospace.
+
+Service_Aerospace_482_Alpha uses Microservice_Aerospace_482_Beta.
+
+Service_Aerospace_482_Alpha depends on Infrastructure_Aerospace_482.
+
+Module_Aerospace_482 has status ACTIVE.
+
+Facility_Aerospace_482 is located in Region_2.

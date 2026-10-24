@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "interactive-knowledge-base-contracts",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "devDependencies": {
+    "json-schema-to-typescript": "16.0.0"
+  },
+  "scripts": {
+    "generate:types": "json2ts --input generated/contracts.schema.json --output generated/contracts.d.ts"
+  }
+}

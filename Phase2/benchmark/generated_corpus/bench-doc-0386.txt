@@ -1,0 +1,11 @@
+# Benchmark Document 0386 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_386 is a part of Global Core_Aerospace.
+
+Service_Aerospace_386_Alpha uses Microservice_Aerospace_386_Beta.
+
+Service_Aerospace_386_Alpha depends on Infrastructure_Aerospace_386.
+
+Module_Aerospace_386 has status ACTIVE.
+
+Facility_Aerospace_386 is located in Region_1.

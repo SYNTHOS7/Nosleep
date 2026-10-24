@@ -1,0 +1,11 @@
+# Benchmark Document 0017 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_17 is a part of Global Core_Healthcare.
+
+Service_Healthcare_17_Alpha uses Microservice_Healthcare_17_Beta.
+
+Service_Healthcare_17_Alpha depends on Infrastructure_Healthcare_17.
+
+Module_Healthcare_17 has status ACTIVE.
+
+Facility_Healthcare_17 is located in Region_2.

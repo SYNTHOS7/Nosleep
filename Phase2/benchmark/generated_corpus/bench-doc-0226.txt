@@ -1,0 +1,11 @@
+# Benchmark Document 0226 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_226 is a part of Global Core_Aerospace.
+
+Service_Aerospace_226_Alpha uses Microservice_Aerospace_226_Beta.
+
+Service_Aerospace_226_Alpha depends on Infrastructure_Aerospace_226.
+
+Module_Aerospace_226 has status ACTIVE.
+
+Facility_Aerospace_226 is located in Region_1.

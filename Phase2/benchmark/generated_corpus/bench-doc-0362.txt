@@ -1,0 +1,11 @@
+# Benchmark Document 0362 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_362 is a part of Global Core_Aerospace.
+
+Service_Aerospace_362_Alpha uses Microservice_Aerospace_362_Beta.
+
+Service_Aerospace_362_Alpha depends on Infrastructure_Aerospace_362.
+
+Module_Aerospace_362 has status ACTIVE.
+
+Facility_Aerospace_362 is located in Region_2.

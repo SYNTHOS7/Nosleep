@@ -1,0 +1,11 @@
+# Benchmark Document 0344 - Finance Architecture Overview
+
+Enterprise System_Finance_344 is a part of Global Core_Finance.
+
+Service_Finance_344_Alpha uses Microservice_Finance_344_Beta.
+
+Service_Finance_344_Alpha depends on Infrastructure_Finance_344.
+
+Module_Finance_344 has status ACTIVE.
+
+Facility_Finance_344 is located in Region_4.

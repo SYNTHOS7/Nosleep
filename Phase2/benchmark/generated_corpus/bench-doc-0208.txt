@@ -1,0 +1,11 @@
+# Benchmark Document 0208 - Finance Architecture Overview
+
+Enterprise System_Finance_208 is a part of Global Core_Finance.
+
+Service_Finance_208_Alpha uses Microservice_Finance_208_Beta.
+
+Service_Finance_208_Alpha depends on Infrastructure_Finance_208.
+
+Module_Finance_208 has status ACTIVE.
+
+Facility_Finance_208 is located in Region_3.

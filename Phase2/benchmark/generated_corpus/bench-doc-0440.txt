@@ -1,0 +1,13 @@
+# Benchmark Document 0440 - Finance Architecture Overview
+
+Enterprise System_Finance_440 is a part of Global Core_Finance.
+
+Service_Finance_440_Alpha uses Microservice_Finance_440_Beta.
+
+Service_Finance_440_Alpha depends on Infrastructure_Finance_440.
+
+Module_Finance_440 has status ACTIVE.
+
+Facility_Finance_440 is located in Region_0.
+
+Subsystem_Finance_440 does not depend on Legacy_Finance_440.

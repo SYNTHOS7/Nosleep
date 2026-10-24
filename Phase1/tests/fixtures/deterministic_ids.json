@@ -1,0 +1,48 @@
+{
+  "input": {
+    "document_id": "01b2c3d4-e5f6-4789-abcd-ef0123456789",
+    "workspace_id": "workspace-alpha",
+    "content_hash": "e1c2a3b4d5e6f70809101112131415161718191a1b1c1d1e1f20212223242526",
+    "pipeline": {
+      "chunker_version": "chunker-1.0.0",
+      "embedding_version": "embedding-2026-01",
+      "extractor_version": "extractor-1.0.0",
+      "parser_version": "parser-1.0.0"
+    },
+    "chunk_index": 0,
+    "text_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "location": {
+      "element_ids": ["p1e1"],
+      "end_offset": 19,
+      "page": 1,
+      "start_offset": 0
+    },
+    "entity_type": "Organization",
+    "normalized_name": "acme",
+    "mention": {
+      "start": 0,
+      "end": 4,
+      "quote": "Acme"
+    },
+    "relation": {
+      "object_entity_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "predicate": "SUPPORTS",
+      "polarity": "positive",
+      "modality": "asserted",
+      "condition": null,
+      "evidence": {
+        "chunk_id": "8c682f337389ffe7632682bbf7addf2a5b0c039742b630de80ce2bb63e7e7250",
+        "start": 0,
+        "end": 19,
+        "quote": "Acme supports IPv6."
+      }
+    }
+  },
+  "expected": {
+    "revision_id": "0fef5b42aba2606f399470e1d445db0f28f92bf5ff6871b9ea6cc091bc840547",
+    "chunk_id": "8c682f337389ffe7632682bbf7addf2a5b0c039742b630de80ce2bb63e7e7250",
+    "entity_id": "6493796446c0a72f6fa708696bb2668d7089880556be12f1d89340f88b96ad78",
+    "entity_mention_id": "cf19c7671bac25e81369a9c62170e42ac075125f6f616f2196d3a079ebc5e34c",
+    "relation_id": "a155862f397c880fa59771b574146ab52d08459ce3e5291d3fbbdc0eecae05ac"
+  }
+}

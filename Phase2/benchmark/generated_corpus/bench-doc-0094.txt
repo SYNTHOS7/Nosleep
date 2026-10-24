@@ -1,0 +1,11 @@
+# Benchmark Document 0094 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_94 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_94_Alpha uses Microservice_Cybersecurity_94_Beta.
+
+Service_Cybersecurity_94_Alpha depends on Infrastructure_Cybersecurity_94.
+
+Module_Cybersecurity_94 has status ACTIVE.
+
+Facility_Cybersecurity_94 is located in Region_4.

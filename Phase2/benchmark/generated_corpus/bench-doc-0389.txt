@@ -1,0 +1,11 @@
+# Benchmark Document 0389 - Retail Architecture Overview
+
+Enterprise System_Retail_389 is a part of Global Core_Retail.
+
+Service_Retail_389_Alpha uses Microservice_Retail_389_Beta.
+
+Service_Retail_389_Alpha depends on Infrastructure_Retail_389.
+
+Module_Retail_389 has status ACTIVE.
+
+Facility_Retail_389 is located in Region_4.

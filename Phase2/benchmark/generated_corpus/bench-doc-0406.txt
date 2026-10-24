@@ -1,0 +1,13 @@
+# Benchmark Document 0406 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_406 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_406_Alpha uses Microservice_Cybersecurity_406_Beta.
+
+Service_Cybersecurity_406_Alpha depends on Infrastructure_Cybersecurity_406.
+
+Module_Cybersecurity_406 has status ACTIVE.
+
+Facility_Cybersecurity_406 is located in Region_1.
+
+Service_Cybersecurity_406_Alpha uses Cache_406 only if high availability is enabled.

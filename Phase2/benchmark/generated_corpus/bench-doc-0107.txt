@@ -1,0 +1,11 @@
+# Benchmark Document 0107 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_107 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_107_Alpha uses Microservice_Telecommunications_107_Beta.
+
+Service_Telecommunications_107_Alpha depends on Infrastructure_Telecommunications_107.
+
+Module_Telecommunications_107 has status ACTIVE.
+
+Facility_Telecommunications_107 is located in Region_2.

@@ -1,0 +1,13 @@
+# Benchmark Document 0161 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_161 is a part of Global Core_Healthcare.
+
+Service_Healthcare_161_Alpha uses Microservice_Healthcare_161_Beta.
+
+Service_Healthcare_161_Alpha depends on Infrastructure_Healthcare_161.
+
+Module_Healthcare_161 has status ACTIVE.
+
+Facility_Healthcare_161 is located in Region_1.
+
+Service_Healthcare_161_Alpha uses Cache_161 only if high availability is enabled.

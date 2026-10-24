@@ -1,0 +1,11 @@
+# Benchmark Document 0239 - Automotive Architecture Overview
+
+Enterprise System_Automotive_239 is a part of Global Core_Automotive.
+
+Service_Automotive_239_Alpha uses Microservice_Automotive_239_Beta.
+
+Service_Automotive_239_Alpha depends on Infrastructure_Automotive_239.
+
+Module_Automotive_239 has status ACTIVE.
+
+Facility_Automotive_239 is located in Region_4.

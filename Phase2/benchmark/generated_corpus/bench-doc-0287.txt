@@ -1,0 +1,13 @@
+# Benchmark Document 0287 - Automotive Architecture Overview
+
+Enterprise System_Automotive_287 is a part of Global Core_Automotive.
+
+Service_Automotive_287_Alpha uses Microservice_Automotive_287_Beta.
+
+Service_Automotive_287_Alpha depends on Infrastructure_Automotive_287.
+
+Module_Automotive_287 has status ACTIVE.
+
+Facility_Automotive_287 is located in Region_2.
+
+Service_Automotive_287_Alpha uses Cache_287 only if high availability is enabled.

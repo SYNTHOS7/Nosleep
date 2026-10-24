@@ -1,0 +1,13 @@
+# Benchmark Document 0325 - Retail Architecture Overview
+
+Enterprise System_Retail_325 is a part of Global Core_Retail.
+
+Service_Retail_325_Alpha uses Microservice_Retail_325_Beta.
+
+Service_Retail_325_Alpha depends on Infrastructure_Retail_325.
+
+Module_Retail_325 has status ACTIVE.
+
+Facility_Retail_325 is located in Region_0.
+
+Subsystem_Retail_325 does not depend on Legacy_Retail_325.

@@ -1,0 +1,13 @@
+# Benchmark Document 0005 - Retail Architecture Overview
+
+Enterprise System_Retail_5 is a part of Global Core_Retail.
+
+Service_Retail_5_Alpha uses Microservice_Retail_5_Beta.
+
+Service_Retail_5_Alpha depends on Infrastructure_Retail_5.
+
+Module_Retail_5 has status ACTIVE.
+
+Facility_Retail_5 is located in Region_0.
+
+Subsystem_Retail_5 does not depend on Legacy_Retail_5.

@@ -1,0 +1,13 @@
+# Benchmark Document 0371 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_371 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_371_Alpha uses Microservice_Telecommunications_371_Beta.
+
+Service_Telecommunications_371_Alpha depends on Infrastructure_Telecommunications_371.
+
+Module_Telecommunications_371 has status ACTIVE.
+
+Facility_Telecommunications_371 is located in Region_1.
+
+Service_Telecommunications_371_Alpha uses Cache_371 only if high availability is enabled.

@@ -1,0 +1,11 @@
+# Benchmark Document 0142 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_142 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_142_Alpha uses Microservice_Cybersecurity_142_Beta.
+
+Service_Cybersecurity_142_Alpha depends on Infrastructure_Cybersecurity_142.
+
+Module_Cybersecurity_142 has status ACTIVE.
+
+Facility_Cybersecurity_142 is located in Region_2.

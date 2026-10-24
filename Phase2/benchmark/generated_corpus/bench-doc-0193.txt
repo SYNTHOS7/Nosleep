@@ -1,0 +1,11 @@
+# Benchmark Document 0193 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_193 is a part of Global Core_Healthcare.
+
+Service_Healthcare_193_Alpha uses Microservice_Healthcare_193_Beta.
+
+Service_Healthcare_193_Alpha depends on Infrastructure_Healthcare_193.
+
+Module_Healthcare_193 has status ACTIVE.
+
+Facility_Healthcare_193 is located in Region_3.

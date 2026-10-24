@@ -1,0 +1,13 @@
+# Benchmark Document 0110 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_110 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_110_Alpha uses Microservice_Cybersecurity_110_Beta.
+
+Service_Cybersecurity_110_Alpha depends on Infrastructure_Cybersecurity_110.
+
+Module_Cybersecurity_110 has status ACTIVE.
+
+Facility_Cybersecurity_110 is located in Region_0.
+
+Subsystem_Cybersecurity_110 does not depend on Legacy_Cybersecurity_110.

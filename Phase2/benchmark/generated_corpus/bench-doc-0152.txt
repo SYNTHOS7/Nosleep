@@ -1,0 +1,11 @@
+# Benchmark Document 0152 - Finance Architecture Overview
+
+Enterprise System_Finance_152 is a part of Global Core_Finance.
+
+Service_Finance_152_Alpha uses Microservice_Finance_152_Beta.
+
+Service_Finance_152_Alpha depends on Infrastructure_Finance_152.
+
+Module_Finance_152 has status ACTIVE.
+
+Facility_Finance_152 is located in Region_2.

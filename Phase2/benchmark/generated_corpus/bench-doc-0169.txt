@@ -1,0 +1,11 @@
+# Benchmark Document 0169 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_169 is a part of Global Core_Healthcare.
+
+Service_Healthcare_169_Alpha uses Microservice_Healthcare_169_Beta.
+
+Service_Healthcare_169_Alpha depends on Infrastructure_Healthcare_169.
+
+Module_Healthcare_169 has status ACTIVE.
+
+Facility_Healthcare_169 is located in Region_4.

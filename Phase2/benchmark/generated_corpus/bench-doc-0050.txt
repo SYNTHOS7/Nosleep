@@ -1,0 +1,13 @@
+# Benchmark Document 0050 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_50 is a part of Global Core_Aerospace.
+
+Service_Aerospace_50_Alpha uses Microservice_Aerospace_50_Beta.
+
+Service_Aerospace_50_Alpha depends on Infrastructure_Aerospace_50.
+
+Module_Aerospace_50 has status ACTIVE.
+
+Facility_Aerospace_50 is located in Region_0.
+
+Subsystem_Aerospace_50 does not depend on Legacy_Aerospace_50.

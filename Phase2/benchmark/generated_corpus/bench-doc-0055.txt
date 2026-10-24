@@ -1,0 +1,13 @@
+# Benchmark Document 0055 - Automotive Architecture Overview
+
+Enterprise System_Automotive_55 is a part of Global Core_Automotive.
+
+Service_Automotive_55_Alpha uses Microservice_Automotive_55_Beta.
+
+Service_Automotive_55_Alpha depends on Infrastructure_Automotive_55.
+
+Module_Automotive_55 has status ACTIVE.
+
+Facility_Automotive_55 is located in Region_0.
+
+Subsystem_Automotive_55 does not depend on Legacy_Automotive_55.

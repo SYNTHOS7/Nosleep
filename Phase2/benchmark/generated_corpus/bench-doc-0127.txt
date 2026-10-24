@@ -1,0 +1,11 @@
+# Benchmark Document 0127 - Automotive Architecture Overview
+
+Enterprise System_Automotive_127 is a part of Global Core_Automotive.
+
+Service_Automotive_127_Alpha uses Microservice_Automotive_127_Beta.
+
+Service_Automotive_127_Alpha depends on Infrastructure_Automotive_127.
+
+Module_Automotive_127 has status ACTIVE.
+
+Facility_Automotive_127 is located in Region_2.

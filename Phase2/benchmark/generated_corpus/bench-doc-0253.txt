@@ -1,0 +1,11 @@
+# Benchmark Document 0253 - Retail Architecture Overview
+
+Enterprise System_Retail_253 is a part of Global Core_Retail.
+
+Service_Retail_253_Alpha uses Microservice_Retail_253_Beta.
+
+Service_Retail_253_Alpha depends on Infrastructure_Retail_253.
+
+Module_Retail_253 has status ACTIVE.
+
+Facility_Retail_253 is located in Region_3.

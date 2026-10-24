@@ -1,0 +1,11 @@
+# Benchmark Document 0433 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_433 is a part of Global Core_Healthcare.
+
+Service_Healthcare_433_Alpha uses Microservice_Healthcare_433_Beta.
+
+Service_Healthcare_433_Alpha depends on Infrastructure_Healthcare_433.
+
+Module_Healthcare_433 has status ACTIVE.
+
+Facility_Healthcare_433 is located in Region_3.

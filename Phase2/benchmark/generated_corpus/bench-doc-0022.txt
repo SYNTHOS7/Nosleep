@@ -1,0 +1,11 @@
+# Benchmark Document 0022 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_22 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_22_Alpha uses Microservice_Cybersecurity_22_Beta.
+
+Service_Cybersecurity_22_Alpha depends on Infrastructure_Cybersecurity_22.
+
+Module_Cybersecurity_22 has status ACTIVE.
+
+Facility_Cybersecurity_22 is located in Region_2.

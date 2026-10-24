@@ -1,0 +1,13 @@
+# Benchmark Document 0230 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_230 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_230_Alpha uses Microservice_Cybersecurity_230_Beta.
+
+Service_Cybersecurity_230_Alpha depends on Infrastructure_Cybersecurity_230.
+
+Module_Cybersecurity_230 has status ACTIVE.
+
+Facility_Cybersecurity_230 is located in Region_0.
+
+Subsystem_Cybersecurity_230 does not depend on Legacy_Cybersecurity_230.

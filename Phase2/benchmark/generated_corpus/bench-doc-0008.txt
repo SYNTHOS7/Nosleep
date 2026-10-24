@@ -1,0 +1,11 @@
+# Benchmark Document 0008 - Finance Architecture Overview
+
+Enterprise System_Finance_8 is a part of Global Core_Finance.
+
+Service_Finance_8_Alpha uses Microservice_Finance_8_Beta.
+
+Service_Finance_8_Alpha depends on Infrastructure_Finance_8.
+
+Module_Finance_8 has status ACTIVE.
+
+Facility_Finance_8 is located in Region_3.

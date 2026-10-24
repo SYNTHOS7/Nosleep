@@ -1,0 +1,11 @@
+# Benchmark Document 0376 - Finance Architecture Overview
+
+Enterprise System_Finance_376 is a part of Global Core_Finance.
+
+Service_Finance_376_Alpha uses Microservice_Finance_376_Beta.
+
+Service_Finance_376_Alpha depends on Infrastructure_Finance_376.
+
+Module_Finance_376 has status ACTIVE.
+
+Facility_Finance_376 is located in Region_1.

@@ -1,0 +1,11 @@
+# Benchmark Document 0232 - Finance Architecture Overview
+
+Enterprise System_Finance_232 is a part of Global Core_Finance.
+
+Service_Finance_232_Alpha uses Microservice_Finance_232_Beta.
+
+Service_Finance_232_Alpha depends on Infrastructure_Finance_232.
+
+Module_Finance_232 has status ACTIVE.
+
+Facility_Finance_232 is located in Region_2.

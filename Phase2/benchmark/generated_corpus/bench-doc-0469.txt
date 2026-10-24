@@ -1,0 +1,13 @@
+# Benchmark Document 0469 - Retail Architecture Overview
+
+Enterprise System_Retail_469 is a part of Global Core_Retail.
+
+Service_Retail_469_Alpha uses Microservice_Retail_469_Beta.
+
+Service_Retail_469_Alpha depends on Infrastructure_Retail_469.
+
+Module_Retail_469 has status ACTIVE.
+
+Facility_Retail_469 is located in Region_4.
+
+Service_Retail_469_Alpha uses Cache_469 only if high availability is enabled.

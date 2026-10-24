@@ -1,0 +1,11 @@
+# Benchmark Document 0128 - Finance Architecture Overview
+
+Enterprise System_Finance_128 is a part of Global Core_Finance.
+
+Service_Finance_128_Alpha uses Microservice_Finance_128_Beta.
+
+Service_Finance_128_Alpha depends on Infrastructure_Finance_128.
+
+Module_Finance_128 has status ACTIVE.
+
+Facility_Finance_128 is located in Region_3.

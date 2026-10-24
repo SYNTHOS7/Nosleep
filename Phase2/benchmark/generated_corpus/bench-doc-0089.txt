@@ -1,0 +1,11 @@
+# Benchmark Document 0089 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_89 is a part of Global Core_Healthcare.
+
+Service_Healthcare_89_Alpha uses Microservice_Healthcare_89_Beta.
+
+Service_Healthcare_89_Alpha depends on Infrastructure_Healthcare_89.
+
+Module_Healthcare_89 has status ACTIVE.
+
+Facility_Healthcare_89 is located in Region_4.

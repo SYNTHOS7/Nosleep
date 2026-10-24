@@ -1,0 +1,11 @@
+# Benchmark Document 0352 - Finance Architecture Overview
+
+Enterprise System_Finance_352 is a part of Global Core_Finance.
+
+Service_Finance_352_Alpha uses Microservice_Finance_352_Beta.
+
+Service_Finance_352_Alpha depends on Infrastructure_Finance_352.
+
+Module_Finance_352 has status ACTIVE.
+
+Facility_Finance_352 is located in Region_2.

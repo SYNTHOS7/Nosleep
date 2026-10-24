@@ -1,0 +1,13 @@
+# Benchmark Document 0133 - Retail Architecture Overview
+
+Enterprise System_Retail_133 is a part of Global Core_Retail.
+
+Service_Retail_133_Alpha uses Microservice_Retail_133_Beta.
+
+Service_Retail_133_Alpha depends on Infrastructure_Retail_133.
+
+Module_Retail_133 has status ACTIVE.
+
+Facility_Retail_133 is located in Region_3.
+
+Service_Retail_133_Alpha uses Cache_133 only if high availability is enabled.

@@ -1,0 +1,13 @@
+# Benchmark Document 0470 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_470 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_470_Alpha uses Microservice_Cybersecurity_470_Beta.
+
+Service_Cybersecurity_470_Alpha depends on Infrastructure_Cybersecurity_470.
+
+Module_Cybersecurity_470 has status ACTIVE.
+
+Facility_Cybersecurity_470 is located in Region_0.
+
+Subsystem_Cybersecurity_470 does not depend on Legacy_Cybersecurity_470.

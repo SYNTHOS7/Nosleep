@@ -1,0 +1,11 @@
+# Benchmark Document 0377 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_377 is a part of Global Core_Healthcare.
+
+Service_Healthcare_377_Alpha uses Microservice_Healthcare_377_Beta.
+
+Service_Healthcare_377_Alpha depends on Infrastructure_Healthcare_377.
+
+Module_Healthcare_377 has status ACTIVE.
+
+Facility_Healthcare_377 is located in Region_2.

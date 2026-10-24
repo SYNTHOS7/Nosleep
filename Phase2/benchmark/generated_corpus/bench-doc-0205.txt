@@ -1,0 +1,13 @@
+# Benchmark Document 0205 - Retail Architecture Overview
+
+Enterprise System_Retail_205 is a part of Global Core_Retail.
+
+Service_Retail_205_Alpha uses Microservice_Retail_205_Beta.
+
+Service_Retail_205_Alpha depends on Infrastructure_Retail_205.
+
+Module_Retail_205 has status ACTIVE.
+
+Facility_Retail_205 is located in Region_0.
+
+Subsystem_Retail_205 does not depend on Legacy_Retail_205.

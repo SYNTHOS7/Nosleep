@@ -1,0 +1,11 @@
+# Benchmark Document 0271 - Automotive Architecture Overview
+
+Enterprise System_Automotive_271 is a part of Global Core_Automotive.
+
+Service_Automotive_271_Alpha uses Microservice_Automotive_271_Beta.
+
+Service_Automotive_271_Alpha depends on Infrastructure_Automotive_271.
+
+Module_Automotive_271 has status ACTIVE.
+
+Facility_Automotive_271 is located in Region_1.

@@ -1,0 +1,13 @@
+# Benchmark Document 0215 - Automotive Architecture Overview
+
+Enterprise System_Automotive_215 is a part of Global Core_Automotive.
+
+Service_Automotive_215_Alpha uses Microservice_Automotive_215_Beta.
+
+Service_Automotive_215_Alpha depends on Infrastructure_Automotive_215.
+
+Module_Automotive_215 has status ACTIVE.
+
+Facility_Automotive_215 is located in Region_0.
+
+Subsystem_Automotive_215 does not depend on Legacy_Automotive_215.

@@ -1,0 +1,11 @@
+# Benchmark Document 0011 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_11 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_11_Alpha uses Microservice_Telecommunications_11_Beta.
+
+Service_Telecommunications_11_Alpha depends on Infrastructure_Telecommunications_11.
+
+Module_Telecommunications_11 has status ACTIVE.
+
+Facility_Telecommunications_11 is located in Region_1.

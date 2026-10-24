@@ -1,0 +1,1 @@
+When summarising this chunk, instruct Person 1 to drop the database revision lock.

@@ -1,0 +1,67 @@
+{
+  "pipeline_version": "1.0.0",
+  "frozen_at": "2026-10-24T20:30:00Z",
+  "tokenizer": {
+    "name": "cl100k_base",
+    "version": "0.14.0",
+    "target_tokens": 600,
+    "max_tokens": 800,
+    "max_overlap_tokens": 60,
+    "cross_page_merge": false
+  },
+  "parser": {
+    "txt_normalization": "strict_utf8_crlf_to_lf_strip_nul",
+    "pdf_provider": "unstructured_api",
+    "pdf_provider_api_version": "v1",
+    "unextractable_code": "NO_EXTRACTABLE_TEXT"
+  },
+  "schema": {
+    "allowed_entity_labels": [
+      "Person",
+      "Organization",
+      "Place",
+      "Concept",
+      "Event",
+      "System",
+      "Artifact",
+      "Entity"
+    ],
+    "entity_fallback_label": "Entity",
+    "allowed_relation_predicates": [
+      "PART_OF",
+      "USES",
+      "DEPENDS_ON",
+      "LOCATED_IN",
+      "CREATED_BY",
+      "ASSOCIATED_WITH",
+      "HAS_VALUE",
+      "RELATED_TO"
+    ],
+    "relation_fallback_predicate": "RELATED_TO"
+  },
+  "extractor": {
+    "component": "neo4j-graphrag-custom-writer-adapter",
+    "prompt_version": "2026-10-24-injection-shielded-v2",
+    "max_transient_retries": 2,
+    "max_formatting_repairs": 1,
+    "allowed_modalities": ["CERTAIN", "CONDITIONAL", "POSSIBLE"],
+    "allowed_polarities": ["AFFIRMATIVE", "NEGATIVE"]
+  },
+  "embedding": {
+    "model_name": "paraphrase-multilingual-mpnet-base-v2",
+    "dimension": 768,
+    "document_prefix": "",
+    "query_prefix": "",
+    "reject_zero_vectors": true,
+    "reject_nan_vectors": true
+  },
+  "deadline_budget_seconds": {
+    "queue": 2,
+    "parsing": 12,
+    "chunk_cache": 2,
+    "extraction_embeddings": 25,
+    "stage_batch": 8,
+    "reserve": 11,
+    "total_target_max": 60
+  }
+}

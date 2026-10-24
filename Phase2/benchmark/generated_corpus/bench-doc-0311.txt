@@ -1,0 +1,11 @@
+# Benchmark Document 0311 - Automotive Architecture Overview
+
+Enterprise System_Automotive_311 is a part of Global Core_Automotive.
+
+Service_Automotive_311_Alpha uses Microservice_Automotive_311_Beta.
+
+Service_Automotive_311_Alpha depends on Infrastructure_Automotive_311.
+
+Module_Automotive_311 has status ACTIVE.
+
+Facility_Automotive_311 is located in Region_1.

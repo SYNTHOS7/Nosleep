@@ -1,0 +1,11 @@
+# Benchmark Document 0146 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_146 is a part of Global Core_Aerospace.
+
+Service_Aerospace_146_Alpha uses Microservice_Aerospace_146_Beta.
+
+Service_Aerospace_146_Alpha depends on Infrastructure_Aerospace_146.
+
+Module_Aerospace_146 has status ACTIVE.
+
+Facility_Aerospace_146 is located in Region_1.

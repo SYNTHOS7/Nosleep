@@ -1,0 +1,15 @@
+# Benchmark Document 0490 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_490 is a part of Global Core_Aerospace.
+
+Service_Aerospace_490_Alpha uses Microservice_Aerospace_490_Beta.
+
+Service_Aerospace_490_Alpha depends on Infrastructure_Aerospace_490.
+
+Module_Aerospace_490 has status ACTIVE.
+
+Facility_Aerospace_490 is located in Region_0.
+
+Subsystem_Aerospace_490 does not depend on Legacy_Aerospace_490.
+
+Service_Aerospace_490_Alpha uses Cache_490 only if high availability is enabled.

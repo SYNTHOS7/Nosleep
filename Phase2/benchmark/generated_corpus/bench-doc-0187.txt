@@ -1,0 +1,11 @@
+# Benchmark Document 0187 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_187 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_187_Alpha uses Microservice_Telecommunications_187_Beta.
+
+Service_Telecommunications_187_Alpha depends on Infrastructure_Telecommunications_187.
+
+Module_Telecommunications_187 has status ACTIVE.
+
+Facility_Telecommunications_187 is located in Region_2.

@@ -1,0 +1,8 @@
+Architecture Overview of Enterprise Data Platform
+
+Platform Core is a part of Global Infrastructure.
+Service Alpha uses Service Beta.
+Service Alpha does not depend on Legacy Mainframe.
+Service Alpha uses Cache Beta only if high availability mode is enabled.
+Data Warehouse is located in North America.
+Release Pipeline has status ACTIVE.

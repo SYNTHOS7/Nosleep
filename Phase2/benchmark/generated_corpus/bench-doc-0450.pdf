@@ -1,0 +1,30 @@
+%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj
+4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+5 0 obj << /Length 613 >> stream
+BT
+/F1 10 Tf
+72 700 Td (# Benchmark Document 0450 - Aerospace Architecture Overview) Tj -72 -20 Td
+72 680 Td (Enterprise System_Aerospace_450 is a part of Global Core_Aerospace.) Tj -72 -20 Td
+72 660 Td (Service_Aerospace_450_Alpha uses Microservice_Aerospace_450_Beta.) Tj -72 -20 Td
+72 640 Td (Service_Aerospace_450_Alpha depends on Infrastructure_Aerospace_450.) Tj -72 -20 Td
+72 620 Td (Module_Aerospace_450 has status ACTIVE.) Tj -72 -20 Td
+72 600 Td (Facility_Aerospace_450 is located in Region_0.) Tj -72 -20 Td
+72 580 Td (Subsystem_Aerospace_450 does not depend on Legacy_Aerospace_450.) Tj -72 -20 Td
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000246 00000 n 
+0000000317 00000 n 
+trailer << /Size 6 /Root 1 0 R >>
+startxref
+993
+%%EOF

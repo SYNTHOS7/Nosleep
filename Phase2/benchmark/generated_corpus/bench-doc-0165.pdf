@@ -1,0 +1,30 @@
+%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj
+4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+5 0 obj << /Length 580 >> stream
+BT
+/F1 10 Tf
+72 700 Td (# Benchmark Document 0165 - Retail Architecture Overview) Tj -72 -20 Td
+72 680 Td (Enterprise System_Retail_165 is a part of Global Core_Retail.) Tj -72 -20 Td
+72 660 Td (Service_Retail_165_Alpha uses Microservice_Retail_165_Beta.) Tj -72 -20 Td
+72 640 Td (Service_Retail_165_Alpha depends on Infrastructure_Retail_165.) Tj -72 -20 Td
+72 620 Td (Module_Retail_165 has status ACTIVE.) Tj -72 -20 Td
+72 600 Td (Facility_Retail_165 is located in Region_0.) Tj -72 -20 Td
+72 580 Td (Subsystem_Retail_165 does not depend on Legacy_Retail_165.) Tj -72 -20 Td
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000246 00000 n 
+0000000317 00000 n 
+trailer << /Size 6 /Root 1 0 R >>
+startxref
+960
+%%EOF

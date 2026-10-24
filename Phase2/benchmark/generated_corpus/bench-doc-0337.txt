@@ -1,0 +1,11 @@
+# Benchmark Document 0337 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_337 is a part of Global Core_Healthcare.
+
+Service_Healthcare_337_Alpha uses Microservice_Healthcare_337_Beta.
+
+Service_Healthcare_337_Alpha depends on Infrastructure_Healthcare_337.
+
+Module_Healthcare_337 has status ACTIVE.
+
+Facility_Healthcare_337 is located in Region_2.

@@ -1,0 +1,13 @@
+# Benchmark Document 0085 - Retail Architecture Overview
+
+Enterprise System_Retail_85 is a part of Global Core_Retail.
+
+Service_Retail_85_Alpha uses Microservice_Retail_85_Beta.
+
+Service_Retail_85_Alpha depends on Infrastructure_Retail_85.
+
+Module_Retail_85 has status ACTIVE.
+
+Facility_Retail_85 is located in Region_0.
+
+Subsystem_Retail_85 does not depend on Legacy_Retail_85.

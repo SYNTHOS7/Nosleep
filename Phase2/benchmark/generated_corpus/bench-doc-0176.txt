@@ -1,0 +1,11 @@
+# Benchmark Document 0176 - Finance Architecture Overview
+
+Enterprise System_Finance_176 is a part of Global Core_Finance.
+
+Service_Finance_176_Alpha uses Microservice_Finance_176_Beta.
+
+Service_Finance_176_Alpha depends on Infrastructure_Finance_176.
+
+Module_Finance_176 has status ACTIVE.
+
+Facility_Finance_176 is located in Region_1.

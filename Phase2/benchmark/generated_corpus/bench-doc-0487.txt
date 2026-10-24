@@ -1,0 +1,11 @@
+# Benchmark Document 0487 - Automotive Architecture Overview
+
+Enterprise System_Automotive_487 is a part of Global Core_Automotive.
+
+Service_Automotive_487_Alpha uses Microservice_Automotive_487_Beta.
+
+Service_Automotive_487_Alpha depends on Infrastructure_Automotive_487.
+
+Module_Automotive_487 has status ACTIVE.
+
+Facility_Automotive_487 is located in Region_2.

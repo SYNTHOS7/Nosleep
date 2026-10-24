@@ -1,0 +1,11 @@
+# Benchmark Document 0464 - Finance Architecture Overview
+
+Enterprise System_Finance_464 is a part of Global Core_Finance.
+
+Service_Finance_464_Alpha uses Microservice_Finance_464_Beta.
+
+Service_Finance_464_Alpha depends on Infrastructure_Finance_464.
+
+Module_Finance_464 has status ACTIVE.
+
+Facility_Finance_464 is located in Region_4.

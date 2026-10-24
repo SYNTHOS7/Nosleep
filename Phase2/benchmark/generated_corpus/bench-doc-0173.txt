@@ -1,0 +1,11 @@
+# Benchmark Document 0173 - Retail Architecture Overview
+
+Enterprise System_Retail_173 is a part of Global Core_Retail.
+
+Service_Retail_173_Alpha uses Microservice_Retail_173_Beta.
+
+Service_Retail_173_Alpha depends on Infrastructure_Retail_173.
+
+Module_Retail_173 has status ACTIVE.
+
+Facility_Retail_173 is located in Region_3.

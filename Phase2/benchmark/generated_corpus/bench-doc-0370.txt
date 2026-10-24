@@ -1,0 +1,13 @@
+# Benchmark Document 0370 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_370 is a part of Global Core_Aerospace.
+
+Service_Aerospace_370_Alpha uses Microservice_Aerospace_370_Beta.
+
+Service_Aerospace_370_Alpha depends on Infrastructure_Aerospace_370.
+
+Module_Aerospace_370 has status ACTIVE.
+
+Facility_Aerospace_370 is located in Region_0.
+
+Subsystem_Aerospace_370 does not depend on Legacy_Aerospace_370.

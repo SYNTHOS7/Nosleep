@@ -1,0 +1,11 @@
+# Benchmark Document 0149 - Retail Architecture Overview
+
+Enterprise System_Retail_149 is a part of Global Core_Retail.
+
+Service_Retail_149_Alpha uses Microservice_Retail_149_Beta.
+
+Service_Retail_149_Alpha depends on Infrastructure_Retail_149.
+
+Module_Retail_149 has status ACTIVE.
+
+Facility_Retail_149 is located in Region_4.

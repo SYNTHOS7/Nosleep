@@ -1,0 +1,13 @@
+# Benchmark Document 0112 - Finance Architecture Overview
+
+Enterprise System_Finance_112 is a part of Global Core_Finance.
+
+Service_Finance_112_Alpha uses Microservice_Finance_112_Beta.
+
+Service_Finance_112_Alpha depends on Infrastructure_Finance_112.
+
+Module_Finance_112 has status ACTIVE.
+
+Facility_Finance_112 is located in Region_2.
+
+Service_Finance_112_Alpha uses Cache_112 only if high availability is enabled.

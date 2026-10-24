@@ -1,0 +1,11 @@
+# Benchmark Document 0272 - Finance Architecture Overview
+
+Enterprise System_Finance_272 is a part of Global Core_Finance.
+
+Service_Finance_272_Alpha uses Microservice_Finance_272_Beta.
+
+Service_Finance_272_Alpha depends on Infrastructure_Finance_272.
+
+Module_Finance_272 has status ACTIVE.
+
+Facility_Finance_272 is located in Region_2.

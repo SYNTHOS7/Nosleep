@@ -1,0 +1,13 @@
+# Benchmark Document 0098 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_98 is a part of Global Core_Aerospace.
+
+Service_Aerospace_98_Alpha uses Microservice_Aerospace_98_Beta.
+
+Service_Aerospace_98_Alpha depends on Infrastructure_Aerospace_98.
+
+Module_Aerospace_98 has status ACTIVE.
+
+Facility_Aerospace_98 is located in Region_3.
+
+Service_Aerospace_98_Alpha uses Cache_98 only if high availability is enabled.

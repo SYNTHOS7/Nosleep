@@ -1,0 +1,11 @@
+# Benchmark Document 0088 - Finance Architecture Overview
+
+Enterprise System_Finance_88 is a part of Global Core_Finance.
+
+Service_Finance_88_Alpha uses Microservice_Finance_88_Beta.
+
+Service_Finance_88_Alpha depends on Infrastructure_Finance_88.
+
+Module_Finance_88 has status ACTIVE.
+
+Facility_Finance_88 is located in Region_3.

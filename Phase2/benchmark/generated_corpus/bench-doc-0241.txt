@@ -1,0 +1,11 @@
+# Benchmark Document 0241 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_241 is a part of Global Core_Healthcare.
+
+Service_Healthcare_241_Alpha uses Microservice_Healthcare_241_Beta.
+
+Service_Healthcare_241_Alpha depends on Infrastructure_Healthcare_241.
+
+Module_Healthcare_241 has status ACTIVE.
+
+Facility_Healthcare_241 is located in Region_1.

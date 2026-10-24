@@ -1,0 +1,11 @@
+# Benchmark Document 0493 - Retail Architecture Overview
+
+Enterprise System_Retail_493 is a part of Global Core_Retail.
+
+Service_Retail_493_Alpha uses Microservice_Retail_493_Beta.
+
+Service_Retail_493_Alpha depends on Infrastructure_Retail_493.
+
+Module_Retail_493 has status ACTIVE.
+
+Facility_Retail_493 is located in Region_3.

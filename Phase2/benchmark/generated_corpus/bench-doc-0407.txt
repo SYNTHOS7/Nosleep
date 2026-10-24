@@ -1,0 +1,11 @@
+# Benchmark Document 0407 - Automotive Architecture Overview
+
+Enterprise System_Automotive_407 is a part of Global Core_Automotive.
+
+Service_Automotive_407_Alpha uses Microservice_Automotive_407_Beta.
+
+Service_Automotive_407_Alpha depends on Infrastructure_Automotive_407.
+
+Module_Automotive_407 has status ACTIVE.
+
+Facility_Automotive_407 is located in Region_2.

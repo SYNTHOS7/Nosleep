@@ -1,0 +1,11 @@
+# Benchmark Document 0194 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_194 is a part of Global Core_Aerospace.
+
+Service_Aerospace_194_Alpha uses Microservice_Aerospace_194_Beta.
+
+Service_Aerospace_194_Alpha depends on Infrastructure_Aerospace_194.
+
+Module_Aerospace_194 has status ACTIVE.
+
+Facility_Aerospace_194 is located in Region_4.

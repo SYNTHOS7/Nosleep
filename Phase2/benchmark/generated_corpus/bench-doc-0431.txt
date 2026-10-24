@@ -1,0 +1,11 @@
+# Benchmark Document 0431 - Automotive Architecture Overview
+
+Enterprise System_Automotive_431 is a part of Global Core_Automotive.
+
+Service_Automotive_431_Alpha uses Microservice_Automotive_431_Beta.
+
+Service_Automotive_431_Alpha depends on Infrastructure_Automotive_431.
+
+Module_Automotive_431 has status ACTIVE.
+
+Facility_Automotive_431 is located in Region_1.

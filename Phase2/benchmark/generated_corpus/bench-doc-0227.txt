@@ -1,0 +1,11 @@
+# Benchmark Document 0227 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_227 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_227_Alpha uses Microservice_Telecommunications_227_Beta.
+
+Service_Telecommunications_227_Alpha depends on Infrastructure_Telecommunications_227.
+
+Module_Telecommunications_227 has status ACTIVE.
+
+Facility_Telecommunications_227 is located in Region_2.

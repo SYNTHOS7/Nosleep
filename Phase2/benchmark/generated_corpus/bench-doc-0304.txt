@@ -1,0 +1,11 @@
+# Benchmark Document 0304 - Finance Architecture Overview
+
+Enterprise System_Finance_304 is a part of Global Core_Finance.
+
+Service_Finance_304_Alpha uses Microservice_Finance_304_Beta.
+
+Service_Finance_304_Alpha depends on Infrastructure_Finance_304.
+
+Module_Finance_304 has status ACTIVE.
+
+Facility_Finance_304 is located in Region_4.

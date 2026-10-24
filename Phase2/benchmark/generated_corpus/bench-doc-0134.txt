@@ -1,0 +1,11 @@
+# Benchmark Document 0134 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_134 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_134_Alpha uses Microservice_Cybersecurity_134_Beta.
+
+Service_Cybersecurity_134_Alpha depends on Infrastructure_Cybersecurity_134.
+
+Module_Cybersecurity_134 has status ACTIVE.
+
+Facility_Cybersecurity_134 is located in Region_4.

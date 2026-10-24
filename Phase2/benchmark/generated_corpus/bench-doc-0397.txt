@@ -1,0 +1,11 @@
+# Benchmark Document 0397 - Retail Architecture Overview
+
+Enterprise System_Retail_397 is a part of Global Core_Retail.
+
+Service_Retail_397_Alpha uses Microservice_Retail_397_Beta.
+
+Service_Retail_397_Alpha depends on Infrastructure_Retail_397.
+
+Module_Retail_397 has status ACTIVE.
+
+Facility_Retail_397 is located in Region_2.

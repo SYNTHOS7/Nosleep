@@ -1,0 +1,11 @@
+# Benchmark Document 0368 - Finance Architecture Overview
+
+Enterprise System_Finance_368 is a part of Global Core_Finance.
+
+Service_Finance_368_Alpha uses Microservice_Finance_368_Beta.
+
+Service_Finance_368_Alpha depends on Infrastructure_Finance_368.
+
+Module_Finance_368 has status ACTIVE.
+
+Facility_Finance_368 is located in Region_3.

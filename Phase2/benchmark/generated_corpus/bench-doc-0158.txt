@@ -1,0 +1,11 @@
+# Benchmark Document 0158 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_158 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_158_Alpha uses Microservice_Cybersecurity_158_Beta.
+
+Service_Cybersecurity_158_Alpha depends on Infrastructure_Cybersecurity_158.
+
+Module_Cybersecurity_158 has status ACTIVE.
+
+Facility_Cybersecurity_158 is located in Region_3.

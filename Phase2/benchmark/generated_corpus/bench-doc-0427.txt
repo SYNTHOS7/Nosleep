@@ -1,0 +1,13 @@
+# Benchmark Document 0427 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_427 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_427_Alpha uses Microservice_Telecommunications_427_Beta.
+
+Service_Telecommunications_427_Alpha depends on Infrastructure_Telecommunications_427.
+
+Module_Telecommunications_427 has status ACTIVE.
+
+Facility_Telecommunications_427 is located in Region_2.
+
+Service_Telecommunications_427_Alpha uses Cache_427 only if high availability is enabled.

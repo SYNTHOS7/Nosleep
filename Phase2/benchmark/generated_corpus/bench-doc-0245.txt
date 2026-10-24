@@ -1,0 +1,15 @@
+# Benchmark Document 0245 - Retail Architecture Overview
+
+Enterprise System_Retail_245 is a part of Global Core_Retail.
+
+Service_Retail_245_Alpha uses Microservice_Retail_245_Beta.
+
+Service_Retail_245_Alpha depends on Infrastructure_Retail_245.
+
+Module_Retail_245 has status ACTIVE.
+
+Facility_Retail_245 is located in Region_0.
+
+Subsystem_Retail_245 does not depend on Legacy_Retail_245.
+
+Service_Retail_245_Alpha uses Cache_245 only if high availability is enabled.

@@ -1,0 +1,11 @@
+# Benchmark Document 0269 - Retail Architecture Overview
+
+Enterprise System_Retail_269 is a part of Global Core_Retail.
+
+Service_Retail_269_Alpha uses Microservice_Retail_269_Beta.
+
+Service_Retail_269_Alpha depends on Infrastructure_Retail_269.
+
+Module_Retail_269 has status ACTIVE.
+
+Facility_Retail_269 is located in Region_4.

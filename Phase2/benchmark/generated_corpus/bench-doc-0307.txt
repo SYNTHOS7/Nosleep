@@ -1,0 +1,11 @@
+# Benchmark Document 0307 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_307 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_307_Alpha uses Microservice_Telecommunications_307_Beta.
+
+Service_Telecommunications_307_Alpha depends on Infrastructure_Telecommunications_307.
+
+Module_Telecommunications_307 has status ACTIVE.
+
+Facility_Telecommunications_307 is located in Region_2.

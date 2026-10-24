@@ -1,0 +1,11 @@
+# Benchmark Document 0278 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_278 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_278_Alpha uses Microservice_Cybersecurity_278_Beta.
+
+Service_Cybersecurity_278_Alpha depends on Infrastructure_Cybersecurity_278.
+
+Module_Cybersecurity_278 has status ACTIVE.
+
+Facility_Cybersecurity_278 is located in Region_3.

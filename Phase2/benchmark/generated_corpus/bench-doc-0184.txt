@@ -1,0 +1,11 @@
+# Benchmark Document 0184 - Finance Architecture Overview
+
+Enterprise System_Finance_184 is a part of Global Core_Finance.
+
+Service_Finance_184_Alpha uses Microservice_Finance_184_Beta.
+
+Service_Finance_184_Alpha depends on Infrastructure_Finance_184.
+
+Module_Finance_184 has status ACTIVE.
+
+Facility_Finance_184 is located in Region_4.

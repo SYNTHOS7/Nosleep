@@ -1,0 +1,13 @@
+# Benchmark Document 0203 - Telecommunications Architecture Overview
+
+Enterprise System_Telecommunications_203 is a part of Global Core_Telecommunications.
+
+Service_Telecommunications_203_Alpha uses Microservice_Telecommunications_203_Beta.
+
+Service_Telecommunications_203_Alpha depends on Infrastructure_Telecommunications_203.
+
+Module_Telecommunications_203 has status ACTIVE.
+
+Facility_Telecommunications_203 is located in Region_3.
+
+Service_Telecommunications_203_Alpha uses Cache_203 only if high availability is enabled.

@@ -1,0 +1,11 @@
+# Benchmark Document 0137 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_137 is a part of Global Core_Healthcare.
+
+Service_Healthcare_137_Alpha uses Microservice_Healthcare_137_Beta.
+
+Service_Healthcare_137_Alpha depends on Infrastructure_Healthcare_137.
+
+Module_Healthcare_137 has status ACTIVE.
+
+Facility_Healthcare_137 is located in Region_2.

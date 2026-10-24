@@ -1,0 +1,13 @@
+# Benchmark Document 0430 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_430 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_430_Alpha uses Microservice_Cybersecurity_430_Beta.
+
+Service_Cybersecurity_430_Alpha depends on Infrastructure_Cybersecurity_430.
+
+Module_Cybersecurity_430 has status ACTIVE.
+
+Facility_Cybersecurity_430 is located in Region_0.
+
+Subsystem_Cybersecurity_430 does not depend on Legacy_Cybersecurity_430.

@@ -1,0 +1,11 @@
+# Benchmark Document 0421 - Retail Architecture Overview
+
+Enterprise System_Retail_421 is a part of Global Core_Retail.
+
+Service_Retail_421_Alpha uses Microservice_Retail_421_Beta.
+
+Service_Retail_421_Alpha depends on Infrastructure_Retail_421.
+
+Module_Retail_421 has status ACTIVE.
+
+Facility_Retail_421 is located in Region_1.

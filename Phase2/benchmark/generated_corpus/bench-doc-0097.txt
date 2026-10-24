@@ -1,0 +1,11 @@
+# Benchmark Document 0097 - Healthcare Architecture Overview
+
+Enterprise System_Healthcare_97 is a part of Global Core_Healthcare.
+
+Service_Healthcare_97_Alpha uses Microservice_Healthcare_97_Beta.
+
+Service_Healthcare_97_Alpha depends on Infrastructure_Healthcare_97.
+
+Module_Healthcare_97 has status ACTIVE.
+
+Facility_Healthcare_97 is located in Region_2.

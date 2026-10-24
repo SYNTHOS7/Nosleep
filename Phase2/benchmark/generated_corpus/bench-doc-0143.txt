@@ -1,0 +1,11 @@
+# Benchmark Document 0143 - Automotive Architecture Overview
+
+Enterprise System_Automotive_143 is a part of Global Core_Automotive.
+
+Service_Automotive_143_Alpha uses Microservice_Automotive_143_Beta.
+
+Service_Automotive_143_Alpha depends on Infrastructure_Automotive_143.
+
+Module_Automotive_143 has status ACTIVE.
+
+Facility_Automotive_143 is located in Region_3.

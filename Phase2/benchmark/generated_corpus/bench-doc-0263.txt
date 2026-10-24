@@ -1,0 +1,11 @@
+# Benchmark Document 0263 - Automotive Architecture Overview
+
+Enterprise System_Automotive_263 is a part of Global Core_Automotive.
+
+Service_Automotive_263_Alpha uses Microservice_Automotive_263_Beta.
+
+Service_Automotive_263_Alpha depends on Infrastructure_Automotive_263.
+
+Module_Automotive_263 has status ACTIVE.
+
+Facility_Automotive_263 is located in Region_3.

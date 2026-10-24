@@ -1,0 +1,11 @@
+# Benchmark Document 0166 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_166 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_166_Alpha uses Microservice_Cybersecurity_166_Beta.
+
+Service_Cybersecurity_166_Alpha depends on Infrastructure_Cybersecurity_166.
+
+Module_Cybersecurity_166 has status ACTIVE.
+
+Facility_Cybersecurity_166 is located in Region_1.

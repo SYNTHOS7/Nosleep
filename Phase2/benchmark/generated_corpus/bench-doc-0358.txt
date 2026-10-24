@@ -1,0 +1,11 @@
+# Benchmark Document 0358 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_358 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_358_Alpha uses Microservice_Cybersecurity_358_Beta.
+
+Service_Cybersecurity_358_Alpha depends on Infrastructure_Cybersecurity_358.
+
+Module_Cybersecurity_358 has status ACTIVE.
+
+Facility_Cybersecurity_358 is located in Region_3.

@@ -1,0 +1,11 @@
+# Benchmark Document 0346 - Aerospace Architecture Overview
+
+Enterprise System_Aerospace_346 is a part of Global Core_Aerospace.
+
+Service_Aerospace_346_Alpha uses Microservice_Aerospace_346_Beta.
+
+Service_Aerospace_346_Alpha depends on Infrastructure_Aerospace_346.
+
+Module_Aerospace_346 has status ACTIVE.
+
+Facility_Aerospace_346 is located in Region_1.

@@ -1,0 +1,13 @@
+# Benchmark Document 0095 - Automotive Architecture Overview
+
+Enterprise System_Automotive_95 is a part of Global Core_Automotive.
+
+Service_Automotive_95_Alpha uses Microservice_Automotive_95_Beta.
+
+Service_Automotive_95_Alpha depends on Infrastructure_Automotive_95.
+
+Module_Automotive_95 has status ACTIVE.
+
+Facility_Automotive_95 is located in Region_0.
+
+Subsystem_Automotive_95 does not depend on Legacy_Automotive_95.

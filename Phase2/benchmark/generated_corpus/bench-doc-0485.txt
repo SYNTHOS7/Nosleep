@@ -1,0 +1,13 @@
+# Benchmark Document 0485 - Retail Architecture Overview
+
+Enterprise System_Retail_485 is a part of Global Core_Retail.
+
+Service_Retail_485_Alpha uses Microservice_Retail_485_Beta.
+
+Service_Retail_485_Alpha depends on Infrastructure_Retail_485.
+
+Module_Retail_485 has status ACTIVE.
+
+Facility_Retail_485 is located in Region_0.
+
+Subsystem_Retail_485 does not depend on Legacy_Retail_485.

@@ -1,0 +1,11 @@
+# Benchmark Document 0118 - Cybersecurity Architecture Overview
+
+Enterprise System_Cybersecurity_118 is a part of Global Core_Cybersecurity.
+
+Service_Cybersecurity_118_Alpha uses Microservice_Cybersecurity_118_Beta.
+
+Service_Cybersecurity_118_Alpha depends on Infrastructure_Cybersecurity_118.
+
+Module_Cybersecurity_118 has status ACTIVE.
+
+Facility_Cybersecurity_118 is located in Region_3.

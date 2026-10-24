@@ -1,0 +1,13 @@
+# Benchmark Document 0392 - Finance Architecture Overview
+
+Enterprise System_Finance_392 is a part of Global Core_Finance.
+
+Service_Finance_392_Alpha uses Microservice_Finance_392_Beta.
+
+Service_Finance_392_Alpha depends on Infrastructure_Finance_392.
+
+Module_Finance_392 has status ACTIVE.
+
+Facility_Finance_392 is located in Region_2.
+
+Service_Finance_392_Alpha uses Cache_392 only if high availability is enabled.
