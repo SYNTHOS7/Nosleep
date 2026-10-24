@@ -75,10 +75,13 @@ def build_batch(operation: Operation) -> ExtractionBatch:
     metrics.byte_count = parsed.byte_size
     metrics.page_count = parsed.page_count
 
+    raw_fname = os.path.basename(operation.source_ref)
+    clean_fname = raw_fname[len(operation.document_id) + 1 :] if raw_fname.startswith(f"{operation.document_id}_") else raw_fname
+
     doc = Document(
         id=operation.document_id,
         workspace_id=operation.workspace_id,
-        source_name=os.path.basename(operation.source_ref),
+        source_name=clean_fname,
         source_type=operation.source_type,
         content_hash=parsed.content_hash,
         revision=operation.new_revision,

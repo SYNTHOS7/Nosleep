@@ -19,6 +19,47 @@ class MutationReceipt(BaseModel):
     retry_after: int = 1
 
 
+class BatchMutationReceipt(BaseModel):
+    """Response returned upon accepting batch document uploads (HTTP 202)."""
+    status: Literal["accepted"] = "accepted"
+    workspace_id: str
+    total_documents: int
+    operation_ids: List[str] = Field(default_factory=list)
+    document_ids: List[str] = Field(default_factory=list)
+    accepted_at: float = Field(default_factory=time.time)
+    message: str = "Batch document ingestion queued."
+
+
+class DocumentItemView(BaseModel):
+    """View of an ingested document."""
+    id: str
+    workspace_id: str
+    source_name: str
+    source_type: str
+    revision: int
+    chunk_count: int = 0
+    created_at: Optional[float] = None
+
+
+class DocumentListResponse(BaseModel):
+    """List of documents in a workspace."""
+    workspace_id: str
+    documents: List[DocumentItemView] = Field(default_factory=list)
+    total: int = 0
+
+
+class BatchStatusResponse(BaseModel):
+    """Status summary for a batch of operations."""
+    workspace_id: str
+    total: int
+    completed: int
+    failed: int
+    in_progress: int
+    percent_complete: float
+    is_finished: bool
+    operation_ids: List[str] = Field(default_factory=list)
+
+
 class OperationView(BaseModel):
     """Status and metrics of an ingestion/mutation operation."""
     id: str

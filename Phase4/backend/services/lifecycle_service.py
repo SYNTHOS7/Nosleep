@@ -99,37 +99,47 @@ class LifecycleService:
             self.vector_store.upsert_vectors(ws, batch.vectors)
 
             # Phase 3 Incremental centroid topic assignment (if topics exist in workspace)
+            # Phase 3 Incremental centroid topic assignment (if topics exist in workspace)
             ws_topics = self.graph_store.topics.get(ws, {})
             if ws_topics:
                 try:
                     import numpy as np
                     from backend.contracts.models import TopicAssignment
+
+                    # Precompute normalized centroids once per topic
+                    topic_centroids = {}
+                    for t_id in ws_topics:
+                        top_cids = self.graph_store.get_topic_chunks(ws, t_id)
+                        top_vecs = [
+                            self.vector_store._vectors.get(ws, {}).get(cid)
+                            for cid in top_cids
+                            if cid in self.vector_store._vectors.get(ws, {})
+                        ]
+                        if top_vecs:
+                            cent = np.mean(top_vecs, axis=0)
+                            cent_norm = np.linalg.norm(cent)
+                            if cent_norm > 0:
+                                topic_centroids[t_id] = cent / cent_norm
+
                     for ch in batch.chunks:
                         ch_vec = batch.vectors.get(ch.id)
-                        if ch_vec:
-                            best_topic_id = None
-                            best_sim = -1.0
-                            for t_id in ws_topics:
-                                top_cids = self.graph_store.get_topic_chunks(ws, t_id)
-                                top_vecs = [
-                                    self.vector_store._vectors.get(ws, {}).get(cid)
-                                    for cid in top_cids
-                                    if cid in self.vector_store._vectors.get(ws, {})
-                                ]
-                                if top_vecs:
-                                    cent = np.mean(top_vecs, axis=0)
-                                    cent_norm = np.linalg.norm(cent)
-                                    ch_norm = np.linalg.norm(ch_vec)
-                                    if cent_norm > 0 and ch_norm > 0:
-                                        sim = float(np.dot(ch_vec, cent) / (cent_norm * ch_norm))
-                                        if sim > best_sim:
-                                            best_sim = sim
-                                            best_topic_id = t_id
-                            if best_topic_id and best_sim > 0.4:
-                                self.graph_store.assign_topic(
-                                    ws,
-                                    TopicAssignment(topic_id=best_topic_id, chunk_id=ch.id, confidence=round(best_sim, 3)),
-                                )
+                        if ch_vec and topic_centroids:
+                            ch_arr = np.array(ch_vec)
+                            ch_norm = np.linalg.norm(ch_arr)
+                            if ch_norm > 0:
+                                ch_unit = ch_arr / ch_norm
+                                best_topic_id = None
+                                best_sim = -1.0
+                                for t_id, cent_unit in topic_centroids.items():
+                                    sim = float(np.dot(ch_unit, cent_unit))
+                                    if sim > best_sim:
+                                        best_sim = sim
+                                        best_topic_id = t_id
+                                if best_topic_id and best_sim > 0.4:
+                                    self.graph_store.assign_topic(
+                                        ws,
+                                        TopicAssignment(topic_id=best_topic_id, chunk_id=ch.id, confidence=round(best_sim, 3)),
+                                    )
                 except Exception:
                     pass
 

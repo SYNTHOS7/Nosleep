@@ -73,6 +73,23 @@ class GraphStore:
                     return doc
             return None
 
+    def list_documents(self, workspace_id: str) -> List[Dict[str, Any]]:
+        with self._lock:
+            docs = list(self.documents.get(workspace_id, {}).values())
+            res = []
+            for doc in docs:
+                chunk_count = sum(1 for ch in self.chunks.get(workspace_id, {}).values() if ch.document_id == doc.id)
+                res.append({
+                    "id": doc.id,
+                    "workspace_id": doc.workspace_id,
+                    "source_name": doc.source_name,
+                    "source_type": doc.source_type,
+                    "revision": doc.revision,
+                    "chunk_count": chunk_count,
+                    "created_at": getattr(doc, "created_at", None),
+                })
+            return res
+
     def get_chunk(self, workspace_id: str, chunk_id: str) -> Optional[Chunk]:
         with self._lock:
             return self.chunks.get(workspace_id, {}).get(chunk_id)
@@ -502,6 +519,18 @@ class GraphStore:
                             modality="CERTAIN",
                         )
 
+            # 6. Ensure all documents in the workspace are represented as document nodes so they stay visible
+            for doc_id, doc in self.documents.get(workspace_id, {}).items():
+                doc_node_id = f"doc:{doc.id}"
+                if doc_node_id not in nodes_dict:
+                    nodes_dict[doc_node_id] = GraphNode(
+                        id=doc_node_id,
+                        label="Document",
+                        name=doc.source_name,
+                        type="document",
+                        properties={"source_type": doc.source_type, "revision": doc.revision},
+                    )
+
             return GraphSlice(
                 nodes=list(nodes_dict.values()),
                 edges=list(edges_dict.values()),
@@ -512,6 +541,8 @@ class GraphStore:
         """Returns the entire graph for the workspace."""
         all_ents = list(self.entities.get(workspace_id, {}).keys())
         all_chunks = list(self.chunks.get(workspace_id, {}).keys())
+        if len(all_chunks) > 120:
+            all_chunks = all_chunks[:120]
         return self.traverse_subgraph(workspace_id, all_ents, all_chunks, max_hops=1)
 
     def clear(self) -> None:

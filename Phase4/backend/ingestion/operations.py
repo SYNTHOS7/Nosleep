@@ -19,9 +19,11 @@ OPERATIONS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__
 class OperationManager:
     """Manages durable operations with disk checkpointing and bounded execution."""
 
-    def __init__(self, storage_dir: str = OPERATIONS_DIR, max_workers: int = 4):
+    def __init__(self, storage_dir: str = OPERATIONS_DIR, max_workers: Optional[int] = None):
         self.storage_dir = storage_dir
         os.makedirs(self.storage_dir, exist_ok=True)
+        if max_workers is None:
+            max_workers = min(32, max(8, (os.cpu_count() or 4) * 4))
         self.executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="ingest-op")
         self.active_operations: Dict[str, Operation] = {}
         self.staged_batches: Dict[str, ExtractionBatch] = {}
@@ -74,8 +76,21 @@ class OperationManager:
         os.makedirs(op_folder, exist_ok=True)
         return os.path.join(op_folder, "checkpoint.json")
 
-    def save_checkpoint(self, operation: Operation, batch: Optional[ExtractionBatch] = None):
+    def save_checkpoint(self, operation: Operation, batch: Optional[ExtractionBatch] = None, force_disk: bool = False):
         """Persists the operation and staged batch to private disk artifacts atomically."""
+        self.active_operations[operation.id] = operation
+        if batch is not None:
+            self.staged_batches[operation.id] = batch
+
+        is_critical_status = operation.status in [
+            OperationStatus.ACCEPTED,
+            OperationStatus.STAGED,
+            OperationStatus.COMPLETED,
+            OperationStatus.FAILED,
+        ]
+        if not (is_critical_status or force_disk):
+            return
+
         path = operation.checkpoint_path or self._get_checkpoint_path(operation.id)
         tmp_path = path + f".tmp_{time.time()}"
         op_dict = operation.model_dump()
@@ -91,7 +106,6 @@ class OperationManager:
                 json.dump(batch.model_dump(), f, indent=2)
                 f.flush()
             os.replace(tmp_batch_path, batch_path)
-            self.staged_batches[operation.id] = batch
 
 
     def load_checkpoint(self, operation_id: str) -> Optional[Operation]:

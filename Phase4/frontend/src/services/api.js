@@ -34,6 +34,47 @@ export async function uploadDocument(workspaceId, { file, rawText, filename }) {
   return res.json() // MutationReceipt
 }
 
+export async function uploadDocumentsBatch(workspaceId, files) {
+  const formData = new FormData()
+  for (const f of files) {
+    formData.append('files', f)
+  }
+
+  const res = await fetch(`${BASE_URL}/v1/workspaces/${workspaceId}/documents/batch`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Batch upload failed' }))
+    throw new Error(err.message || 'Batch upload failed')
+  }
+  return res.json() // BatchMutationReceipt
+}
+
+export async function getBatchStatus(workspaceId, operationIds = null) {
+  const queryParam = operationIds && operationIds.length > 0 ? `?operation_ids=${encodeURIComponent(operationIds.join(','))}` : ''
+  const res = await fetch(`${BASE_URL}/v1/workspaces/${workspaceId}/operations/batch-status${queryParam}`)
+  if (!res.ok) throw new Error('Failed to get batch status')
+  return res.json()
+}
+
+export async function pollBatchStatus(workspaceId, operationIds, onProgress = null, intervalMs = 200, maxAttempts = 300) {
+  for (let i = 0; i < maxAttempts; i++) {
+    const st = await getBatchStatus(workspaceId, operationIds)
+    if (onProgress) onProgress(st)
+    if (st.is_finished) return st
+    await new Promise(r => setTimeout(r, intervalMs))
+  }
+  throw new Error('Batch operation polling timed out')
+}
+
+export async function getWorkspaceDocuments(workspaceId) {
+  const res = await fetch(`${BASE_URL}/v1/workspaces/${encodeURIComponent(workspaceId)}/documents`)
+  if (!res.ok) throw new Error('Failed to load workspace documents')
+  return res.json()
+}
+
 export async function editDocument(workspaceId, docId, expectedRevisionId, { file, rawText, filename }) {
   const formData = new FormData()
   formData.append('expected_revision_id', expectedRevisionId)

@@ -7,7 +7,7 @@ import shutil
 import tempfile
 import time
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import (
     FastAPI,
@@ -22,7 +22,13 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+import zipfile
+
 from backend.contracts.api_models import (
+    BatchMutationReceipt,
+    BatchStatusResponse,
+    DocumentItemView,
+    DocumentListResponse,
     ErrorResponse,
     GraphSlice,
     HealthResponse,
@@ -161,6 +167,162 @@ async def upload_document(
         workspace_id=ws,
         accepted_at=op.accepted_at,
         retry_after=1,
+    )
+
+
+@app.get(
+    "/v1/workspaces/{ws}/documents",
+    response_model=DocumentListResponse,
+)
+def list_workspace_documents(ws: str) -> DocumentListResponse:
+    """Returns all documents ingested in the workspace."""
+    graph_store = get_graph_store()
+    raw_docs = graph_store.list_documents(ws)
+    docs = [
+        DocumentItemView(
+            id=d["id"],
+            workspace_id=d["workspace_id"],
+            source_name=d["source_name"],
+            source_type=d["source_type"],
+            revision=d["revision"],
+            chunk_count=d["chunk_count"],
+            created_at=d.get("created_at"),
+        )
+        for d in raw_docs
+    ]
+    return DocumentListResponse(workspace_id=ws, documents=docs, total=len(docs))
+
+
+@app.post(
+    "/v1/workspaces/{ws}/documents/batch",
+    response_model=BatchMutationReceipt,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def upload_documents_batch(
+    ws: str,
+    files: List[UploadFile] = File(...),
+) -> BatchMutationReceipt:
+    """
+    Accepts bulk document uploads (supports 500+ files or .zip bundles)
+    and queues them concurrently for background ingestion.
+    """
+    if not ws or (not ws.isalnum() and "-" not in ws and "_" not in ws):
+        raise HTTPException(status_code=400, detail="Invalid workspace ID.")
+
+    if not files:
+        raise HTTPException(status_code=400, detail="No files provided for batch ingestion.")
+
+    op_manager = get_operation_manager()
+    lifecycle_service = get_lifecycle_service()
+
+    queued_doc_ids: List[str] = []
+    queued_op_ids: List[str] = []
+
+    for upload in files:
+        fname = upload.filename or "file.txt"
+        ext = os.path.splitext(fname)[1].lower()
+
+        # Handle zip bundles containing multiple files
+        if ext == ".zip":
+            zip_path = os.path.join(UPLOAD_DIR, f"bundle_{uuid.uuid4().hex[:8]}_{fname}")
+            with open(zip_path, "wb") as buffer:
+                shutil.copyfileobj(upload.file, buffer)
+
+            extract_dir = os.path.join(UPLOAD_DIR, f"extracted_{uuid.uuid4().hex[:8]}")
+            os.makedirs(extract_dir, exist_ok=True)
+            with zipfile.ZipFile(zip_path, "r") as zf:
+                zf.extractall(extract_dir)
+
+            for root, _, z_files in os.walk(extract_dir):
+                for z_file in z_files:
+                    z_ext = os.path.splitext(z_file)[1].lower()
+                    if z_ext in [".txt", ".pdf", ".md", ".json", ".csv"]:
+                        z_doc_id = f"doc-{uuid.uuid4().hex[:12]}"
+                        z_src_path = os.path.join(root, z_file)
+                        z_source_type = "pdf" if z_ext == ".pdf" else "txt"
+                        op = op_manager.create_operation(
+                            workspace_id=ws,
+                            document_id=z_doc_id,
+                            operation_type=OperationType.ADD,
+                            source_ref=z_src_path,
+                            source_type=z_source_type,
+                            current_revision=1,
+                            new_revision=1,
+                        )
+                        op_manager.executor.submit(lifecycle_service.process_operation, op)
+                        queued_doc_ids.append(z_doc_id)
+                        queued_op_ids.append(op.id)
+            continue
+
+        # Handle individual file
+        doc_id = f"doc-{uuid.uuid4().hex[:12]}"
+        source_type = "pdf" if ext == ".pdf" else "txt"
+        file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_{fname}")
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(upload.file, buffer)
+
+        op = op_manager.create_operation(
+            workspace_id=ws,
+            document_id=doc_id,
+            operation_type=OperationType.ADD,
+            source_ref=file_path,
+            source_type=source_type,
+            current_revision=1,
+            new_revision=1,
+        )
+        op_manager.executor.submit(lifecycle_service.process_operation, op)
+        queued_doc_ids.append(doc_id)
+        queued_op_ids.append(op.id)
+
+    return BatchMutationReceipt(
+        status="accepted",
+        workspace_id=ws,
+        total_documents=len(queued_doc_ids),
+        operation_ids=queued_op_ids,
+        document_ids=queued_doc_ids,
+        accepted_at=time.time(),
+        message=f"Successfully accepted {len(queued_doc_ids)} documents for background ingestion.",
+    )
+
+
+@app.get(
+    "/v1/workspaces/{ws}/operations/batch-status",
+    response_model=BatchStatusResponse,
+)
+def get_batch_status(ws: str, operation_ids: Optional[str] = Query(None)) -> BatchStatusResponse:
+    """Returns aggregated status and percentage completion for a batch of operations."""
+    op_manager = get_operation_manager()
+    if operation_ids:
+        op_id_list = [oid.strip() for oid in operation_ids.split(",") if oid.strip()]
+    else:
+        op_id_list = [
+            op.id for op in list(op_manager.active_operations.values()) if op.workspace_id == ws
+        ]
+
+    total = len(op_id_list)
+    completed = 0
+    failed = 0
+    in_prog = 0
+    for oid in op_id_list:
+        op = op_manager.active_operations.get(oid) or op_manager.load_checkpoint(oid)
+        if op:
+            if op.status == OperationStatus.COMPLETED:
+                completed += 1
+            elif op.status == OperationStatus.FAILED:
+                failed += 1
+            else:
+                in_prog += 1
+
+    pct = round(((completed + failed) / max(1, total)) * 100, 1)
+    return BatchStatusResponse(
+        workspace_id=ws,
+        total=total,
+        completed=completed,
+        failed=failed,
+        in_progress=in_prog,
+        percent_complete=pct,
+        is_finished=(completed + failed >= total) if total > 0 else True,
+        operation_ids=op_id_list,
     )
 
 

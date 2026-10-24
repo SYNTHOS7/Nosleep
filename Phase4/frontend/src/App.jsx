@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import DocumentUploader from './components/DocumentUploader'
+import DocumentList from './components/DocumentList'
 import TopicPicker from './components/TopicPicker'
 import ChatPanel from './components/ChatPanel'
 import GraphCanvas from './components/GraphCanvas'
@@ -10,11 +11,14 @@ import {
   discoverTopics,
   runQuery,
   getChunkSource,
+  getWorkspaceDocuments,
+  deleteDocument,
 } from './services/api'
 
 export default function App() {
   const [workspaceId, setWorkspaceId] = useState('ws-default')
   const [topics, setTopics] = useState([])
+  const [documents, setDocuments] = useState([])
   const [selectedTopicIds, setSelectedTopicIds] = useState([])
   const [graphData, setGraphData] = useState({ nodes: [], edges: [], highlighted_path_ids: [] })
   const [queryResponse, setQueryResponse] = useState(null)
@@ -22,15 +26,17 @@ export default function App() {
   const [isQuerying, setIsQuerying] = useState(false)
   const [isDiscovering, setIsDiscovering] = useState(false)
 
-  // Refresh workspace data
+  // Refresh all workspace data (graph, topics, and documents)
   const refreshWorkspace = async () => {
     try {
-      const [gData, topData] = await Promise.all([
+      const [gData, topData, docsData] = await Promise.all([
         getWorkspaceGraph(workspaceId).catch(() => ({ nodes: [], edges: [], highlighted_path_ids: [] })),
         getTopics(workspaceId).catch(() => ({ topics: [] })),
+        getWorkspaceDocuments(workspaceId).catch(() => ({ documents: [] })),
       ])
       setGraphData(gData)
       setTopics(topData.topics || [])
+      setDocuments(docsData.documents || [])
     } catch (err) {
       console.error('Error refreshing workspace:', err)
     }
@@ -40,15 +46,32 @@ export default function App() {
     refreshWorkspace()
   }, [workspaceId])
 
-  // Handle Query Execution
+  // Handle Query Execution without wiping out non-query nodes
   const handleRunQuery = async queryText => {
     setIsQuerying(true)
     try {
       const resp = await runQuery(workspaceId, queryText, selectedTopicIds)
       setQueryResponse(resp)
-      // Update graph view with returned graph path slice
+
+      // Merge returned slice with full workspace graph so previous nodes stay permanently!
       if (resp.graph_path && resp.graph_path.nodes && resp.graph_path.nodes.length > 0) {
-        setGraphData(resp.graph_path)
+        setGraphData(prev => {
+          const nodeMap = new Map(prev.nodes.map(n => [n.id, n]))
+          resp.graph_path.nodes.forEach(n => {
+            const existing = nodeMap.get(n.id)
+            nodeMap.set(n.id, existing ? { ...existing, ...n } : n)
+          })
+          const edgeMap = new Map(prev.edges.map(e => [e.id, e]))
+          resp.graph_path.edges.forEach(e => {
+            const existing = edgeMap.get(e.id)
+            edgeMap.set(e.id, existing ? { ...existing, ...e } : e)
+          })
+          return {
+            nodes: Array.from(nodeMap.values()),
+            edges: Array.from(edgeMap.values()),
+            highlighted_path_ids: resp.graph_path.highlighted_path_ids || [],
+          }
+        })
       }
     } catch (err) {
       alert(`Query failed: ${err.message}`)
@@ -68,6 +91,17 @@ export default function App() {
       alert(`Topic discovery failed: ${err.message}`)
     } finally {
       setIsDiscovering(false)
+    }
+  }
+
+  // Handle Document Deletion
+  const handleDeleteDocument = async docId => {
+    if (!confirm('Are you sure you want to delete this document from the workspace?')) return
+    try {
+      await deleteDocument(workspaceId, docId)
+      await refreshWorkspace()
+    } catch (err) {
+      alert(`Delete failed: ${err.message}`)
     }
   }
 
@@ -142,6 +176,12 @@ export default function App() {
             <DocumentUploader
               workspaceId={workspaceId}
               onUploadComplete={refreshWorkspace}
+            />
+
+            <DocumentList
+              documents={documents}
+              onSelectDocument={setSelectedElement}
+              onDeleteDocument={handleDeleteDocument}
             />
 
             <TopicPicker

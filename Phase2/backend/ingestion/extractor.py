@@ -78,16 +78,25 @@ class ExtractionCache:
                 return None
         return None
 
-    def set(self, cache_key: str, graph: CandidateGraph):
+    def set(self, cache_key: str, graph: CandidateGraph, flush_to_disk: bool = False):
         self._memory_cache[cache_key] = graph.model_dump()
+        self._dirty = True
+        if flush_to_disk:
+            self.flush()
+
+    def flush(self):
+        if not getattr(self, "_dirty", False):
+            return
         try:
             with open(self.cache_file, "w", encoding="utf-8") as f:
-                json.dump(self._memory_cache, f, indent=2)
+                json.dump(self._memory_cache, f)
+            self._dirty = False
         except Exception:
             pass
 
     def clear(self):
         self._memory_cache.clear()
+        self._dirty = False
         if os.path.exists(self.cache_file):
             try:
                 os.remove(self.cache_file)
