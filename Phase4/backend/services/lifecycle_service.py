@@ -32,6 +32,11 @@ class LifecycleService:
         self.op_manager = get_operation_manager()
         self.graph_store = get_graph_store()
         self.vector_store = get_vector_store()
+        self.persistence = getattr(self.vector_store, "persistence", None)
+        if self.persistence:
+            for batch in self.persistence.load_batches():
+                self.graph_store.publish_batch(batch)
+                self.vector_store.cache_vectors(batch.workspace_id, batch.vectors)
 
     def process_operation(self, op: Operation) -> Operation:
         """
@@ -44,12 +49,17 @@ class LifecycleService:
 
         try:
             if op.operation_type == OperationType.DELETE:
+                chunk_ids = [cid for cid, ch in self.graph_store.chunks.get(ws, {}).items() if ch.document_id == doc_id]
+                if self.persistence:
+                    self.persistence.delete_document(ws, doc_id)
                 # 1. Clean up from GraphStore
                 self.graph_store.delete_document(ws, doc_id)
                 # 2. Clean up from VectorStore
-                self.vector_store.remove_chunks(ws, [
-                    cid for cid, ch in self.graph_store.chunks.get(ws, {}).items() if ch.document_id == doc_id
-                ])
+                if self.persistence:
+                    for cid in chunk_ids:
+                        self.vector_store._vectors.get(ws, {}).pop(cid, None)
+                else:
+                    self.vector_store.remove_chunks(ws, chunk_ids)
 
                 op.status = OperationStatus.COMPLETED
                 op.ready_at = time.time()
@@ -83,20 +93,34 @@ class LifecycleService:
                     return op
 
             # If EDIT: verify document exists and clean previous revision records
+            old_chunk_ids = []
             if op.operation_type == OperationType.EDIT:
                 old_doc = self.graph_store.get_document(ws, doc_id)
                 if old_doc:
                     # Remove old revision state while preserving shared entities
-                    self.graph_store.delete_document(ws, doc_id)
+                    old_chunk_ids = [cid for cid, ch in self.graph_store.chunks.get(ws, {}).items() if ch.document_id == doc_id]
 
             # Build extraction batch via Person 2 pipeline
             batch: ExtractionBatch = build_batch(op)
+
+            if self.persistence:
+                self.persistence.publish(batch)
+            if op.operation_type == OperationType.EDIT:
+                self.graph_store.delete_document(ws, doc_id)
+                if not self.persistence:
+                    self.vector_store.remove_chunks(ws, old_chunk_ids)
+                else:
+                    for cid in old_chunk_ids:
+                        self.vector_store._vectors.get(ws, {}).pop(cid, None)
 
             # Publish into GraphStore
             self.graph_store.publish_batch(batch)
 
             # Publish into VectorStore
-            self.vector_store.upsert_vectors(ws, batch.vectors)
+            if self.persistence:
+                self.vector_store.cache_vectors(ws, batch.vectors)
+            else:
+                self.vector_store.upsert_vectors(ws, batch.vectors)
 
             # Persist into Chroma persistent database
             try:

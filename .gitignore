@@ -24,9 +24,17 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+*service-account*.json
+*firebase-adminsdk*.json
 
 # Local data, Chroma store, and cache
 data/
+!data/
+data/*
+!data/cyber_corpus/
+!data/cyber_corpus/**
+.test-temp/
+**/.pytest_contracts.schema.json
 **/data/cache/
 **/data/operations/
 **/data/chroma/

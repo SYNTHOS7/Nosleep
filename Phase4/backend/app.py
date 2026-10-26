@@ -47,7 +47,7 @@ from backend.services.topic_service import get_topic_service
 from backend.storage.graph_store import get_graph_store
 
 app = FastAPI(
-    title="Interactive Knowledge Base API",
+    title="AegisGraph AI API",
     version="1.0.0",
     description="Person 4 FastAPI backend providing document lifecycle, grounded query answering, topics, and graph slices.",
 )
@@ -55,8 +55,8 @@ app = FastAPI(
 # Enable CORS for frontend development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[origin.strip() for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:8080").split(",") if origin.strip()],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -99,7 +99,7 @@ def get_health() -> HealthResponse:
         components={
             "api": {"status": "ready", "version": "1.0.0"},
             "graph_store": {"status": "ready", "type": db_status["active_mode"]},
-            "vector_store": {"status": "ready", "dimension": 768, "chroma": db_status["chromadb"]["status"]},
+            "vector_store": {"status": "ready", "dimension": 768, "backend": db_status["vector_backend"], "chroma": db_status["chromadb"]["status"]},
             "unstructured_parser": {"status": "ready", "fallback": "pypdf_local"},
             "kg_builder": {"status": "ready", "adapter": "neo4j-graphrag-adapter"},
             "embedder": {"status": "ready", "model": "paraphrase-multilingual-mpnet-base-v2"},
@@ -541,10 +541,33 @@ def get_workspace_graph(ws: str) -> GraphSlice:
     return graph_store.get_full_workspace_graph(ws)
 
 
+@app.get("/v1/workspaces/{ws}/attack-paths")
+def get_attack_paths(ws: str, entry_point: str = Query(..., min_length=1), max_depth: int = Query(3, ge=1, le=8)):
+    from backend.services.attack_path_service import trace_attack_paths
+    return trace_attack_paths(ws, entry_point, max_depth)
+
+
+@app.post("/v1/workspaces/{ws}/demo/cyber")
+def load_cyber_demo(ws: str):
+    """Load labeled synthetic fixtures through the normal ingestion lifecycle."""
+    from pathlib import Path
+    corpus = Path(__file__).resolve().parents[2] / "data" / "cyber_corpus"
+    results = []
+    for source in sorted(corpus.glob("*.txt")):
+        op = get_operation_manager().create_operation(workspace_id=ws,
+            document_id=f"demo-{source.stem}", operation_type=OperationType.ADD,
+            source_ref=str(source), source_type="txt")
+        get_lifecycle_service().process_operation(op)
+        results.append({"document_id": op.document_id, "status": op.status.value})
+    if not results:
+        raise HTTPException(status_code=503, detail="Cyber demo corpus is not included in this build.")
+    return {"workspace_id": ws, "synthetic": True, "documents": results}
+
+
 # Mount built React split-screen UI on root path
 from fastapi.staticfiles import StaticFiles
 
 FRONTEND_DIST = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
-if os.path.exists(FRONTEND_DIST):
+if os.environ.get("SERVE_FRONTEND", "true").lower() == "true" and os.path.exists(FRONTEND_DIST):
     app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="ui")
 

@@ -1,0 +1,2 @@
+SYNTHETIC DEMO: Demo_Actor is fictional and is not a real-world attribution.
+Demo_Actor exploits CVE-2024-4577.

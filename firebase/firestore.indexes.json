@@ -1,0 +1,6 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "pages", "fieldPath": "payload", "indexes": [] }
+  ]
+}

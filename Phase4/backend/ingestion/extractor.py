@@ -17,6 +17,7 @@ from backend.contracts.models import (
 
 # Pinned schema from config/pipeline-lock.json
 ALLOWED_ENTITY_LABELS = {
+    "ThreatActor", "Vulnerability", "Asset", "Technique", "AttackPayload",
     "Person",
     "Organization",
     "Place",
@@ -29,6 +30,7 @@ ALLOWED_ENTITY_LABELS = {
 ENTITY_FALLBACK = "Entity"
 
 ALLOWED_RELATION_PREDICATES = {
+    "EXPLOITS", "TARGETS", "COMMUNICATES_WITH", "ACCESSES", "MITIGATES", "EXFILTRATES",
     "PART_OF",
     "USES",
     "DEPENDS_ON",
@@ -43,7 +45,7 @@ RELATION_FALLBACK = "RELATED_TO"
 ALLOWED_POLARITIES = {"AFFIRMATIVE", "NEGATIVE"}
 ALLOWED_MODALITIES = {"CERTAIN", "CONDITIONAL", "POSSIBLE"}
 
-PROMPT_VERSION = "2026-10-24-injection-shielded-v2"
+PROMPT_VERSION = "2026-10-26-cyber-v3"
 CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "cache")
 
 
@@ -393,6 +395,14 @@ def _run_extraction_adapter(chunk_text: str) -> Dict[str, Any]:
     for sent in sentences:
         sent_clean = sent.strip()
         if not sent_clean:
+            continue
+
+        from backend.ingestion.cyber import extract_cyber_sentence
+        cyber = extract_cyber_sentence(sent_clean)
+        if cyber is not None:
+            entities.extend(cyber["entities"])
+            values.extend(cyber["values"])
+            relations.extend(cyber["relations"])
             continue
 
         # Check for conditional modality

@@ -1,0 +1,4 @@
+SYNTHETIC DEMO: Fictional enterprise topology; connectivity is not proof of exploitability.
+Legacy_PHP_Gateway communicates with Session_Auth_v3.
+Session_Auth_v3 accesses Core_Banking_Database.
+Core_Banking_Database does not access Backup_Vault.

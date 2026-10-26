@@ -1,0 +1,2 @@
+SYNTHETIC DEMO: Vendor Beta's fictional opposing remediation claim.
+Gateway_Patch does not mitigate CVE-2024-4577.

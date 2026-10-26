@@ -5,14 +5,14 @@ import ConflictAlert from './ConflictAlert'
  * Chat and grounded query panel.
  * Displays questions, suggested queries, grounded answers, citations, limitations, and conflict alerts.
  */
-export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSelectChunk }) {
+export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSelectChunk, onLoadDemo, isLoadingDemo }) {
   const [queryText, setQueryText] = useState('')
 
   const suggestedQueries = [
-    'What are the overarching architectural patterns for the ingestion pipeline?',
-    'Is database port 5432 public or private?',
-    'डेटाबेस पोर्ट 5432 की स्थिति क्या है?',
-    'What is the internal quantum encryption algorithm for the 2035 satellite?',
+    'What is the blast radius of CVE-2024-4577?',
+    'Trace the attack path from Legacy_PHP_Gateway',
+    'Are there conflicting mitigation claims for CVE-2024-4577?',
+    'What prompt injection appears in the malicious log?',
   ]
 
   const handleSubmit = e => {
@@ -34,8 +34,11 @@ export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSel
 
       {/* Suggested Queries */}
       <div style={{ marginBottom: '10px' }}>
+        <button className="btn-primary" onClick={onLoadDemo} disabled={isLoadingDemo || isQuerying} style={{ marginBottom: '8px' }}>
+          {isLoadingDemo ? 'Loading demo…' : 'Load synthetic cyber demo'}
+        </button>
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
-          Suggested Test Scenarios:
+          Fictional enterprise scenario · source quotes preserved
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {suggestedQueries.map((sq, i) => (
@@ -44,6 +47,7 @@ export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSel
               className="topic-chip"
               style={{ textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
               onClick={() => handleSelectSuggested(sq)}
+              disabled={isQuerying || isLoadingDemo}
               id={`suggested-query-${i}`}
             >
               ↳ {sq}
@@ -78,7 +82,7 @@ export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSel
           <div className="answer-header">
             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Synthesis & Grounded Evidence</span>
             <span className="badge-grounded">
-              {queryResponse.limitations ? 'Insufficient Evidence' : '100% Grounded'}
+              {queryResponse.source_chunks?.length ? 'Source-backed evidence' : 'Insufficient Evidence'}
             </span>
           </div>
 

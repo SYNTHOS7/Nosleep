@@ -568,6 +568,10 @@ export default function GraphCanvas({
         else if (node.type === 'topic') ctx.fillStyle = '#9333ea'
         else if (node.type === 'chunk') ctx.fillStyle = '#475569'
         else if (node.type === 'value') ctx.fillStyle = '#06b6d4'
+        else if (node.label === 'Vulnerability' || node.label === 'ThreatActor') ctx.fillStyle = '#ef4444'
+        else if (node.label === 'Asset') ctx.fillStyle = '#2563eb'
+        else if (node.label === 'Technique') ctx.fillStyle = '#f59e0b'
+        else if (node.label === 'AttackPayload') ctx.fillStyle = '#a855f7'
         else ctx.fillStyle = isHighlighted ? '#2563eb' : '#1e293b'
 
         ctx.fill()

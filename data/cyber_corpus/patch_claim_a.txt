@@ -1,0 +1,2 @@
+SYNTHETIC DEMO: Vendor Alpha's fictional remediation claim.
+Gateway_Patch mitigates CVE-2024-4577.

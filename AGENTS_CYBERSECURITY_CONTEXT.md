@@ -8,6 +8,20 @@
 
 ---
 
+## Current implementation update (October 26)
+
+The current hosting target is React on Vercel, FastAPI on Render, and Firebase
+Firestore for durable extraction batches/embeddings. Supabase is not required.
+See `docs/HOSTED_SETUP.md` for the actual runtime behavior and setup boundaries;
+the diagrams and roadmap below include aspirational features.
+
+Implemented: cyber entity/relationship extraction, synthetic corpus, directed
+evidence-backed attack-path API and query routing, demo-loader UI, MCP tools over
+the REST API, Firebase persistence and startup restoration. Search uses a backend
+cosine index. Neo4j write-through, user authentication and multi-instance cache
+synchronization are not implemented by this release. Do not represent connection
+status as proof of Neo4j graph writes or describe rule-based extraction as an LLM.
+
 ## 1. Project Mission & Pivot Summary
 
 ### What This System Is

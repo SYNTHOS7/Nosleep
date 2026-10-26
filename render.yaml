@@ -4,12 +4,23 @@ services:
     env: python
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python run_app.py"
+    healthCheckPath: /health
     plan: free
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.16
       - key: STORAGE_BACKEND
         value: in_memory
+      - key: VECTOR_BACKEND
+        value: firebase
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: SERVE_FRONTEND
+        value: "false"
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
       - key: NEO4J_URI
         sync: false
       - key: NEO4J_USERNAME

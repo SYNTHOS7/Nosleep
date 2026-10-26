@@ -46,7 +46,10 @@ class DatabaseManager:
         self.neo4j_status = "unconfigured"
         self.neo4j_error = None
 
-        self._init_chroma()
+        if os.environ.get("VECTOR_BACKEND") == "firebase":
+            self.chroma_status = "disabled"
+        else:
+            self._init_chroma()
         self._init_neo4j()
 
     def _init_chroma(self) -> None:
@@ -161,6 +164,13 @@ class DatabaseManager:
                 "status": "active",
                 "storage_backend": "atomic_disk_checkpoints",
                 "directory": os.path.abspath("./data/operations"),
+            },
+            "vector_backend": os.environ.get("VECTOR_BACKEND", "in_memory"),
+            "firebase": {
+                "configured": os.environ.get("VECTOR_BACKEND") == "firebase",
+                "status": "initialized" if os.environ.get("VECTOR_BACKEND") == "firebase" else "disabled",
+                "backend": "firestore_persistence_local_cosine_search",
+                "error_or_info": "Firestore stores extracted documents and embeddings; the backend restores its cosine index on startup.",
             },
         }
 

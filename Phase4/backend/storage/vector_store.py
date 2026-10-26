@@ -73,7 +73,16 @@ class VectorStore:
         self._vectors.clear()
 
 
-_default_vector_store = VectorStore()
+import os
+
+_vector_backend = os.environ.get("VECTOR_BACKEND", "in_memory")
+if _vector_backend == "firebase":
+    from backend.storage.firebase_store import FirebaseVectorStore
+    _default_vector_store = FirebaseVectorStore()
+elif _vector_backend == "in_memory":
+    _default_vector_store = VectorStore()
+else:
+    raise ValueError("VECTOR_BACKEND must be in_memory or firebase")
 
 
 def get_vector_store() -> VectorStore:

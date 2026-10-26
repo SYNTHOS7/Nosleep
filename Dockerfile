@@ -26,7 +26,7 @@ COPY Phase3/ Phase3/
 COPY Phase4/ Phase4/
 COPY run_app.py .
 COPY test_all_phases.py .
-COPY config/ pipeline-lock.json* ./config/
+COPY data/cyber_corpus/ data/cyber_corpus/
 
 EXPOSE 8080
 

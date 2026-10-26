@@ -2,7 +2,13 @@
  * API client service connecting React frontend to FastAPI Person 4 backend.
  */
 
-const BASE_URL = ''
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
+
+export async function loadCyberDemo(workspaceId) {
+  const res = await fetch(`${BASE_URL}/v1/workspaces/${encodeURIComponent(workspaceId)}/demo/cyber`, { method: 'POST' })
+  if (!res.ok) throw new Error('Could not load the cyber demo. Check backend storage configuration.')
+  return res.json()
+}
 
 export async function getHealth() {
   const res = await fetch(`${BASE_URL}/health`)

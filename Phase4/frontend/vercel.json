@@ -5,7 +5,11 @@
   "rewrites": [
     {
       "source": "/v1/:path*",
-      "destination": "/index.html"
+      "destination": "https://nosleep-n1ae.onrender.com/v1/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://nosleep-n1ae.onrender.com/health"
     },
     {
       "source": "/(.*)",

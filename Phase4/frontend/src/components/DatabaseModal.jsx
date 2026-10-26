@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { configureDatabase } from '../services/api'
 
 export default function DatabaseModal({ dbStatus, onClose, onRefresh }) {
+  const usesFirebase = dbStatus?.vector_backend === 'firebase'
   const [uri, setUri] = useState(dbStatus?.neo4j?.uri === 'none' ? '' : dbStatus?.neo4j?.uri || '')
   const [username, setUsername] = useState('neo4j')
   const [password, setPassword] = useState('')
@@ -55,17 +56,17 @@ export default function DatabaseModal({ dbStatus, onClose, onRefresh }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: '#10b981', fontSize: '1rem' }}>●</span>
-                <strong style={{ color: '#10b981' }}>Chroma Vector Database</strong>
+                <strong style={{ color: '#10b981' }}>{usesFirebase ? 'Firebase Firestore' : 'Local Vector Database'}</strong>
               </div>
               <span className="badge" style={{ background: '#10b981', color: '#000', fontSize: '0.75rem', fontWeight: 600 }}>
-                PERSISTENT DISK
+                {usesFirebase ? 'FIRESTORE' : 'LOCAL'}
               </span>
             </div>
             <p style={{ margin: '8px 0 4px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              {dbStatus?.chromadb?.error_or_info || 'Chroma persistent engine active with HNSW cosine index.'}
+              {usesFirebase ? dbStatus?.firebase?.error_or_info : dbStatus?.chromadb?.error_or_info}
             </p>
             <div style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-              Persist Dir: {dbStatus?.chromadb?.persist_directory || './data/chroma'} | Embedding Dim: 768
+              {usesFirebase ? 'Hosted documents; backend cosine search' : 'Local persistence'} | Embedding Dim: 768
             </div>
           </div>
 

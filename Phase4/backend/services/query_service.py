@@ -66,6 +66,30 @@ class QueryService:
                 allowed_chunk_ids.extend(cids)
                 topic_scope_used.append(t_id)
 
+        # Cyber questions use directed paths rather than a generic undirected neighborhood.
+        if re.search(r"attack path|blast radius|lateral movement", raw_query, re.I):
+            from backend.services.attack_path_service import trace_attack_paths
+            names = self.graph_store.entities.get(ws, {})
+            normalized_query = raw_query.lower().replace("_", " ")
+            matches = [name for name in names if name.lower().replace("_", " ") in normalized_query]
+            matches.sort(key=lambda name: (names[name].label != "Vulnerability", -len(name)))
+            if matches:
+                result = trace_attack_paths(ws, matches[0], 4, self.graph_store, allowed_chunk_ids)
+                sources = {}
+                statements = []
+                # Include each hop once while preserving its exact supporting path and chunk IDs.
+                seen_edges = set()
+                for path in result["paths"]:
+                    for i, (edge_id, citation) in enumerate(zip(path["edge_ids"], path["citations"])):
+                        sources[(citation["chunk_id"], citation["start_char"])] = SourceView(**citation)
+                        if edge_id not in seen_edges:
+                            statements.append(f"{path['nodes'][i]} → {path['nodes'][i+1]}: {citation['exact_quote']} [path {path['path_id']}; chunk {citation['chunk_id']}]")
+                            seen_edges.add(edge_id)
+                answer = "Potential attack routes supported by the ingested evidence:\n" + "\n".join(statements) if statements else "Insufficient evidence for an undisputed directed attack path from this entry point."
+                return QueryResponse(answer=answer, source_chunks=list(sources.values()),
+                    graph_path=GraphSlice(**result["graph_path"]), topic_scope_used=topic_scope_used,
+                    limitations=result["limitations"])
+
         # 2. Vector search over workspace chunks
         search_query = raw_query
         if is_hindi:
@@ -86,7 +110,7 @@ class QueryService:
         query_words = [w.lower() for w in re.findall(r"\w+", search_query) if len(w) > 2]
         lexical_candidate_ids = []
         for cid, ch in self.graph_store.chunks.get(ws, {}).items():
-            if allowed_chunk_ids and cid not in allowed_chunk_ids:
+            if allowed_chunk_ids is not None and cid not in allowed_chunk_ids:
                 continue
             ch_lower = ch.text.lower()
             if any(w in ch_lower for w in query_words):

@@ -16,6 +16,7 @@ import {
   deleteDocument,
   editDocument,
   getDatabaseStatus,
+  loadCyberDemo,
 } from './services/api'
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
   const [isDiscovering, setIsDiscovering] = useState(false)
   const [dbStatus, setDbStatus] = useState(null)
   const [showDbModal, setShowDbModal] = useState(false)
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false)
 
   // Workbench state
   const [activeTab, setActiveTab] = useState('chat') // 'chat' | 'documents' | 'topics'
@@ -59,6 +61,20 @@ export default function App() {
   }, [workspaceId])
 
   // Handle Query Execution without wiping out non-query nodes
+  const handleLoadDemo = async () => {
+    setIsLoadingDemo(true)
+    try {
+      await loadCyberDemo(workspaceId)
+      setSelectedTopicIds([])
+      setQueryResponse(null)
+      await refreshWorkspace()
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setIsLoadingDemo(false)
+    }
+  }
+
   const handleRunQuery = async (queryText) => {
     setIsQuerying(true)
     try {
@@ -193,8 +209,8 @@ export default function App() {
         <div className="header-brand">
           <div className="brand-icon">❖</div>
           <div className="brand-title-wrap">
-            <span className="brand-title">Interactive Knowledge Base</span>
-            <span className="brand-subtitle">Grounded Intelligence & Card Graph</span>
+            <span className="brand-title">AegisGraph AI</span>
+            <span className="brand-subtitle">Cyber Threat Intelligence & Attack Paths</span>
           </div>
         </div>
 
@@ -230,7 +246,7 @@ export default function App() {
               ●
             </span>
             <span>
-              DB: {dbStatus?.neo4j?.status === 'connected' ? 'Neo4j Aura' : 'Chroma + Embedded'}
+              DB: {dbStatus?.vector_backend === 'firebase' ? 'Firebase' : 'Local'} + {dbStatus?.neo4j?.status === 'connected' ? 'Neo4j Aura' : 'Embedded'}
             </span>
             <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>⚙</span>
           </div>
@@ -328,6 +344,8 @@ export default function App() {
                   isQuerying={isQuerying}
                   queryResponse={queryResponse}
                   onSelectChunk={handleSelectChunk}
+                  onLoadDemo={handleLoadDemo}
+                  isLoadingDemo={isLoadingDemo}
                 />
               )}
 

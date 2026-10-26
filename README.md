@@ -1,227 +1,144 @@
-# AegisGraph AI — Cyber Threat Intelligence & Attack Path Knowledge Graph
+# AegisGraph AI
 
-> 🛡️ **Autonomous Grounded Intelligence, Blast-Radius Knowledge Graph & Immune SOC Copilot via MCP**  
-> *Target Event: Cybersecurity Hackathon (October 30) | Core Engine: Interactive Knowledge Base (NoSleep)*
->
-> 🤖 **Notice for AI Agents (Claude / ChatGPT / Cursor / Copilot)**:  
-> **MANDATORY**: Please read **[AGENTS_CYBERSECURITY_CONTEXT.md](AGENTS_CYBERSECURITY_CONTEXT.md)** first. It contains the complete technical architecture, file map, data contracts, and cybersecurity hero demo specifications.  
-> 📊 **Visual Flowcharts**: Open **[flowcharts.html](flowcharts.html)** in any browser or view **[CYBERSECURITY_SYSTEM_FLOWCHARTS.md](CYBERSECURITY_SYSTEM_FLOWCHARTS.md)**.  
-> 📖 **Hackathon Strategy & Pitch Script**: Read **[CYBERSECURITY_PIVOT_BLUEPRINT.md](CYBERSECURITY_PIVOT_BLUEPRINT.md)**.
+Cyber threat intelligence, cited graph exploration, and potential attack-path
+analysis over uploaded documents. Built with FastAPI and React/Vite.
 
-[![Unified Test Suite](https://img.shields.io/badge/tests-120%2F120%20passing-brightgreen.svg)](#testing--verification)
-[![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
-[![ChromaDB](https://img.shields.io/badge/ChromaDB-Persistent-orange.svg)](https://www.trychroma.com/)
-[![Neo4j](https://img.shields.io/badge/Neo4j-AuraDB%20%26%20Embedded-008CC1.svg)](https://neo4j.com/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+## What works
 
-An enterprise-grade, grounded intelligence system that bridges unstructured documents, persistent vector embeddings, and an interactive knowledge graph. Designed to handle broad thematic queries, multi-hop fact chains, document contradiction tracking, prompt injection immunity, and cross-lingual Hindi queries over English corpora.
+- Upload PDF/TXT documents, edit revisions, delete documents, and inspect sources.
+- Search a workspace and scope questions to discovered topics.
+- Extract explicit cyber assertions into Vulnerability, ThreatActor, Asset,
+  Technique and AttackPayload nodes with source quotes.
+- Trace directed potential attack routes with a document ID, chunk ID, exact quote
+  and path ID supporting every hop. Negated, uncertain, conditional and disputed
+  links do not become affirmative attack routes.
+- Display opposing claims together with their original evidence.
+- Load a six-document synthetic cyber demo from the UI.
+- Preserve attacker instructions as passive data artifacts.
+- Connect MCP clients to the same API used by the browser.
+- Optionally persist extraction batches and embeddings in Firebase Firestore and
+  reconstruct the graph/search cache after restart.
 
----
+## Storage and hosting
 
-## 🌐 Live Deployment
+The frontend is ready for Vercel and the API for Render; you choose when to deploy.
+Firebase configuration is optional for local development. No cloud credentials or
+account-specific Firebase project IDs are committed.
 
-- **Production Web Application**: [https://nosleep-n1ae.onrender.com/](https://nosleep-n1ae.onrender.com/)
-- **Interactive Swagger Docs**: [https://nosleep-n1ae.onrender.com/docs](https://nosleep-n1ae.onrender.com/docs)
-- **Health & Readiness Check**: [https://nosleep-n1ae.onrender.com/health](https://nosleep-n1ae.onrender.com/health)
-- **Database Status**: [https://nosleep-n1ae.onrender.com/v1/database/status](https://nosleep-n1ae.onrender.com/v1/database/status)
+| Component | Current implementation |
+| --- | --- |
+| Frontend | React/Vite, in Phase4/frontend |
+| API | FastAPI, started with run_app.py |
+| Durable hosted data | Firebase Firestore when VECTOR_BACKEND=firebase |
+| Search | 768-dimensional cosine index in the backend, restored from Firebase |
+| Active graph | Embedded graph reconstructed from persisted extraction batches |
+| Neo4j | Existing optional adapter; current ingestion write-through is pending |
+| Local mode | In-memory graph and vectors; existing Chroma compatibility retained |
 
----
+Supabase is not needed. Firebase mode disables Chroma. The current extraction and
+embedding adapters are deterministic; this release does not claim external LLM
+reasoning or learned semantic embeddings. Use one API instance for the shared
+in-memory index. Firestore native vector search is not used.
 
-## 🚀 Key Capabilities & Phase 2 Compliance
+Read **[the setup guide](docs/HOSTED_SETUP.md)** for environment variables,
+Firestore rules, Vercel routing, Render settings, MCP setup and remaining boundaries.
 
-| Requirement | Implementation & Performance |
-| :--- | :--- |
-| **500+ Documents Bulk Ingestion** | Ingests 500+ documents concurrently via batch endpoint or 1-click UI benchmark. Reports exact ingestion time (s) and graph size (nodes, edges). |
-| **60-Second Dynamic Mutation** | Add, edit, or delete documents without rebuilding the app. Sub-second mutation latency (**~75ms - 95ms**) with durable disk checkpoints. |
-| **Document Contradiction Detection** | Detects conflicting claims across documents; presents both sides with exact quotes and source links instead of picking one. |
-| **Prompt Injection Immunity** | Robust extraction layer treats all 20+ planted prompt injections as raw data, completely neutralizing malicious execution. |
-| **Cross-Lingual Hindi Answering** | Accepts Hindi queries over English knowledge corpora, returning Hindi syntheses with English graph citation paths. |
-| **Answer Quality Preservation** | Maintains Phase 1 benchmark answer quality within 3 points while enabling broad thematic exploration. |
-| **Dual-Database Topology** | **ChromaDB** for persistent vector embeddings + **Neo4j** (AuraDB & self-hosted) alongside embedded transactional fallback. |
+## Run locally
 
----
-
-## 🏛️ System Architecture
-
-![System Architecture Diagram](docs/architecture.svg)
-
-<details>
-<summary><b>View Mermaid Source Code</b></summary>
-
-```mermaid
-graph TD
-    Client[Split-Screen React UI / REST Client] -->|FastAPI Gateway| API[Phase 4: REST API & Lifecycle Service]
-    
-    subgraph Ingestion Pipeline
-        API -->|Upload / Batch| Parser[Phase 2: PDF / TXT Parser]
-        Parser --> Chunker[Deterministic 600-Token Chunker]
-        Chunker --> Extractor[Entity, Relation & Value Extractor]
-        Chunker --> Embedder[Multilingual MPNet 768-Dim Embedder]
-    end
-    
-    subgraph Dual Persistence & Storage
-        Extractor -->|Batch Publish| GS[Phase 1 / 4: Transactional Graph Store]
-        Embedder -->|Vector Upsert| VS[Phase 1 / 4: Vector Repository]
-        GS -.->|Synchronize| Neo4j[(Neo4j AuraDB / Bolt)]
-        VS -.->|Persistent Index| Chroma[(ChromaDB: ./data/chroma)]
-        API -.->|Atomic Checkpoints| Disk[(Operations Checkpoint: ./data/operations)]
-    end
-    
-    subgraph Thematic Clustering & Grounded Synthesis
-        GS --> Clustering[Phase 3: HDBSCAN + Incremental Centroid Topics]
-        VS --> Hybrid[Phase 3: Reciprocal Rank Fusion & Graph Traversal]
-        Hybrid --> ConflictEngine[Phase 3: O(N) Conflict Detection]
-        Hybrid --> HindiEngine[Phase 3: Cross-Lingual Hindi Routing]
-        ConflictEngine --> Synthesis[Grounded Synthesis with Provenance]
-        HindiEngine --> Synthesis
-    end
-    
-    Synthesis --> Client
-```
-</details>
-
----
-
-## 📸 Interactive System Showcase
-
-### 1. Force-Directed Knowledge Graph Visual
-Nodes stay permanently visible on the canvas with color-coded entity labels, document clusters, and bidirectional relation edges:
-
-![Interactive Knowledge Graph Visual](docs/knowledge_graph.png)
-
-### 2. Dual-Database Connectivity & Configuration
-Active Chroma vector persistence alongside Neo4j AuraDB and embedded transactional graph repository:
-
-![Database & Persistence Connections](docs/database_connections.png)
-
-### 3. Grounded Synthesis & Highlighted Graph Path
-100% citation-grounded answering with supporting subgraph traversal path highlighting:
-
-![Grounded Query Answering & Graph Highlight](docs/query_synthesis.png)
-
----
-
-## 🗄️ Database & Storage Engine
-
-The architecture supports a dual-engine database strategy configured via environment variables or runtime UI controls:
-
-### 1. Vector Database: ChromaDB
-- **Storage Mode**: Persistent on-disk vector store located at `./data/chroma`.
-- **Embedding Space**: 768-dimensional normalized unit sphere (`hnsw:space: cosine`).
-- **Collections**: Per-workspace collections (`ws_<workspace_id>`) for strict multi-tenant isolation.
-
-### 2. Graph Database: Neo4j & Embedded Transactional
-- **Cloud / Self-Hosted Neo4j**: Connects to Neo4j AuraDB (`neo4j+s://...`) or local instances (`bolt://localhost:7687`).
-- **Resilient Fallback**: If external Neo4j credentials are not supplied, the system seamlessly uses its embedded in-memory transactional graph repository.
-
-### 3. Durable Checkpoint Storage
-- **Directory**: `./data/operations`
-- **Guarantees**: Atomic rename operations, disk durability, crash recovery across server restarts.
-
----
-
-## 🛠️ Getting Started
-
-### Prerequisites
-- Python 3.11+
-- Node.js 18+ & npm (for UI development)
-
-### 1. Clone & Setup Environment
+Python 3.11+:
 
 ```bash
-git clone https://github.com/SYNTHOS7/Nosleep.git
-cd Nosleep
-
-# Create and activate Python virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install requirements
 pip install -r requirements.txt
-```
-
-### 2. Configure Environment (Optional)
-
-Copy `.env.example` to `.env` to customize storage and credentials:
-
-```bash
-cp .env.example .env
-```
-
-Key environment variables:
-```env
-STORAGE_BACKEND=in_memory            # 'in_memory' or 'neo4j'
-NEO4J_URI=neo4j+s://<instance>.databases.neo4j.io
-NEO4J_USERNAME=neo4j
-NEO4J_PASSWORD=<your-password>
-NEO4J_DATABASE=neo4j
-CHROMA_PERSIST_DIR=./data/chroma
-PORT=8080
-HOST=0.0.0.0
-```
-
-### 3. Run Application
-
-```bash
-# Start unified full-stack server
 python run_app.py
 ```
-- Open browser at: **`http://localhost:8080/`**
-- API Documentation: **`http://localhost:8080/docs`**
 
----
+Open http://localhost:8080 and http://localhost:8080/docs.
+The checked-in production UI is served automatically. Offline storage is the default.
+The application reads environment variables; .env.example is a reference, not an
+automatically loaded secrets file.
 
-## 🧪 Testing & Verification
+For frontend development:
 
-A unified runner validates all 120 test specifications across all four phases:
+```bash
+cd Phase4/frontend
+npm ci
+npm run dev
+```
+
+Vite proxies to port 8000 by default. Start the API with `python run_app.py --port 8000`
+or configure VITE_API_BASE_URL for the port you choose.
+
+## Cyber demo
+
+Click **Load synthetic cyber demo** in the Reasoner panel, then try:
+
+- What is the blast radius of CVE-2024-4577?
+- Trace the attack path from Legacy_PHP_Gateway
+- Are there conflicting mitigation claims for CVE-2024-4577?
+- What prompt injection appears in the malicious log?
+
+The corpus uses a real CVE identifier with a fictional actor, enterprise topology
+and patch dispute. It is demonstration data, not real vendor guidance or threat
+attribution. A connectivity route does not prove that exploitation is possible.
+
+## MCP tools
+
+```bash
+cd Phase4
+python -m backend.mcp_server
+```
+
+Set AEGISGRAPH_API_URL to your API URL (default http://localhost:8000).
+The stdio server exposes sec_trace_attack_path, sec_query_threat_intel,
+sec_find_conflicts and sec_ingest_advisory. Advisory ingestion returns an operation
+receipt; check that operation before assuming the document is ready.
+
+## Main API routes
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| GET | /health | Component readiness and active vector backend |
+| GET | /v1/database/status | Storage configuration/status |
+| POST | /v1/workspaces/{ws}/documents | Upload TXT/PDF or pasted text |
+| POST | /v1/workspaces/{ws}/documents/batch | Batch upload |
+| GET | /v1/workspaces/{ws}/documents | List documents |
+| PUT / DELETE | /v1/workspaces/{ws}/documents/{id} | Edit/delete |
+| GET | /v1/operations/{id} | Inspect operation completion |
+| POST | /v1/query | Query evidence and attack paths |
+| GET | /v1/workspaces/{ws}/graph | Graph slice |
+| GET | /v1/workspaces/{ws}/attack-paths | Directed routes, bounded depth |
+| POST | /v1/workspaces/{ws}/demo/cyber | Load synthetic fixtures |
+| GET | /v1/topics | List topics |
+| POST | /v1/topics/discover | Discover topics |
+
+## Tests
 
 ```bash
 python test_all_phases.py
 ```
 
-### Test Suite Scorecard (120/120 Passed)
-- **Phase 1 (Storage Contracts & Lifecycle)**: 44/44 tests passed
-- **Phase 2 (Ingestion, Extraction & Embeddings)**: 25/25 tests passed
-- **Phase 3 (Topics, Retrieval, Conflicts & Hindi)**: 34/34 tests passed
-- **Phase 4 (API, Gates & E2E Acceptance)**: 17/17 tests passed
+The runner covers all four phases, including cyber paths, topic isolation,
+Firebase publication/recovery/edit/delete/integrity behavior, and MCP routing.
+Firebase tests use a test double; live Firebase needs verification after you
+connect a project. The Neo4j live test is optional without credentials.
 
----
+## Current boundaries
 
-## 📡 Core API Reference
+The API has no user authentication or workspace-membership authorization.
+Workspace IDs are data partitions, not access control. Use private access controls
+before storing private intelligence. Backend administrative endpoints must not be
+publicly writable. Firebase rules protect direct database access, not the API.
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/health` | Live system readiness and component health |
-| `GET` | `/v1/database/status` | Real-time connectivity status of Neo4j, Chroma, and disk |
-| `POST` | `/v1/database/configure` | Dynamically test and configure Neo4j Aura credentials |
-| `POST` | `/v1/workspaces/{ws}/documents` | Upload a single document (`multipart/form-data` or JSON) |
-| `POST` | `/v1/workspaces/{ws}/documents/batch` | Bulk upload 500+ documents or `.zip` archive bundles |
-| `GET` | `/v1/workspaces/{ws}/documents` | List all ingested documents in the workspace |
-| `PUT` | `/v1/workspaces/{ws}/documents/{doc_id}` | Edit an existing document revision without rebuild |
-| `DELETE` | `/v1/workspaces/{ws}/documents/{doc_id}` | Delete a document and purge orphaned chunks/relations |
-| `GET` | `/v1/operations/{op_id}` | Poll mutation status, timings, and extraction metrics |
-| `POST` | `/v1/query` | Execute hybrid retrieval, conflict resolution, or Hindi queries |
-| `GET` | `/v1/workspaces/{ws}/graph` | Retrieve full interactive graph slice with highlight paths |
-| `POST` | `/v1/topics/discover` | Discover latent thematic topic clusters via HDBSCAN |
+Completed extraction batches and evidence survive Firebase-backed restarts.
+Original uploads, operation polling checkpoints and discovered topics remain local.
+In-flight uploads may need resubmission and topic discovery may need rerunning.
 
----
+## Project references
 
-## 🐳 Docker Deployment
+- [Agent context and architecture](AGENTS_CYBERSECURITY_CONTEXT.md)
+- [Historical hackathon blueprint](CYBERSECURITY_PIVOT_BLUEPRINT.md)
+- [Architecture flowcharts](CYBERSECURITY_SYSTEM_FLOWCHARTS.md)
+- [Standalone flowchart viewer](flowcharts.html)
 
-Build and run using the included production container:
-
-```bash
-# Build multi-platform image
-docker build -t nosleep-knowledge-base .
-
-# Run container on port 8080
-docker run -p 8080:8080 -e PORT=8080 nosleep-knowledge-base
-```
-
----
-
-## 👥 Contributors
-
-- **SYNTHOS7 Team** ([GitHub](https://github.com/SYNTHOS7))
-- Developed for the **NoSleep Interactive Knowledge Base** Challenge.
+The older blueprint/flowcharts contain planned features; the setup guide and
+implementation notes above describe the current code.
