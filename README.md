@@ -1,4 +1,12 @@
-# Interactive Knowledge Base — Grounded Intelligence & Knowledge Graph
+# AegisGraph AI — Cyber Threat Intelligence & Attack Path Knowledge Graph
+
+> 🛡️ **Autonomous Grounded Intelligence, Blast-Radius Knowledge Graph & Immune SOC Copilot via MCP**  
+> *Target Event: Cybersecurity Hackathon (October 30) | Core Engine: Interactive Knowledge Base (NoSleep)*
+>
+> 🤖 **Notice for AI Agents (Claude / ChatGPT / Cursor / Copilot)**:  
+> **MANDATORY**: Please read **[AGENTS_CYBERSECURITY_CONTEXT.md](AGENTS_CYBERSECURITY_CONTEXT.md)** first. It contains the complete technical architecture, file map, data contracts, and cybersecurity hero demo specifications.  
+> 📊 **Visual Flowcharts**: Open **[flowcharts.html](flowcharts.html)** in any browser or view **[CYBERSECURITY_SYSTEM_FLOWCHARTS.md](CYBERSECURITY_SYSTEM_FLOWCHARTS.md)**.  
+> 📖 **Hackathon Strategy & Pitch Script**: Read **[CYBERSECURITY_PIVOT_BLUEPRINT.md](CYBERSECURITY_PIVOT_BLUEPRINT.md)**.
 
 [![Unified Test Suite](https://img.shields.io/badge/tests-120%2F120%20passing-brightgreen.svg)](#testing--verification)
 [![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
