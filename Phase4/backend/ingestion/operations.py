@@ -23,7 +23,7 @@ class OperationManager:
         self.storage_dir = storage_dir
         os.makedirs(self.storage_dir, exist_ok=True)
         if max_workers is None:
-            max_workers = min(32, max(8, (os.cpu_count() or 4) * 4))
+            max_workers = min(64, max(16, (os.cpu_count() or 4) * 8))
         self.executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="ingest-op")
         self.active_operations: Dict[str, Operation] = {}
         self.staged_batches: Dict[str, ExtractionBatch] = {}
@@ -92,30 +92,34 @@ class OperationManager:
             return
 
         path = operation.checkpoint_path or self._get_checkpoint_path(operation.id)
-        tmp_path = path + f".tmp_{time.time()}"
         op_dict = operation.model_dump()
-        with open(tmp_path, "w", encoding="utf-8") as f:
-            json.dump(op_dict, f, indent=2)
-            f.flush()
-        os.replace(tmp_path, path)
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(op_dict, f, separators=(",", ":"))
+        except Exception:
+            pass
 
         if batch is not None:
             batch_path = os.path.join(os.path.dirname(path), "staged_batch.json")
-            tmp_batch_path = batch_path + f".tmp_{time.time()}"
-            with open(tmp_batch_path, "w", encoding="utf-8") as f:
-                json.dump(batch.model_dump(), f, indent=2)
-                f.flush()
-            os.replace(tmp_batch_path, batch_path)
+            try:
+                with open(batch_path, "w", encoding="utf-8") as f:
+                    json.dump(batch.model_dump(), f, separators=(",", ":"))
+            except Exception:
+                pass
 
 
     def load_checkpoint(self, operation_id: str) -> Optional[Operation]:
-        """Loads an operation from its disk checkpoint."""
+        """Loads an operation from memory cache or its disk checkpoint."""
+        if operation_id in self.active_operations:
+            return self.active_operations[operation_id]
         path = self._get_checkpoint_path(operation_id)
         if not os.path.exists(path):
             return None
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        return Operation.model_validate(data)
+        op = Operation.model_validate(data)
+        self.active_operations[operation_id] = op
+        return op
 
     def load_staged_batch(self, operation_id: str) -> Optional[ExtractionBatch]:
         """Loads staged extraction batch for an operation."""

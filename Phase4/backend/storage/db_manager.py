@@ -38,6 +38,8 @@ class DatabaseManager:
         self.chroma_client = None
         self.chroma_status = "uninitialized"
         self.chroma_error = None
+        from concurrent.futures import ThreadPoolExecutor
+        self._chroma_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="chroma-sync")
 
         self.neo4j_driver = None
         self.neo4j_repo = None
@@ -108,21 +110,25 @@ class DatabaseManager:
         return self.get_status()
 
     def sync_vectors_to_chroma(self, workspace_id: str, vectors_map: Dict[str, list[float]]) -> None:
-        """Persists vectors into the persistent ChromaDB collection."""
+        """Persists vectors asynchronously into the persistent ChromaDB collection."""
         if not self.chroma_client or not vectors_map:
             return
-        try:
-            col_name = f"ws_{workspace_id.replace('-', '_')}"[:63]
-            collection = self.chroma_client.get_or_create_collection(
-                name=col_name,
-                metadata={"hnsw:space": "cosine", "workspace_id": workspace_id},
-            )
-            ids = list(vectors_map.keys())
-            embeddings = [vectors_map[cid] for cid in ids]
-            metadatas = [{"workspace_id": workspace_id, "chunk_id": cid} for cid in ids]
-            collection.upsert(ids=ids, embeddings=embeddings, metadatas=metadatas)
-        except Exception as e:
-            logger.warning(f"Non-blocking Chroma persistent upsert error: {e}")
+
+        def _persist_task():
+            try:
+                col_name = f"ws_{workspace_id.replace('-', '_')}"[:63]
+                collection = self.chroma_client.get_or_create_collection(
+                    name=col_name,
+                    metadata={"hnsw:space": "cosine", "workspace_id": workspace_id},
+                )
+                ids = list(vectors_map.keys())
+                embeddings = [vectors_map[cid] for cid in ids]
+                metadatas = [{"workspace_id": workspace_id, "chunk_id": cid} for cid in ids]
+                collection.upsert(ids=ids, embeddings=embeddings, metadatas=metadatas)
+            except Exception as e:
+                logger.warning(f"Non-blocking Chroma persistent upsert error: {e}")
+
+        self._chroma_executor.submit(_persist_task)
 
     def get_status(self) -> Dict[str, Any]:
         """Returns the active connectivity state of all configured databases."""

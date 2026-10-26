@@ -26,10 +26,15 @@ export default function App() {
   const [graphData, setGraphData] = useState({ nodes: [], edges: [], highlighted_path_ids: [] })
   const [queryResponse, setQueryResponse] = useState(null)
   const [selectedElement, setSelectedElement] = useState(null)
+  const [focusElementId, setFocusElementId] = useState(null)
   const [isQuerying, setIsQuerying] = useState(false)
   const [isDiscovering, setIsDiscovering] = useState(false)
   const [dbStatus, setDbStatus] = useState(null)
   const [showDbModal, setShowDbModal] = useState(false)
+
+  // Workbench state
+  const [activeTab, setActiveTab] = useState('chat') // 'chat' | 'documents' | 'topics'
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   // Refresh all workspace data (graph, topics, documents, and database status)
   const refreshWorkspace = async () => {
@@ -54,22 +59,22 @@ export default function App() {
   }, [workspaceId])
 
   // Handle Query Execution without wiping out non-query nodes
-  const handleRunQuery = async queryText => {
+  const handleRunQuery = async (queryText) => {
     setIsQuerying(true)
     try {
       const resp = await runQuery(workspaceId, queryText, selectedTopicIds)
       setQueryResponse(resp)
 
-      // Merge returned slice with full workspace graph so previous nodes stay permanently!
+      // Merge returned slice with full workspace graph so previous nodes stay permanently
       if (resp.graph_path && resp.graph_path.nodes && resp.graph_path.nodes.length > 0) {
-        setGraphData(prev => {
-          const nodeMap = new Map(prev.nodes.map(n => [n.id, n]))
-          resp.graph_path.nodes.forEach(n => {
+        setGraphData((prev) => {
+          const nodeMap = new Map(prev.nodes.map((n) => [n.id, n]))
+          resp.graph_path.nodes.forEach((n) => {
             const existing = nodeMap.get(n.id)
             nodeMap.set(n.id, existing ? { ...existing, ...n } : n)
           })
-          const edgeMap = new Map(prev.edges.map(e => [e.id, e]))
-          resp.graph_path.edges.forEach(e => {
+          const edgeMap = new Map(prev.edges.map((e) => [e.id, e]))
+          resp.graph_path.edges.forEach((e) => {
             const existing = edgeMap.get(e.id)
             edgeMap.set(e.id, existing ? { ...existing, ...e } : e)
           })
@@ -79,6 +84,11 @@ export default function App() {
             highlighted_path_ids: resp.graph_path.highlighted_path_ids || [],
           }
         })
+
+        // Auto-focus on first seed chunk returned if available
+        if (resp.source_chunks && resp.source_chunks.length > 0) {
+          setFocusElementId(`chunk:${resp.source_chunks[0].chunk_id}`)
+        }
       }
     } catch (err) {
       alert(`Query failed: ${err.message}`)
@@ -102,7 +112,7 @@ export default function App() {
   }
 
   // Handle Document Deletion
-  const handleDeleteDocument = async docId => {
+  const handleDeleteDocument = async (docId) => {
     if (!confirm('Are you sure you want to delete this document from the workspace?')) return
     try {
       await deleteDocument(workspaceId, docId)
@@ -124,19 +134,22 @@ export default function App() {
   }
 
   // Toggle Topic Filter
-  const handleToggleTopic = topicId => {
+  const handleToggleTopic = (topicId) => {
     if (topicId === 'ALL') {
       setSelectedTopicIds([])
     } else {
-      setSelectedTopicIds(prev =>
-        prev.includes(topicId) ? prev.filter(id => id !== topicId) : [...prev, topicId]
+      setSelectedTopicIds((prev) =>
+        prev.includes(topicId) ? prev.filter((id) => id !== topicId) : [...prev, topicId]
       )
     }
   }
 
-  // Click on a source chunk citation
-  const handleSelectChunk = async sourceChunk => {
-    const chunkNode = graphData.nodes.find(n => n.id === `chunk:${sourceChunk.chunk_id}`)
+  // Click on a source chunk citation -> focus on its card
+  const handleSelectChunk = async (sourceChunk) => {
+    const chunkNode = graphData.nodes.find((n) => n.id === `chunk:${sourceChunk.chunk_id}`)
+    const targetId = `chunk:${sourceChunk.chunk_id}`
+    setFocusElementId(targetId)
+
     if (chunkNode) {
       setSelectedElement({ ...chunkNode, elementType: 'node' })
     } else {
@@ -149,105 +162,231 @@ export default function App() {
         properties: {
           page: sourceChunk.page_number,
           revision: sourceChunk.revision,
+          source_name: sourceChunk.source_name,
+          text: sourceChunk.exact_quote,
         },
       })
     }
   }
 
+  // Select document and focus in graph
+  const handleSelectDocument = (doc) => {
+    const docNodeId = `doc:${doc.id}`
+    setFocusElementId(docNodeId)
+    setSelectedElement({
+      id: docNodeId,
+      elementType: 'node',
+      label: 'Document',
+      name: doc.source_name,
+      properties: {
+        source_type: doc.source_type,
+        revision: doc.revision,
+        chunk_count: doc.chunk_count,
+      },
+    })
+  }
+
   return (
     <div className="app-container">
-      {/* Header */}
+      {/* Top Application Bar */}
       <header className="app-header">
         <div className="header-brand">
           <div className="brand-icon">❖</div>
-          <span className="brand-title">Interactive Knowledge Base</span>
+          <div className="brand-title-wrap">
+            <span className="brand-title">Interactive Knowledge Base</span>
+            <span className="brand-subtitle">Grounded Intelligence & Card Graph</span>
+          </div>
         </div>
 
         <div className="header-controls">
+          {/* Active Topic Filters Indicator */}
+          {selectedTopicIds.length > 0 && (
+            <div
+              className="active-filter-badge"
+              onClick={() => setActiveTab('topics')}
+              title="Click to adjust thematic scoping"
+            >
+              <span className="filter-dot"></span>
+              <span>
+                Filter: <strong>{selectedTopicIds.length}</strong> topic{selectedTopicIds.length > 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
+
           {/* Database Connection Pill */}
           <div
             className="workspace-badge"
             id="db-status-badge"
             onClick={() => setShowDbModal(true)}
-            title="Click to view Database connection details and configure Neo4j"
+            title="Click to view Database connection details and configure Neo4j Aura"
             style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <span style={{ color: dbStatus?.chromadb?.status === 'connected_persistent' ? '#10b981' : '#06b6d4' }}>●</span>
-            <span>DB: {dbStatus?.neo4j?.status === 'connected' ? 'Neo4j Aura' : 'Chroma + Embedded'}</span>
+            <span
+              style={{
+                color:
+                  dbStatus?.chromadb?.status === 'connected_persistent' ? '#10b981' : '#06b6d4',
+              }}
+            >
+              ●
+            </span>
+            <span>
+              DB: {dbStatus?.neo4j?.status === 'connected' ? 'Neo4j Aura' : 'Chroma + Embedded'}
+            </span>
             <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>⚙</span>
           </div>
 
+          {/* Workspace ID Input */}
           <div className="workspace-badge" id="workspace-badge">
             <div className="status-dot"></div>
             <span>Workspace:</span>
             <input
               type="text"
               value={workspaceId}
-              onChange={e => setWorkspaceId(e.target.value.trim() || 'ws-default')}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.85rem',
-                width: '100px',
-                outline: 'none',
-              }}
+              onChange={(e) => setWorkspaceId(e.target.value.trim() || 'ws-default')}
+              className="workspace-input"
               id="workspace-input"
             />
           </div>
         </div>
       </header>
 
-      {/* Split-screen layout */}
+      {/* Main Split-Screen Workspace */}
       <div className="split-screen">
-        {/* Left Panel */}
-        <aside className="left-panel" id="left-panel">
-          <div className="left-panel-content">
-            <DocumentUploader
-              workspaceId={workspaceId}
-              onUploadComplete={refreshWorkspace}
-            />
+        {/* Left Workbench Panel */}
+        <aside
+          className={`left-panel ${sidebarCollapsed ? 'collapsed' : ''}`}
+          id="left-panel"
+        >
+          {/* Workbench Tab Switcher Navigation */}
+          <div className="workbench-nav">
+            <button
+              className={`workbench-tab ${activeTab === 'chat' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('chat')
+                if (sidebarCollapsed) setSidebarCollapsed(false)
+              }}
+              id="tab-chat-btn"
+              title="Grounded Query & Reasoning"
+            >
+              <span className="tab-icon">💬</span>
+              {!sidebarCollapsed && <span className="tab-title">Reasoner</span>}
+              {queryResponse && <span className="tab-indicator green"></span>}
+            </button>
 
-            <DocumentList
-              documents={documents}
-              onSelectDocument={setSelectedElement}
-              onEditDocument={handleEditDocument}
-              onDeleteDocument={handleDeleteDocument}
-            />
+            <button
+              className={`workbench-tab ${activeTab === 'documents' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('documents')
+                if (sidebarCollapsed) setSidebarCollapsed(false)
+              }}
+              id="tab-documents-btn"
+              title="Corpus & Document Library"
+            >
+              <span className="tab-icon">📚</span>
+              {!sidebarCollapsed && (
+                <>
+                  <span className="tab-title">Corpus</span>
+                  <span className="tab-badge">{documents.length}</span>
+                </>
+              )}
+            </button>
 
-            <TopicPicker
-              topics={topics}
-              selectedTopicIds={selectedTopicIds}
-              onToggleTopic={handleToggleTopic}
-              onDiscoverTopics={handleDiscoverTopics}
-              isDiscovering={isDiscovering}
-            />
+            <button
+              className={`workbench-tab ${activeTab === 'topics' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('topics')
+                if (sidebarCollapsed) setSidebarCollapsed(false)
+              }}
+              id="tab-topics-btn"
+              title="Thematic Clusters"
+            >
+              <span className="tab-icon">🏷️</span>
+              {!sidebarCollapsed && (
+                <>
+                  <span className="tab-title">Themes</span>
+                  <span className="tab-badge">{topics.length}</span>
+                </>
+              )}
+            </button>
 
-            <ChatPanel
-              onRunQuery={handleRunQuery}
-              isQuerying={isQuerying}
-              queryResponse={queryResponse}
-              onSelectChunk={handleSelectChunk}
-            />
+            <button
+              className="sidebar-collapse-btn"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? 'Expand Workbench' : 'Collapse Workbench'}
+              id="collapse-sidebar-btn"
+            >
+              {sidebarCollapsed ? '▶' : '◀'}
+            </button>
           </div>
+
+          {/* Active Tab Panel Content */}
+          {!sidebarCollapsed && (
+            <div className="left-panel-content">
+              {activeTab === 'chat' && (
+                <ChatPanel
+                  onRunQuery={handleRunQuery}
+                  isQuerying={isQuerying}
+                  queryResponse={queryResponse}
+                  onSelectChunk={handleSelectChunk}
+                />
+              )}
+
+              {activeTab === 'documents' && (
+                <>
+                  <DocumentUploader
+                    workspaceId={workspaceId}
+                    onUploadComplete={refreshWorkspace}
+                  />
+                  <DocumentList
+                    documents={documents}
+                    onSelectDocument={handleSelectDocument}
+                    onEditDocument={handleEditDocument}
+                    onDeleteDocument={handleDeleteDocument}
+                  />
+                </>
+              )}
+
+              {activeTab === 'topics' && (
+                <TopicPicker
+                  topics={topics}
+                  selectedTopicIds={selectedTopicIds}
+                  onToggleTopic={handleToggleTopic}
+                  onDiscoverTopics={handleDiscoverTopics}
+                  isDiscovering={isDiscovering}
+                />
+              )}
+            </div>
+          )}
         </aside>
 
-        {/* Right Panel: Interactive Graph */}
+        {/* Floating Sidebar Restore Button if collapsed */}
+        {sidebarCollapsed && (
+          <button
+            className="floating-expand-btn"
+            onClick={() => setSidebarCollapsed(false)}
+            title="Expand Workbench"
+          >
+            ▶ Open Reasoner & Docs
+          </button>
+        )}
+
+        {/* Right Panel: Interactive Dual-Mode Knowledge Canvas */}
         <main className="right-panel">
           <GraphCanvas
             graphData={graphData}
             onSelectElement={setSelectedElement}
             selectedElement={selectedElement}
+            focusElementId={focusElementId}
+            queryResponse={queryResponse}
           />
 
-          {/* Node/Edge Inspector Drawer */}
+          {/* Granular Node & Edge Inspector Modal */}
           <InspectorModal
             element={selectedElement}
             onClose={() => setSelectedElement(null)}
           />
 
-          {/* Database Connection & Settings Modal */}
+          {/* Database & Neo4j Settings Modal */}
           {showDbModal && (
             <DatabaseModal
               dbStatus={dbStatus}

@@ -2,10 +2,24 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import time
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+
+def _utc(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("timestamp must be timezone-aware UTC")
+    return value
+
+
+class ContractModel(BaseModel):
+    """Immutable transport value object."""
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
 
 
 class OperationType(str, Enum):
@@ -189,3 +203,23 @@ class TopicAssignment(BaseModel):
     confidence: float = 1.0
     method: str = "vector_clustering"
     model_version: str = "v1"
+
+
+# Canonical Phase 1 compatibility exports for storage adapters (Neo4j / Chroma)
+try:
+    from Phase1.backend.contracts.models import (
+        ChunkLocation,
+        Conflict,
+        ConflictKind,
+        ConflictState,
+        EntityMention,
+        Evidence,
+        OperationKind,
+        OperationState,
+        Revision,
+        RevisionState,
+        TopicMembership,
+        Value,
+    )
+except ImportError:
+    pass

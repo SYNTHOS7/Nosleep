@@ -434,13 +434,21 @@ class GraphStore:
                 if cid in ws_chunks:
                     ch = ws_chunks[cid]
                     c_node_id = f"chunk:{ch.id}"
+                    doc = self.documents[workspace_id].get(ch.document_id)
+                    source_name = doc.source_name if doc else f"Document {ch.document_id[:8]}"
                     nodes_dict[c_node_id] = GraphNode(
                         id=c_node_id,
                         label="Chunk",
-                        name=f"Chunk {ch.chunk_index} (P.{ch.page_number})",
+                        name=f"Chunk {ch.chunk_index} ({source_name} P.{ch.page_number})",
                         type="chunk",
                         document_id=ch.document_id,
-                        properties={"text": ch.text[:150], "page": ch.page_number},
+                        properties={
+                            "text": ch.text,
+                            "page": ch.page_number,
+                            "revision": ch.revision,
+                            "chunk_index": ch.chunk_index,
+                            "source_name": source_name,
+                        },
                     )
                     highlighted_ids.add(c_node_id)
 

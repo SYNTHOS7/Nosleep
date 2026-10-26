@@ -36,6 +36,11 @@ An enterprise-grade, grounded intelligence system that bridges unstructured docu
 
 ## 🏛️ System Architecture
 
+![System Architecture Diagram](docs/architecture.svg)
+
+<details>
+<summary><b>View Mermaid Source Code</b></summary>
+
 ```mermaid
 graph TD
     Client[Split-Screen React UI / REST Client] -->|FastAPI Gateway| API[Phase 4: REST API & Lifecycle Service]
@@ -66,6 +71,26 @@ graph TD
     
     Synthesis --> Client
 ```
+</details>
+
+---
+
+## 📸 Interactive System Showcase
+
+### 1. Force-Directed Knowledge Graph Visual
+Nodes stay permanently visible on the canvas with color-coded entity labels, document clusters, and bidirectional relation edges:
+
+![Interactive Knowledge Graph Visual](docs/knowledge_graph.png)
+
+### 2. Dual-Database Connectivity & Configuration
+Active Chroma vector persistence alongside Neo4j AuraDB and embedded transactional graph repository:
+
+![Database & Persistence Connections](docs/database_connections.png)
+
+### 3. Grounded Synthesis & Highlighted Graph Path
+100% citation-grounded answering with supporting subgraph traversal path highlighting:
+
+![Grounded Query Answering & Graph Highlight](docs/query_synthesis.png)
 
 ---
 
