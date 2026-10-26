@@ -108,7 +108,7 @@ class GraphStore:
                         page_number=chunk.page_number,
                         start_char=chunk.start_char,
                         end_char=chunk.end_char,
-                        exact_quote=chunk.text[:200],
+                        exact_quote=chunk.text,
                         revision=chunk.revision,
                     )
             return None
@@ -229,11 +229,16 @@ class GraphStore:
                     r1 = bucket[i]
                     r2 = bucket[j]
 
-                    is_polarity_conflict = (r1.polarity != r2.polarity)
-
                     t1 = (r1.target_entity_name or r1.target_value_id or "").lower()
                     t2 = (r2.target_entity_name or r2.target_value_id or "").lower()
-                    is_target_conflict = bool(t1 and t2 and t1 != t2)
+                    # Different targets of a multi-valued relation can both be true.
+                    # Opposite polarity contradicts only the same assertion/context.
+                    same_context = (r1.condition == r2.condition and r1.temporal_qualifier == r2.temporal_qualifier
+                                    and r1.modality == r2.modality)
+                    is_polarity_conflict = bool(t1 and t1 == t2 and r1.polarity != r2.polarity and same_context)
+                    exclusive = p_clean in {"has_value", "has_status", "status", "version", "has_version", "located_in"}
+                    is_target_conflict = bool(exclusive and t1 and t2 and t1 != t2 and same_context
+                                              and r1.polarity == r2.polarity == "AFFIRMATIVE")
 
                     if is_polarity_conflict or is_target_conflict:
                         cid_pair = tuple(sorted([r1.id, r2.id]))
@@ -317,7 +322,7 @@ class GraphStore:
         except Exception:
             pass
 
-        # 4. Bounded chunk-level assertion scan for opposing claims
+        # 4. Bounded fallback for opposite status terms on the same named subject.
         opposing_pairs = [
             ("open", "closed"),
             ("publicly accessible", "strictly private"),
@@ -333,6 +338,10 @@ class GraphStore:
                 for ca in chunks_a[:5]:
                     for cb in chunks_b[:5]:
                         if ca.document_id != cb.document_id:
+                            names_a = {r.source_entity_name.lower() for r in rels if r.provenance.source_chunk_id == ca.id}
+                            names_b = {r.source_entity_name.lower() for r in rels if r.provenance.source_chunk_id == cb.id}
+                            if not names_a.intersection(names_b):
+                                continue
                             pair_key = tuple(sorted([ca.id, cb.id]))
                             if pair_key in seen_chunk_conflicts:
                                 continue

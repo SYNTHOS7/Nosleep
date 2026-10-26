@@ -124,10 +124,13 @@ connect a project. The Neo4j live test is optional without credentials.
 
 ## Current boundaries
 
-The API has no user authentication or workspace-membership authorization.
-Workspace IDs are data partitions, not access control. Use private access controls
-before storing private intelligence. Backend administrative endpoints must not be
-publicly writable. Firebase rules protect direct database access, not the API.
+Firebase login, live workspace roles and protected administration are now
+implemented. See [authentication setup](docs/AUTHENTICATION.md). Local offline
+runs explicitly display demo mode; Firebase/hosted modes require verified tokens.
+
+Configure Firebase Authentication and server-managed memberships before enabling
+private hosted use. Original upload retention, audit trails and rate limits remain
+future work. Build the frontend with Node 20.19+ or 22.12+.
 
 Completed extraction batches and evidence survive Firebase-backed restarts.
 Original uploads, operation polling checkpoints and discovered topics remain local.

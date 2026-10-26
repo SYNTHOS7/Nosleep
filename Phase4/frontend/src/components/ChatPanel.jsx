@@ -5,7 +5,7 @@ import ConflictAlert from './ConflictAlert'
  * Chat and grounded query panel.
  * Displays questions, suggested queries, grounded answers, citations, limitations, and conflict alerts.
  */
-export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSelectChunk, onLoadDemo, isLoadingDemo }) {
+export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSelectChunk, onLoadDemo, isLoadingDemo, canWrite = true }) {
   const [queryText, setQueryText] = useState('')
 
   const suggestedQueries = [
@@ -34,7 +34,7 @@ export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSel
 
       {/* Suggested Queries */}
       <div style={{ marginBottom: '10px' }}>
-        <button className="btn-primary" onClick={onLoadDemo} disabled={isLoadingDemo || isQuerying} style={{ marginBottom: '8px' }}>
+        <button className="btn-primary" onClick={onLoadDemo} disabled={!canWrite || isLoadingDemo || isQuerying} style={{ marginBottom: '8px' }}>
           {isLoadingDemo ? 'Loading demo…' : 'Load synthetic cyber demo'}
         </button>
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px' }}>

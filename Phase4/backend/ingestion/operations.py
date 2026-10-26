@@ -92,10 +92,9 @@ class OperationManager:
             return
 
         path = operation.checkpoint_path or self._get_checkpoint_path(operation.id)
-        op_dict = operation.model_dump()
         try:
             with open(path, "w", encoding="utf-8") as f:
-                json.dump(op_dict, f, separators=(",", ":"))
+                f.write(operation.model_dump_json())
         except Exception:
             pass
 
@@ -103,7 +102,7 @@ class OperationManager:
             batch_path = os.path.join(os.path.dirname(path), "staged_batch.json")
             try:
                 with open(batch_path, "w", encoding="utf-8") as f:
-                    json.dump(batch.model_dump(), f, separators=(",", ":"))
+                    f.write(batch.model_dump_json())
             except Exception:
                 pass
 

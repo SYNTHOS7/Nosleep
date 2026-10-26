@@ -54,6 +54,17 @@ def test_attack_path_endpoint_bounds(client):
     assert client.get("/v1/workspaces/test/attack-paths", params={"entry_point": "Gateway"}).json()["paths"] == []
 
 
+def test_source_endpoint_preserves_evidence_after_200_characters(client):
+    from backend.storage.graph_store import get_graph_store
+    text = 'Context ' * 40 + '. Gateway accesses Database.'
+    batch = publish(get_graph_store(), text)
+    response = client.get(f'/v1/chunks/{batch.chunks[0].id}/source')
+    assert response.status_code == 200
+    source = response.json()
+    assert source['exact_quote'] == text
+    assert source['end_char'] - source['start_char'] == len(source['exact_quote'])
+
+
 def test_cyber_demo_to_cited_query_and_conflict(client):
     response = client.post('/v1/workspaces/cyber-demo/demo/cyber')
     assert response.status_code == 200

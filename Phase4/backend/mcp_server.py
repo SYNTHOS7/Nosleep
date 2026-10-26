@@ -10,7 +10,9 @@ import requests
 
 def _call(method, path, **kwargs):
     base = os.environ.get("AEGISGRAPH_API_URL", "http://localhost:8000").rstrip("/")
-    response = requests.request(method, base + path, timeout=60, **kwargs)
+    token = os.environ.get("AEGISGRAPH_ID_TOKEN")
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    response = requests.request(method, base + path, headers=headers, timeout=60, **kwargs)
     if not response.ok:
         raise RuntimeError(f"AegisGraph API returned HTTP {response.status_code}")
     return response.json()

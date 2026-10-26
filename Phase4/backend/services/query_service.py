@@ -207,8 +207,15 @@ class QueryService:
         query_lower = raw_query.lower()
         if ws_conflicts:
             for conf in ws_conflicts:
+                # Every conflict must remain inside the requested topic scope.
+                if allowed_chunk_ids is not None and any(side.get("chunk_id") not in allowed_chunk_ids for side in (conf.source_a, conf.source_b)):
+                    continue
                 stmt_words = set(re.findall(r"\w+", conf.statement_a.lower() + " " + conf.statement_b.lower()))
-                is_rel = any(w in query_lower for w in stmt_words if len(w) > 3) or any(w in query_lower for w in ["conflict", "contradict", "opposing", "public", "private", "open", "closed", "port", "status"])
+                requested_ids = re.findall(r"cve-\d{4}-\d{4,}", query_lower)
+                claim_text = (conf.statement_a + " " + conf.statement_b + " " + conf.source_a.get("quote", "") + " " + conf.source_b.get("quote", "")).lower()
+                meaningful = {w for w in query_words if len(w) > 3} - {"conflict", "conflicts", "conflicting", "contradictory", "opposing", "claims", "about", "what", "which", "status", "detected", "sources"}
+                is_rel = (any(identifier in claim_text for identifier in requested_ids) if requested_ids else
+                          any(w in claim_text for w in meaningful) if meaningful else True)
                 if is_rel:
                     active_conflicts.append(conf)
                     conflict_detected = True
@@ -258,7 +265,7 @@ class QueryService:
             factual_edges = [e for e in graph_slice.edges if e.edge_type == "factual"]
             prefix = ""
             if factual_edges:
-                fact_descriptions = [f"{e.source.replace('ent:', '')} {e.predicate} {e.target.replace('ent:', '')}" for e in factual_edges[:2]]
+                fact_descriptions = [f"{e.source.replace('ent:', '')} {'does not ' if e.polarity == 'NEGATIVE' else ''}{e.predicate} {e.target.replace('ent:', '')} [{e.modality}]" for e in factual_edges[:2]]
                 prefix = f"Based on the evidence in the documents, {', '.join(fact_descriptions)}. "
 
             if conflict_detected:

@@ -7,6 +7,7 @@ import shutil
 import tempfile
 import time
 import uuid
+import re
 from typing import Any, Dict, List, Optional
 
 from fastapi import (
@@ -52,6 +53,24 @@ app = FastAPI(
     description="Person 4 FastAPI backend providing document lifecycle, grounded query answering, topics, and graph slices.",
 )
 
+from backend.security.access import ProtectedRoute, auth_mode
+auth_mode()  # Reject unsafe storage/auth combinations at startup.
+app.router.route_class = ProtectedRoute
+from backend.security.upload_limits import UploadLimitMiddleware
+app.add_middleware(UploadLimitMiddleware)
+
+
+@app.get("/v1/auth/config")
+def get_auth_config():
+    return {"mode": auth_mode(), "demo": auth_mode() == "demo"}
+
+
+@app.get("/v1/auth/me")
+def get_current_user(request: Request):
+    principal = request.state.principal
+    return {"uid": principal.uid, "email": principal.email,
+            "workspaces": principal.workspaces, "platform_admin": principal.platform_admin}
+
 # Enable CORS for frontend development
 app.add_middleware(
     CORSMiddleware,
@@ -63,6 +82,14 @@ app.add_middleware(
 
 UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "kb_uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+def safe_filename(name):
+    # Treat both slash styles as separators on every deployment OS.
+    cleaned = os.path.basename(str(name).replace("\\", "/"))
+    if not cleaned or cleaned in {".", ".."} or any(ord(c) < 32 or c in '<>:"|?*' for c in cleaned) or len(cleaned) > 160:
+        raise HTTPException(400, "Invalid source filename.")
+    return cleaned
 
 
 @app.exception_handler(HTTPException)
@@ -166,15 +193,18 @@ async def upload_document(
             except Exception:
                 pass
 
+    if not isinstance(doc_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", doc_id):
+        raise HTTPException(status_code=400, detail="Invalid document ID.")
+
     if file:
-        fname = file.filename or "upload.txt"
+        fname = safe_filename(file.filename or "upload.txt")
         ext = os.path.splitext(fname)[1].lower()
         source_type = "pdf" if ext == ".pdf" else "txt"
         file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_{fname}")
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     elif raw_text:
-        fname = filename or "pasted_source.txt"
+        fname = safe_filename(filename or "pasted_source.txt")
         file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_{fname}")
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(raw_text)
@@ -251,6 +281,8 @@ async def upload_documents_batch(
 
     if not files:
         raise HTTPException(status_code=400, detail="No files provided for batch ingestion.")
+    if len(files) > 1000:
+        raise HTTPException(status_code=413, detail="At most 1000 files are allowed per batch.")
 
     op_manager = get_operation_manager()
     lifecycle_service = get_lifecycle_service()
@@ -259,7 +291,7 @@ async def upload_documents_batch(
     queued_op_ids: List[str] = []
 
     for upload in files:
-        fname = upload.filename or "file.txt"
+        fname = safe_filename(upload.filename or "file.txt")
         ext = os.path.splitext(fname)[1].lower()
 
         # Handle zip bundles containing multiple files
@@ -271,6 +303,13 @@ async def upload_documents_batch(
             extract_dir = os.path.join(UPLOAD_DIR, f"extracted_{uuid.uuid4().hex[:8]}")
             os.makedirs(extract_dir, exist_ok=True)
             with zipfile.ZipFile(zip_path, "r") as zf:
+                members = zf.infolist()
+                if len(members) > 1000 or sum(member.file_size for member in members) > 50 * 1024 * 1024:
+                    raise HTTPException(413, "Archive exceeds the 1000-entry or 50 MiB expanded limit.")
+                for member in members:
+                    relative = member.filename.replace("\\", "/")
+                    if relative.startswith("/") or ".." in relative.split("/") or ":" in relative or (member.external_attr >> 16) & 0o170000 == 0o120000:
+                        raise HTTPException(400, "Archive contains an unsafe path or symbolic link.")
                 zf.extractall(extract_dir)
 
             for root, _, z_files in os.walk(extract_dir):
@@ -394,14 +433,14 @@ async def edit_document(
 
     source_type = current_doc.source_type
     if file:
-        fname = file.filename or current_doc.source_name
+        fname = safe_filename(file.filename or current_doc.source_name)
         ext = os.path.splitext(fname)[1].lower()
         source_type = "pdf" if ext == ".pdf" else "txt"
         file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_rev{expected_revision_id+1}_{fname}")
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     elif raw_text:
-        fname = filename or current_doc.source_name
+        fname = safe_filename(filename or current_doc.source_name)
         file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_rev{expected_revision_id+1}_{fname}")
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(raw_text)

@@ -124,7 +124,7 @@ export default function ParagraphCard({
               return (
                 <div key={idx} className="rel-chip" title={rel.predicate}>
                   <span className="rel-node">{srcName}</span>
-                  <span className="rel-pred">──[{rel.predicate}]──►</span>
+                  <span className="rel-pred">──[{rel.polarity === 'NEGATIVE' ? 'NOT ' : ''}{rel.predicate}{rel.modality && rel.modality !== 'CERTAIN' ? ` · ${rel.modality}` : ''}]──►</span>
                   <span className="rel-node">{tgtName}</span>
                 </div>
               )

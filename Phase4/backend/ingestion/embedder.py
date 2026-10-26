@@ -3,6 +3,7 @@
 import hashlib
 import math
 import re
+from functools import lru_cache
 from typing import List, Literal
 import numpy as np
 
@@ -57,6 +58,15 @@ def embed_texts(texts: List[str], purpose: Literal["document", "query"]) -> List
     return validated_vectors
 
 
+@lru_cache(maxsize=2048)
+def _word_vector(word, dimension):
+    digest = hashlib.sha256(word.encode("utf-8")).digest()
+    rng = np.random.default_rng(int.from_bytes(digest[:4], "big"))
+    vector = rng.standard_normal(dimension).astype(float)
+    vector.setflags(write=False)
+    return vector
+
+
 def _generate_multilingual_vectors(texts: List[str]) -> List[List[float]]:
     """
     Generates deterministic 768-dimensional normalized vectors with semantic term overlap.
@@ -71,12 +81,7 @@ def _generate_multilingual_vectors(texts: List[str]) -> List[List[float]]:
 
         composite_vec = np.zeros(PINNED_DIMENSION, dtype=float)
         for w in words:
-            w_bytes = w.encode("utf-8")
-            hash_digest = hashlib.sha256(w_bytes).digest()
-            seed = int.from_bytes(hash_digest[:4], "big")
-            rng = np.random.default_rng(seed)
-            w_vec = rng.standard_normal(PINNED_DIMENSION).astype(float)
-            composite_vec += w_vec
+            composite_vec += _word_vector(w, PINNED_DIMENSION)
 
         # Normalize to unit sphere (L2 norm)
         l2_norm = np.linalg.norm(composite_vec)

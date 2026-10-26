@@ -19,7 +19,10 @@ Implemented: cyber entity/relationship extraction, synthetic corpus, directed
 evidence-backed attack-path API and query routing, demo-loader UI, MCP tools over
 the REST API, Firebase persistence and startup restoration. Search uses a backend
 cosine index. Neo4j write-through, user authentication and multi-instance cache
-synchronization are not implemented by this release. Do not represent connection
+synchronization were not implemented in the initial release. Firebase sign-in,
+live workspace-role enforcement and protected administration are now implemented;
+see docs/AUTHENTICATION.md. Demo heading noise and multi-target conflict false
+positives are fixed. Do not represent connection
 status as proof of Neo4j graph writes or describe rule-based extraction as an LLM.
 
 ## 1. Project Mission & Pivot Summary

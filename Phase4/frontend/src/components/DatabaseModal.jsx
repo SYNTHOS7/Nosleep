@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { configureDatabase } from '../services/api'
 
-export default function DatabaseModal({ dbStatus, onClose, onRefresh }) {
+export default function DatabaseModal({ dbStatus, onClose, onRefresh, canConfigure = false }) {
   const usesFirebase = dbStatus?.vector_backend === 'firebase'
   const [uri, setUri] = useState(dbStatus?.neo4j?.uri === 'none' ? '' : dbStatus?.neo4j?.uri || '')
   const [username, setUsername] = useState('neo4j')
@@ -107,7 +107,7 @@ export default function DatabaseModal({ dbStatus, onClose, onRefresh }) {
           </div>
 
           {/* Optional Neo4j AuraDB credentials form */}
-          <form
+          {canConfigure && <form
             onSubmit={handleConnectNeo4j}
             style={{
               padding: '14px',
@@ -208,7 +208,7 @@ export default function DatabaseModal({ dbStatus, onClose, onRefresh }) {
             >
               {isSaving ? 'Testing Connection...' : '🔌 Test & Connect Neo4j'}
             </button>
-          </form>
+          </form>}
         </div>
       </div>
     </div>

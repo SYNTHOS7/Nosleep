@@ -45,7 +45,7 @@ RELATION_FALLBACK = "RELATED_TO"
 ALLOWED_POLARITIES = {"AFFIRMATIVE", "NEGATIVE"}
 ALLOWED_MODALITIES = {"CERTAIN", "CONDITIONAL", "POSSIBLE"}
 
-PROMPT_VERSION = "2026-10-26-cyber-v3"
+PROMPT_VERSION = "2026-10-27-cyber-v4"
 CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "cache")
 
 
@@ -395,6 +395,9 @@ def _run_extraction_adapter(chunk_text: str) -> Dict[str, Any]:
     for sent in sentences:
         sent_clean = sent.strip()
         if not sent_clean:
+            continue
+        # Fixture labels describe the source; they are not security assertions.
+        if re.match(r"^SYNTHETIC DEMO\s*:", sent_clean, re.I):
             continue
 
         from backend.ingestion.cyber import extract_cyber_sentence

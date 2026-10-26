@@ -46,10 +46,12 @@ class DatabaseManager:
         self.neo4j_status = "unconfigured"
         self.neo4j_error = None
 
-        if os.environ.get("VECTOR_BACKEND") == "firebase":
-            self.chroma_status = "disabled"
-        else:
+        if os.environ.get("VECTOR_BACKEND") != "firebase" and os.environ.get("CHROMA_MIRROR_ENABLED", "false").lower() == "true":
             self._init_chroma()
+        else:
+            # Offline/in-memory mode must not silently schedule persistent HNSW writes.
+            # The legacy mirror is explicit and never runs alongside Firebase storage.
+            self.chroma_status = "disabled"
         self._init_neo4j()
 
     def _init_chroma(self) -> None:
@@ -153,12 +155,12 @@ class DatabaseManager:
                 "error_or_info": self.neo4j_error or "Neo4j connection is verified and active.",
             },
             "chromadb": {
-                "configured": True,
+                "configured": self.chroma_status != "disabled",
                 "status": self.chroma_status,
                 "backend": "persistent_disk",
                 "persist_directory": self.chroma_dir,
                 "collections_count": chroma_col_count,
-                "error_or_info": self.chroma_error or "Chroma persistent database is active and accepting embeddings.",
+                "error_or_info": self.chroma_error or ("Legacy Chroma mirror is disabled." if self.chroma_status == "disabled" else "Chroma mirror is active and accepting embeddings."),
             },
             "operations_store": {
                 "status": "active",

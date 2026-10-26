@@ -5,7 +5,7 @@ import React, { useState } from 'react'
  * Displays all processed documents staying in the workspace, with search filter,
  * chunk counts, revision badges, inline revision editing, and deletion.
  */
-export default function DocumentList({ documents, onSelectDocument, onEditDocument, onDeleteDocument }) {
+export default function DocumentList({ documents, onSelectDocument, onEditDocument, onDeleteDocument, readOnly = false }) {
   const [filterQuery, setFilterQuery] = useState('')
   const [isExpanded, setIsExpanded] = useState(true)
   const [editingDocId, setEditingDocId] = useState(null)
@@ -17,11 +17,13 @@ export default function DocumentList({ documents, onSelectDocument, onEditDocume
   )
 
   const handleStartEdit = (doc) => {
+    if (readOnly) return
     setEditingDocId(doc.id)
     setEditContent(`Updated specification for ${doc.source_name}: System operating under revised high-availability protocol.`)
   }
 
   const handleSaveEdit = async (doc) => {
+    if (readOnly) return
     if (!editContent.trim()) return
     setIsSavingEdit(true)
     try {
@@ -153,7 +155,7 @@ export default function DocumentList({ documents, onSelectDocument, onEditDocume
                       </span>
 
                       {/* Edit without rebuild button */}
-                      {onEditDocument && (
+                      {onEditDocument && !readOnly && (
                         <button
                           style={{
                             background: 'none',
@@ -178,7 +180,7 @@ export default function DocumentList({ documents, onSelectDocument, onEditDocume
                       )}
 
                       {/* Delete button */}
-                      {onDeleteDocument && (
+                      {onDeleteDocument && !readOnly && (
                         <button
                           style={{
                             background: 'none',

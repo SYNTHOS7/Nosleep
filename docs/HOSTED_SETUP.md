@@ -11,6 +11,9 @@ You choose where to publish. No Firebase account credentials are committed.
 - Graph: embedded graph traversal; the existing Neo4j adapter remains optional.
 
 Supabase is not required. ChromaDB is disabled in Firebase mode. The current
+offline in-memory mode also disables disk mirroring. Legacy Chroma mirroring is
+available only through CHROMA_MIRROR_ENABLED=true outside Firebase mode. This avoids
+scheduling persistent index writes during offline ingestion and benchmarks. The
 embedding adapter generates deterministic 768-dimensional vectors; this release
 does not add an external embedding model or a hosted language model.
 
@@ -101,10 +104,11 @@ Run `python test_all_phases.py`, then `npm run build` in Phase4/frontend.
 Firebase persistence tests use a Firestore test double. Once connected, verify
 upload -> query -> edit -> restart -> delete -> restart with exact source quotes.
 
-The API has no user login/workspace-membership authorization. Workspace IDs
-partition data but are not access control. Put private deployments behind access
-control before storing sensitive information. Firestore rules protect direct
-client access, not the API. Runtime database configuration is an admin endpoint.
+Firebase login and backend workspace-role checks are implemented. Follow
+AUTHENTICATION.md to enable Authentication, configure public frontend settings and
+provision initial memberships. Hosted mode requires authentication; local demo
+mode is explicitly labeled. Runtime database configuration requires a platform
+administrator. Frontend builds require Node 20.19+ or 22.12+.
 
 Neo4j's existing adapter uses a different contract from current ingestion. Until
 write-through is connected, queries use the embedded graph restored from Firebase.

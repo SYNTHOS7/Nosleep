@@ -19,8 +19,9 @@ import {
   loadCyberDemo,
 } from './services/api'
 
-export default function App() {
-  const [workspaceId, setWorkspaceId] = useState('ws-default')
+export default function App({ session = { demo: true, workspaces: {} }, onSignOut }) {
+  const [workspaceId, setWorkspaceId] = useState(Object.keys(session.workspaces)[0] || 'ws-default')
+  const canWrite = session.demo || session.platform_admin || ['editor', 'admin'].includes(session.workspaces[workspaceId])
   const [topics, setTopics] = useState([])
   const [documents, setDocuments] = useState([])
   const [selectedTopicIds, setSelectedTopicIds] = useState([])
@@ -206,6 +207,10 @@ export default function App() {
     <div className="app-container">
       {/* Top Application Bar */}
       <header className="app-header">
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span className="badge">{session.demo ? 'Local demo · no login' : session.email}</span>
+          {!session.demo && <button className="btn-primary" onClick={onSignOut}>Sign out</button>}
+        </div>
         <div className="header-brand">
           <div className="brand-icon">❖</div>
           <div className="brand-title-wrap">
@@ -255,13 +260,15 @@ export default function App() {
           <div className="workspace-badge" id="workspace-badge">
             <div className="status-dot"></div>
             <span>Workspace:</span>
-            <input
+            {(session.demo || session.platform_admin) ? <input
               type="text"
               value={workspaceId}
               onChange={(e) => setWorkspaceId(e.target.value.trim() || 'ws-default')}
               className="workspace-input"
               id="workspace-input"
-            />
+            /> : <select aria-label="Workspace" className="workspace-input" value={workspaceId} onChange={event => setWorkspaceId(event.target.value)}>
+              {Object.keys(session.workspaces).map(name => <option key={name} value={name}>{name} ({session.workspaces[name]})</option>)}
+            </select>}
           </div>
         </div>
       </header>
@@ -346,20 +353,22 @@ export default function App() {
                   onSelectChunk={handleSelectChunk}
                   onLoadDemo={handleLoadDemo}
                   isLoadingDemo={isLoadingDemo}
+                  canWrite={canWrite}
                 />
               )}
 
               {activeTab === 'documents' && (
                 <>
-                  <DocumentUploader
+                  {canWrite && <DocumentUploader
                     workspaceId={workspaceId}
                     onUploadComplete={refreshWorkspace}
-                  />
+                  />}
                   <DocumentList
                     documents={documents}
                     onSelectDocument={handleSelectDocument}
                     onEditDocument={handleEditDocument}
                     onDeleteDocument={handleDeleteDocument}
+                    readOnly={!canWrite}
                   />
                 </>
               )}
@@ -370,7 +379,7 @@ export default function App() {
                   selectedTopicIds={selectedTopicIds}
                   onToggleTopic={handleToggleTopic}
                   onDiscoverTopics={handleDiscoverTopics}
-                  isDiscovering={isDiscovering}
+                  isDiscovering={isDiscovering || !canWrite}
                 />
               )}
             </div>
@@ -410,6 +419,7 @@ export default function App() {
               dbStatus={dbStatus}
               onClose={() => setShowDbModal(false)}
               onRefresh={refreshWorkspace}
+              canConfigure={!session.demo && session.platform_admin}
             />
           )}
         </main>
