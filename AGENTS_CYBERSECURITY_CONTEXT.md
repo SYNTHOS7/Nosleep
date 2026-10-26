@@ -8,23 +8,19 @@
 
 ---
 
-## Current implementation update (October 26)
+## Current implementation update (October 27)
 
-The current hosting target is React on Vercel, FastAPI on Render, and Firebase
-Firestore for durable extraction batches/embeddings. Supabase is not required.
-See `docs/HOSTED_SETUP.md` for the actual runtime behavior and setup boundaries;
-the diagrams and roadmap below include aspirational features.
+The current target is React on Vercel, FastAPI on Render, and Neon PostgreSQL
+with pgvector plus Neon managed Auth. Firebase and Supabase are not required.
+See docs/HOSTED_SETUP.md and docs/AUTHENTICATION.md for the current setup.
 
-Implemented: cyber entity/relationship extraction, synthetic corpus, directed
-evidence-backed attack-path API and query routing, demo-loader UI, MCP tools over
-the REST API, Firebase persistence and startup restoration. Search uses a backend
-cosine index. Neo4j write-through, user authentication and multi-instance cache
-synchronization were not implemented in the initial release. Firebase sign-in,
-live workspace-role enforcement and protected administration are now implemented;
-see docs/AUTHENTICATION.md. Demo heading noise and multi-target conflict false
-positives are fixed. Do not represent connection
-status as proof of Neo4j graph writes or describe rule-based extraction as an LLM.
-
+Implemented: cited cyber extraction and attack paths, synthetic demo, MCP tools,
+transactional extraction/vector persistence, database-native cosine search,
+startup graph reconstruction, verified JWT login and live workspace roles.
+Live Neon integration remains pending account configuration. Neo4j write-through,
+multi-instance cache synchronization and durable original uploads remain unfinished.
+Extraction and embeddings are deterministic; do not describe them as an LLM or
+learned semantic embeddings. Historical diagrams below contain planned features.
 ## 1. Project Mission & Pivot Summary
 
 ### What This System Is

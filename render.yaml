@@ -12,12 +12,12 @@ services:
       - key: STORAGE_BACKEND
         value: in_memory
       - key: VECTOR_BACKEND
-        value: firebase
+        value: neon
       - key: AUTH_MODE
-        value: firebase
-      - key: FIREBASE_PROJECT_ID
+        value: neon
+      - key: DATABASE_URL
         sync: false
-      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+      - key: NEON_AUTH_URL
         sync: false
       - key: SERVE_FRONTEND
         value: "false"

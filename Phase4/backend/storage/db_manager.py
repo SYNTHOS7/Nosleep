@@ -46,11 +46,11 @@ class DatabaseManager:
         self.neo4j_status = "unconfigured"
         self.neo4j_error = None
 
-        if os.environ.get("VECTOR_BACKEND") != "firebase" and os.environ.get("CHROMA_MIRROR_ENABLED", "false").lower() == "true":
+        if os.environ.get("VECTOR_BACKEND") != "neon" and os.environ.get("CHROMA_MIRROR_ENABLED", "false").lower() == "true":
             self._init_chroma()
         else:
             # Offline/in-memory mode must not silently schedule persistent HNSW writes.
-            # The legacy mirror is explicit and never runs alongside Firebase storage.
+            # The legacy mirror is explicit and never runs alongside Neon storage.
             self.chroma_status = "disabled"
         self._init_neo4j()
 
@@ -168,11 +168,11 @@ class DatabaseManager:
                 "directory": os.path.abspath("./data/operations"),
             },
             "vector_backend": os.environ.get("VECTOR_BACKEND", "in_memory"),
-            "firebase": {
-                "configured": os.environ.get("VECTOR_BACKEND") == "firebase",
-                "status": "initialized" if os.environ.get("VECTOR_BACKEND") == "firebase" else "disabled",
-                "backend": "firestore_persistence_local_cosine_search",
-                "error_or_info": "Firestore stores extracted documents and embeddings; the backend restores its cosine index on startup.",
+            "neon": {
+                "configured": os.environ.get("VECTOR_BACKEND") == "neon",
+                "status": "initialized" if os.environ.get("VECTOR_BACKEND") == "neon" else "disabled",
+                "backend": "postgres_pgvector",
+                "error_or_info": "Neon stores extracted documents and performs workspace-scoped vector search; graph state is restored on startup.",
             },
         }
 

@@ -13,8 +13,8 @@ def test_in_memory_mode_never_starts_chroma_disk_mirroring(monkeypatch):
     manager._chroma_executor.shutdown()
 
 
-def test_firebase_never_enables_the_legacy_mirror(monkeypatch):
-    monkeypatch.setenv('VECTOR_BACKEND', 'firebase')
+def test_neon_never_enables_the_legacy_mirror(monkeypatch):
+    monkeypatch.setenv('VECTOR_BACKEND', 'neon')
     monkeypatch.setenv('CHROMA_MIRROR_ENABLED', 'true')
     calls = []
     monkeypatch.setattr(DatabaseManager, '_init_chroma', lambda self: calls.append('chroma'))

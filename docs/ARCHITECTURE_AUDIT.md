@@ -1,3 +1,7 @@
+# October 27 migration update
+
+Neon PostgreSQL/pgvector and Neon Auth replace the Firebase implementation described in the historical audit below. Current setup and boundaries are in HOSTED_SETUP.md and AUTHENTICATION.md. SQL publication is transactional; live Neon verification remains pending. Neo4j write-through remains unfinished.
+
 # AegisGraph architecture audit and local verification
 
 Reviewed against the master context, pivot blueprint, flowcharts and the current

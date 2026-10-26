@@ -16,32 +16,32 @@ analysis over uploaded documents. Built with FastAPI and React/Vite.
 - Load a six-document synthetic cyber demo from the UI.
 - Preserve attacker instructions as passive data artifacts.
 - Connect MCP clients to the same API used by the browser.
-- Optionally persist extraction batches and embeddings in Firebase Firestore and
+- Optionally persist extraction batches and embeddings in Neon PostgreSQL and
   reconstruct the graph/search cache after restart.
 
 ## Storage and hosting
 
 The frontend is ready for Vercel and the API for Render; you choose when to deploy.
-Firebase configuration is optional for local development. No cloud credentials or
-account-specific Firebase project IDs are committed.
+Neon configuration is optional for local development. No cloud credentials or
+account-specific Neon project IDs are committed.
 
 | Component | Current implementation |
 | --- | --- |
 | Frontend | React/Vite, in Phase4/frontend |
 | API | FastAPI, started with run_app.py |
-| Durable hosted data | Firebase Firestore when VECTOR_BACKEND=firebase |
-| Search | 768-dimensional cosine index in the backend, restored from Firebase |
+| Durable hosted data | Neon PostgreSQL when VECTOR_BACKEND=neon |
+| Search | 768-dimensional pgvector cosine search in PostgreSQL |
 | Active graph | Embedded graph reconstructed from persisted extraction batches |
 | Neo4j | Existing optional adapter; current ingestion write-through is pending |
 | Local mode | In-memory graph and vectors; existing Chroma compatibility retained |
 
-Supabase is not needed. Firebase mode disables Chroma. The current extraction and
+Supabase is not needed. Neon mode disables Chroma. The current extraction and
 embedding adapters are deterministic; this release does not claim external LLM
 reasoning or learned semantic embeddings. Use one API instance for the shared
-in-memory index. Firestore native vector search is not used.
+in-memory index. Neon mode uses native pgvector cosine queries.
 
 Read **[the setup guide](docs/HOSTED_SETUP.md)** for environment variables,
-Firestore rules, Vercel routing, Render settings, MCP setup and remaining boundaries.
+Neon schema setup, Vercel routing, Render settings, MCP setup and remaining boundaries.
 
 ## Run locally
 
@@ -118,21 +118,21 @@ python test_all_phases.py
 ```
 
 The runner covers all four phases, including cyber paths, topic isolation,
-Firebase publication/recovery/edit/delete/integrity behavior, and MCP routing.
-Firebase tests use a test double; live Firebase needs verification after you
+Neon publication/recovery/edit/delete/integrity behavior, and MCP routing.
+Neon tests use a test double; live Neon needs verification after you
 connect a project. The Neo4j live test is optional without credentials.
 
 ## Current boundaries
 
-Firebase login, live workspace roles and protected administration are now
+Neon login, live workspace roles and protected administration are now
 implemented. See [authentication setup](docs/AUTHENTICATION.md). Local offline
-runs explicitly display demo mode; Firebase/hosted modes require verified tokens.
+runs explicitly display demo mode; Neon/hosted modes require verified tokens.
 
-Configure Firebase Authentication and server-managed memberships before enabling
+Configure Neon Auth and server-managed memberships before enabling
 private hosted use. Original upload retention, audit trails and rate limits remain
 future work. Build the frontend with Node 20.19+ or 22.12+.
 
-Completed extraction batches and evidence survive Firebase-backed restarts.
+Completed extraction batches and evidence survive Neon-backed restarts.
 Original uploads, operation polling checkpoints and discovered topics remain local.
 In-flight uploads may need resubmission and topic discovery may need rerunning.
 

@@ -1,119 +1,64 @@
-# AegisGraph setup and deployment handoff
+# Hosted setup: Neon, Render and Vercel
 
-You choose where to publish. No Firebase account credentials are committed.
+The API uses Neon PostgreSQL for completed extraction batches, workspace permissions and pgvector search. Login uses Neon managed Auth (Better Auth). Firebase and Supabase are no longer required. No hosted account has been configured or tested by this migration.
 
-## Runtime layout
+## 1. Neon
 
-- Frontend: React/Vite in Phase4/frontend, ready for Vercel.
-- API: FastAPI, started from the repository root with `python run_app.py`, ready for Render.
-- Firebase Firestore: durable extracted documents, relations, source citations and embeddings.
-- Search: a cosine index in the backend, rebuilt from Firestore on startup.
-- Graph: embedded graph traversal; the existing Neo4j adapter remains optional.
+Create a project, enable Neon Auth, and copy its full Auth endpoint URL and pooled PostgreSQL connection string. Keep the database connection string private. Enable the pgvector extension by running the explicit schema setup with a database owner connection:
 
-Supabase is not required. ChromaDB is disabled in Firebase mode. The current
-offline in-memory mode also disables disk mirroring. Legacy Chroma mirroring is
-available only through CHROMA_MIRROR_ENABLED=true outside Firebase mode. This avoids
-scheduling persistent index writes during offline ingestion and benchmarks. The
-embedding adapter generates deterministic 768-dimensional vectors; this release
-does not add an external embedding model or a hosted language model.
-
-## Local run
-
-Install requirements.txt in Python 3.11+, then run `python run_app.py` from the
-repository root. Default storage is in-memory. The built UI is at localhost:8080.
-For frontend development, run `npm ci` and `npm run dev` in Phase4/frontend.
-Check vite.config.js for its backend proxy port or set VITE_API_BASE_URL.
-
-## Firebase configuration (when you connect it)
-
-1. Create a Firebase project and a Cloud Firestore database.
-2. Give a backend service account Firestore access through IAM.
-3. Set backend environment values:
-
-```env
-VECTOR_BACKEND=firebase
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_SERVICE_ACCOUNT_JSON={...the complete service-account JSON...}
+```powershell
+# From Phase4, with DATABASE_URL supplied in your environment
+python -m backend.storage.neon_setup
 ```
 
-Instead of JSON in an environment variable, use Application Default Credentials,
-for example a Render secret file referenced by GOOGLE_APPLICATION_CREDENTIALS.
-Never expose these credentials through a VITE_ variable.
+This creates the private `aegis` schema and the public vector extension. API startup does not run schema migrations. Add your frontend origin to the Neon Auth trusted origins. The browser uses session cookies; browsers blocking cross-site cookies may require a same-site Auth proxy or shared-domain arrangement supported by Neon.
 
-Apply firebase/firestore.rules and firebase/firestore.indexes.json with the
-Firebase CLI (`firebase deploy --only firestore --project YOUR_PROJECT_ID`) or
-the console. Rules deny direct browser access; the backend Admin SDK uses IAM.
-No browser Firebase SDK, Storage bucket, or native vector index is required.
+## 2. Render API
 
-On startup, Firebase mode loads committed document batches, verifies integrity,
-and reconstructs the graph and search index. Invalid credentials/read failures
-stop startup rather than silently claiming cloud persistence works.
+Use the repository Dockerfile or render.yaml. Set:
 
-Batches are compressed and divided into 700 KB pages. The manifest changes only
-after every page is written, so interrupted publication preserves the previous
-revision. A delete tombstones the manifest before removing all pages. Old edit
-pages are retained until document deletion. The maximum raw batch is 64 MiB.
+```text
+DATABASE_URL=<private Neon pooled connection string>
+NEON_AUTH_URL=<full Neon Auth endpoint>
+VECTOR_BACKEND=neon
+AUTH_MODE=neon
+HOST=0.0.0.0
+SERVE_FRONTEND=false
+CHROMA_MIRROR_ENABLED=false
+CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app
+```
 
-Use one API instance/process: caches are not synchronized across replicas. Startup
-reads the persisted corpus. This design targets a demo-sized corpus; it does not
-claim unlimited scale or guaranteed free operation. Firestore usage is metered.
+Keep one API instance: the active graph and topic cache are local to that process. Completed batches and their vectors are published atomically in PostgreSQL; edits replace old vectors and deletes cascade. Startup restores the active graph from saved batches. Vector queries run in PostgreSQL with workspace and optional topic filters. Original upload files, operation checkpoints and discovered topics still need separate durable storage for full restart recovery.
 
-Original uploaded files, operation polling checkpoints, and discovered topics
-remain local. Extracted content and evidence survive restarts. Interrupted uploads
-may need resubmission; topic discovery may need rerunning.
+## 3. Vercel frontend
 
-## Vercel frontend
+Set the root directory to `Phase4/frontend`, build command `npm run build`, output directory `dist`, and use Node 24 (or supported Node 20.19+/22.12+). Set these public build variables, then rebuild:
 
-Root Directory: Phase4/frontend. Framework: Vite. Build: `npm run build`.
-Output: dist. Two supported API connection choices:
+```text
+VITE_API_BASE_URL=https://your-api.onrender.com
+VITE_NEON_AUTH_URL=<same full Neon Auth endpoint>
+```
 
-- Leave VITE_API_BASE_URL empty and update the backend hostname in vercel.json.
-  API rewrites run before the SPA fallback.
-- Set VITE_API_BASE_URL to your API URL, and configure backend CORS_ALLOWED_ORIGINS
-  with the exact frontend origins, comma-separated.
+Never expose DATABASE_URL in a VITE_ variable. The frontend talks to the API, which owns database access.
 
-## Render backend
+## 4. First account and permissions
 
-Build: `pip install -r requirements.txt`. Start: `python run_app.py`.
-Health endpoint: /health. Set SERVE_FRONTEND=false for separate frontend hosting.
-render.yaml is a template; fill in your Firebase secrets before applying it.
-Neo4j credentials are optional and backend-only, as shown in .env.example.
+Sign up through the app. New accounts receive no workspace access automatically. Copy the user ID displayed by the access screen, then run from Phase4 with DATABASE_URL in the operator environment:
 
-## Cyber demo
+```powershell
+python -m backend.security.manage_access --uid USER_ID --workspace security-team --role admin --platform-admin
+```
 
-Click **Load synthetic cyber demo** in Reasoner. Six labeled fixtures pass
-through the normal ingestion lifecycle. Suggested prompts cover the blast radius,
-PHP gateway attack path, opposing mitigation claims, and malicious log text.
-The actor, topology and patch dispute are fictional. No real threat actor is
-attributed to the CVE. Connectivity means a potential route, not proven exploitation.
-Negated, uncertain, conditional and disputed links are excluded from attack paths.
-Each hop has an exact quote, source document, chunk ID and path ID. Topic filters
-also constrain cyber paths.
+Reload the app. Give other users viewer, editor or admin access using the same command without `--platform-admin`. See AUTHENTICATION.md for revocation and verification details.
 
-## MCP
+## Local development and MCP
 
-From Phase4 run `python -m backend.mcp_server`. Set AEGISGRAPH_API_URL to your
-API (default http://localhost:8000). Standard MCP clients launch it over stdio.
-Tools: sec_trace_attack_path, sec_query_threat_intel, sec_find_conflicts,
-sec_ingest_advisory. They call the same API as React, not a second data store.
-Ingestion returns a receipt; check its operation ID through the API for completion.
+Local defaults remain `VECTOR_BACKEND=in_memory` and `AUTH_MODE=demo`; run `python run_app.py --port 8000`. Demo mode is rejected for hosted environments or Neon storage. Environment examples are references; load variables through your shell or hosting provider.
 
-## Validation and boundaries
+MCP: from Phase4 run `python -m backend.mcp_server`, with AEGISGRAPH_API_URL and an authenticated AEGISGRAPH_ID_TOKEN for hosted access. Tokens expire and must be refreshed by the caller.
 
-Run `python test_all_phases.py`, then `npm run build` in Phase4/frontend.
-Firebase persistence tests use a Firestore test double. Once connected, verify
-upload -> query -> edit -> restart -> delete -> restart with exact source quotes.
+## Verification boundaries
 
-Firebase login and backend workspace-role checks are implemented. Follow
-AUTHENTICATION.md to enable Authentication, configure public frontend settings and
-provision initial memberships. Hosted mode requires authentication; local demo
-mode is explicitly labeled. Runtime database configuration requires a platform
-administrator. Frontend builds require Node 20.19+ or 22.12+.
+Run `python test_all_phases.py`, and `npm run test:auth` in the frontend. Storage tests use a transaction-aware database double; JWT tests verify real Ed25519 signatures with a mocked key endpoint. A live Neon project still needs schema, sign-up/login, upload/search/edit/delete, restart recovery and role revocation checks.
 
-Neo4j's existing adapter uses a different contract from current ingestion. Until
-write-through is connected, queries use the embedded graph restored from Firebase.
-Database status reports connectivity, not proof every storage path is active.
-
-References: [Firebase Admin](https://firebase.google.com/docs/admin/setup),
-[Firestore limits](https://firebase.google.com/docs/firestore/quotas),
-[Vercel rewrites](https://vercel.com/docs/rewrites).
+Neo4j remains an optional connection adapter; ingestion write-through is not implemented. Extraction and embeddings remain deterministic rules/hash vectors. Audit trails, rate limits, multi-instance synchronization and original-upload object storage are unfinished. Existing Firebase data is not automatically migrated or deleted.

@@ -27,6 +27,7 @@ COPY Phase4/ Phase4/
 COPY run_app.py .
 COPY test_all_phases.py .
 COPY data/cyber_corpus/ data/cyber_corpus/
+COPY sql/ sql/
 
 EXPOSE 8080
 

@@ -1,6 +1,5 @@
-"""Firebase identity plus live, server-managed workspace memberships."""
+"""Neon Auth identity plus live, server-managed workspace memberships."""
 from dataclasses import dataclass
-import hashlib
 import os
 import re
 
@@ -13,11 +12,11 @@ ROLES = {"viewer": 0, "editor": 1, "admin": 2}
 
 def auth_mode():
     hosted = os.environ.get("RENDER") == "true" or os.environ.get("APP_ENV") == "production"
-    mode = os.environ.get("AUTH_MODE", "firebase" if hosted or os.environ.get("VECTOR_BACKEND") == "firebase" else "demo")
-    if mode not in {"demo", "firebase"}:
-        raise ValueError("AUTH_MODE must be demo or firebase")
-    if mode == "demo" and (hosted or os.environ.get("VECTOR_BACKEND") == "firebase"):
-        raise ValueError("Hosted/Firebase deployments require AUTH_MODE=firebase")
+    mode = os.environ.get("AUTH_MODE", "neon" if hosted or os.environ.get("VECTOR_BACKEND") == "neon" else "demo")
+    if mode not in {"demo", "neon"}:
+        raise ValueError("AUTH_MODE must be demo or neon")
+    if mode == "demo" and (hosted or os.environ.get("VECTOR_BACKEND") == "neon"):
+        raise ValueError("Hosted/Neon deployments require AUTH_MODE=neon")
     return mode
 
 
@@ -30,15 +29,13 @@ class Principal:
 
 
 def verify_identity(token):
-    from firebase_admin import auth
-    from backend.storage.firebase_store import get_firebase_app
-    return auth.verify_id_token(token, app=get_firebase_app(), check_revoked=True)
+    from backend.security.neon_identity import verify_identity as verify
+    return verify(token)
 
 
 def load_memberships(uid):
-    from backend.storage.firebase_store import FirebaseStore
-    key = hashlib.sha256(uid.encode()).hexdigest()
-    return FirebaseStore().client.collection("aegis_users").document(key).get().to_dict() or {}
+    from backend.storage.neon_store import NeonStore
+    return NeonStore().get_memberships(uid)
 
 
 def authenticate(authorization):
@@ -52,6 +49,8 @@ def authenticate(authorization):
         record = load_memberships(identity["uid"])
     except Exception:
         raise HTTPException(503, "Workspace access could not be verified.") from None
+    if record.get("disabled") is True:
+        raise HTTPException(403, "Account access is disabled.")
     memberships = {name: role for name, role in record.get("workspaces", {}).items() if role in ROLES}
     return Principal(identity["uid"], identity.get("email", ""), memberships, record.get("platform_admin") is True)
 

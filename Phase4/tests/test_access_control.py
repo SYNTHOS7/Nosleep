@@ -9,7 +9,7 @@ from test_cyber_and_hosted_storage import publish
 
 @pytest.fixture
 def secured(monkeypatch):
-    monkeypatch.setenv('AUTH_MODE', 'firebase')
+    monkeypatch.setenv('AUTH_MODE', 'neon')
     monkeypatch.setattr(access, 'verify_identity', lambda token: {'uid': token, 'email': token + '@example.com'})
     memberships = {
         'reader': {'workspaces': {'alpha': 'viewer'}},
@@ -24,7 +24,7 @@ def secured(monkeypatch):
 def test_private_api_rejects_unsigned_requests(client, secured):
     assert client.get('/v1/workspaces/alpha/documents').status_code == 401
     assert client.post('/v1/query', json={'workspace_id':'alpha', 'query':'hello'}).status_code == 401
-    assert client.get('/v1/auth/config').json()['mode'] == 'firebase'
+    assert client.get('/v1/auth/config').json()['mode'] == 'neon'
 
 
 def test_roles_and_cross_workspace_access(client, secured):
@@ -69,7 +69,7 @@ def test_invalid_tokens_and_membership_outage_fail_closed(client, secured, monke
     assert client.get('/v1/auth/me', headers=secured('reader')).status_code == 401
     monkeypatch.setattr(access, 'verify_identity', lambda token: {'uid': token})
     def outage(uid):
-        raise RuntimeError('Firestore unavailable')
+        raise RuntimeError('Neon unavailable')
     monkeypatch.setattr(access, 'load_memberships', outage)
     assert client.get('/v1/workspaces/alpha/documents', headers=secured('reader')).status_code == 503
 
@@ -77,19 +77,9 @@ def test_invalid_tokens_and_membership_outage_fail_closed(client, secured, monke
 def test_local_demo_cannot_configure_databases_and_hosted_cannot_disable_auth(client, monkeypatch):
     monkeypatch.setenv('AUTH_MODE', 'demo')
     assert client.post('/v1/database/configure', json={}).status_code == 403
-    monkeypatch.setenv('VECTOR_BACKEND', 'firebase')
+    monkeypatch.setenv('VECTOR_BACKEND', 'neon')
     with pytest.raises(ValueError):
         access.auth_mode()
-
-
-def test_actual_firebase_verifier_checks_revocation(monkeypatch):
-    import firebase_admin.auth
-    from backend.storage import firebase_store
-    calls = []
-    monkeypatch.setattr(firebase_store, 'get_firebase_app', lambda: 'app')
-    monkeypatch.setattr(firebase_admin.auth, 'verify_id_token', lambda token, **kw: calls.append(kw) or {'uid':'u'})
-    assert access.verify_identity('token')['uid'] == 'u'
-    assert calls == [{'app':'app', 'check_revoked':True}]
 
 
 def test_upload_identifiers_filenames_and_archives_are_bounded(client):

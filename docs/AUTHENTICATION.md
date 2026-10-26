@@ -1,93 +1,22 @@
-# Firebase sign-in and workspace access
+# Authentication and workspace access
 
-## Local versus hosted mode
+Hosted mode uses Neon managed Auth (Better Auth). The browser SDK signs users in and obtains short-lived JWTs. The API verifies EdDSA signatures through the configured Auth endpoint's JWKS, requires expiration/issued-at/subject claims, and checks issuer and audience against that endpoint's origin. Arbitrary client-supplied identity fields are never trusted.
 
-Local, in-memory runs default to AUTH_MODE=demo and show a **Local demo · no login**
-badge. Database credential configuration is disabled in demo mode. Firebase-backed
-storage, Render deployments, and APP_ENV=production require AUTH_MODE=firebase;
-explicitly selecting demo in these environments stops startup.
+Set AUTH_MODE=neon and NEON_AUTH_URL on the API, and VITE_NEON_AUTH_URL at frontend build time. Missing configuration or invalid tokens fail closed. Public signup grants no workspace permissions. Database credentials stay on the backend. The application stores its authorization records in private `aegis.users` and `aegis.memberships` tables; Neon Auth owns passwords and sessions.
 
-## Connect Firebase Authentication
+From Phase4, operators can grant or remove access using DATABASE_URL:
 
-1. Enable Email/Password sign-in in your Firebase project.
-2. Create initial user accounts in Firebase Authentication. Public account signup
-   is deliberately not included in this administrative application.
-3. Configure the backend service account using HOSTED_SETUP.md. It needs Firebase
-   Authentication access for token revocation/disabled-user checks and Firestore
-   access for workspace membership lookup.
-4. Set AUTH_MODE=firebase in the backend. Set these public frontend values before
-   building with Node 20.19+ or 22.12+:
-
-   ```env
-   VITE_FIREBASE_API_KEY=your-public-web-api-key
-   VITE_FIREBASE_PROJECT_ID=your-project-id
-   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-   ```
-
-   Never put a service-account credential in frontend variables. Add the frontend
-   domain to Firebase Authentication's authorized domains.
-5. Give each user a workspace membership using the trusted backend/operator CLI:
-
-   ```bash
-   cd Phase4
-   python -m backend.security.manage_access --uid FIREBASE_USER_UID --workspace security-team --role editor
-   ```
-
-   Roles are viewer, editor and admin. Viewers read/query; editors and workspace
-   admins may upload, edit, delete, load fixtures and discover topics. Platform
-   database administration requires the separate platform_admin flag. Grant it
-   only to an operator using the explicit --platform-admin option. Revoke it with
-   --revoke-platform-admin. Remove a workspace membership with --role remove.
-
-## Enforcement
-
-The backend verifies Firebase ID tokens with revocation checks. It reads current
-membership records on every protected request; an old token does not preserve a
-removed workspace role. Memberships are stored in aegis_users/{sha256(uid)}:
-
-```json
-{"uid":"firebase-uid", "workspaces":{"security-team":"editor"}, "platform_admin":false}
+```powershell
+python -m backend.security.manage_access --uid USER_ID --workspace security-team --role viewer
+python -m backend.security.manage_access --uid USER_ID --workspace security-team --role editor
+python -m backend.security.manage_access --uid USER_ID --workspace security-team --role admin --platform-admin
+python -m backend.security.manage_access --uid USER_ID --workspace security-team --role remove --revoke-platform-admin
 ```
 
-These are trusted server records, not editable user profile claims. Direct browser
-Firestore access remains denied by firestore.rules. There is no public role-grant
-endpoint. The operator CLI uses a Firestore transaction to preserve concurrent
-membership changes.
+Use the exact user ID displayed by the signed-in app. Viewer can read/query, editor can ingest/edit/delete, and workspace admin can administer that workspace. Platform administration is an explicit separate grant. Every protected request reads current memberships; database failure denies access. Setting `aegis.users.disabled=true` denies that user's application access immediately.
 
-Query bodies, workspace routes, chunk-source lookups, operation IDs and batch
-status checks all enforce membership. Referencing an operation/source from another
-workspace does not bypass access checks. Database status/configuration require a
-platform administrator. Public endpoints are the UI, health and auth configuration.
+Neon JWTs normally expire after 15 minutes. Signing out removes the browser session; do not assume an already issued token is instantly revoked at the provider. Application membership removal and the disabled flag are checked live. The frontend fetches a token for API requests; MCP clients must supply and refresh their own bearer token.
 
-The browser sends current Firebase tokens automatically and refreshes on an
-authentication failure. It offers only assigned workspaces and hides write actions
-for viewers. The API is authoritative even if a client changes its own controls.
+Local AUTH_MODE=demo is deliberately unauthenticated and labeled in the UI. It is rejected when running hosted or using Neon storage. Configure trusted frontend origins in Neon Auth and matching API CORS origins. Session requests include credentials; restrictive cross-site cookie policies may require a supported same-site proxy/domain setup.
 
-For MCP in authenticated mode, set AEGISGRAPH_ID_TOKEN to a current Firebase user
-ID token. It has the same workspace restrictions as the UI. Tokens expire; the
-MCP launcher must supply a fresh token when necessary. No permanent admin bypass
-key or unverified token mode is implemented.
-
-## Ingestion limits
-
-Requests are capped at 50 MiB. Batch requests accept at most 1000 uploaded files.
-Archives are limited to 1000 entries and 50 MiB expanded content and reject traversal
-paths or symbolic links. Source filenames are normalized to basenames and reject
-control characters/Windows alternate streams. Client-supplied document/resource
-IDs must use the restricted identifier alphabet.
-
-## Verification boundary
-
-Automated tests cover unsigned/expired/revoked identities, unavailable membership
-storage, viewer/editor/platform permissions, cross-workspace evidence and operation
-access, live membership removal, unsafe identifiers and archives. Tests substitute
-identity verification and membership storage; an actual Firebase project and real
-user sign-in still need verification after you connect your account.
-
-Remaining security work includes audit trails, request-rate/concurrency limits,
-virus/content scanning, account lifecycle UI and workspace invitation management.
-Authentication and upload bounds do not constitute a complete security audit.
-
-Existing persisted documents retain their previous extracted assertions. Edit or
-re-ingest those documents to apply the revised extraction rules. Fresh extraction
-uses a new cache version; old candidate caches are not reused.
+See HOSTED_SETUP.md for schema setup and first-account onboarding. Live provider integration remains pending your account configuration.

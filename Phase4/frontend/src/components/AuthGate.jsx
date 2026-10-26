@@ -1,16 +1,33 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { getAuthConfig, getCurrentUser, setTokenProvider } from '../services/api'
+import { createNeonAuth, getNeonSession, getNeonToken, signInNeon, registerNeon } from '../services/neonAuth'
 
 export default function AuthGate({ children }) {
   const [session, setSession] = useState(null)
   const [authClient, setAuthClient] = useState(null)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [register, setRegister] = useState(false)
+  const generation = useRef(0)
+
+  const loadIdentity = async client => {
+    const attempt = ++generation.current
+    const user = await getNeonSession(client)
+    if (attempt !== generation.current) return false
+    if (!user) { setTokenProvider(null); setSession(null); return false }
+    setTokenProvider(() => getNeonToken(client))
+    const identity = await getCurrentUser()
+    if (attempt !== generation.current) return false
+    setSession({ ...identity, demo: false })
+    return true
+  }
+
   useEffect(() => {
     let cancelled = false
-    let unsubscribe
     const start = async () => {
       try {
         const config = await getAuthConfig()
@@ -20,52 +37,47 @@ export default function AuthGate({ children }) {
           setBusy(false)
           return
         }
-        const apiKey = import.meta.env.VITE_FIREBASE_API_KEY
-        const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID
-        const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN
-        if (!apiKey || !projectId || !authDomain) throw new Error('Firebase sign-in is not configured. Set the frontend Firebase web configuration and rebuild.')
-        const [{ initializeApp, getApps }, authSdk] = await Promise.all([import('firebase/app'), import('firebase/auth')])
+        const url = import.meta.env.VITE_NEON_AUTH_URL
+        if (!url) throw new Error('Neon sign-in is not configured. Set VITE_NEON_AUTH_URL and rebuild the frontend.')
+        const client = await createNeonAuth(url)
         if (cancelled) return
-        const app = getApps().find(item => item.name === 'aegisgraph-web') || initializeApp({ apiKey, projectId, authDomain }, 'aegisgraph-web')
-        const auth = authSdk.getAuth(app)
-        setAuthClient({ auth, sdk: authSdk })
-        unsubscribe = authSdk.onAuthStateChanged(auth, async user => {
-          setSession(null)
-          setTokenProvider(user ? force => user.getIdToken(force) : null)
-          if (user) {
-            try {
-              const identity = await getCurrentUser()
-              if (!cancelled && auth.currentUser?.uid === user.uid) setSession({ ...identity, demo: false })
-            } catch (err) {
-              if (!cancelled) setError(err.message)
-            }
-          }
-          if (!cancelled) setBusy(false)
-        })
+        setAuthClient(client)
+        await loadIdentity(client)
       } catch (err) {
-        if (!cancelled) { setError(err.message); setBusy(false) }
+        if (!cancelled) setError(err.message)
+      } finally {
+        if (!cancelled) setBusy(false)
       }
     }
     start()
-    return () => { cancelled = true; unsubscribe?.(); setTokenProvider(null) }
+    return () => { cancelled = true; generation.current += 1; setTokenProvider(null) }
   }, [])
 
   const signOut = async () => {
-    setSession(null)
+    generation.current += 1
     setTokenProvider(null)
-    await authClient.sdk.signOut(authClient.auth)
+    setSession(null)
+    setError('')
+    try {
+      const result = await authClient.signOut()
+      if (result.error) throw new Error('Sign-out was not confirmed. Check your connection and retry.')
+    } catch {
+      setError('Sign-out was not confirmed. Check your connection and retry before leaving a shared device.')
+    }
   }
-  const signIn = async event => {
+  const submit = async event => {
     event.preventDefault()
     setBusy(true)
     setError('')
+    setNotice('')
     try {
-      await authClient.sdk.signInWithEmailAndPassword(authClient.auth, email.trim(), password)
+      if (register) await registerNeon(authClient, name.trim(), email.trim(), password)
+      else await signInNeon(authClient, email.trim(), password)
       setPassword('')
-    } catch {
-      setError('Sign-in failed. Check your credentials and that your account is enabled.')
-      setBusy(false)
-    }
+      if (!await loadIdentity(authClient)) setNotice('Check your email for a verification link, then sign in.')
+    } catch (err) {
+      setError(err.message)
+    } finally { setBusy(false) }
   }
   if (session && (session.demo || Object.keys(session.workspaces).length || session.platform_admin)) {
     return children(session, signOut)
@@ -74,14 +86,21 @@ export default function AuthGate({ children }) {
     <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24 }}>
       <section className="glass-card" style={{ width: '100%', maxWidth: 420 }}>
         <h1>AegisGraph AI</h1>
-        <p style={{ color: 'var(--text-secondary)', margin: '16px 0' }}>Sign in to your security workspace.</p>
+        <p style={{ color: 'var(--text-secondary)', margin: '16px 0' }}>{register ? 'Create your account. An administrator assigns workspace access.' : 'Sign in to your security workspace.'}</p>
         {busy && <p role="status">Checking your session…</p>}
+        {notice && <p role="status">{notice}</p>}
         {error && <p role="alert" style={{ color: 'var(--accent-amber)', marginBottom: 16 }}>{error}</p>}
-        {session && <><p>Your account has no workspace access. Ask an administrator to assign a workspace.</p><button className="btn-primary" onClick={signOut}>Sign out</button></>}
-        {!session && authClient && <form onSubmit={signIn} style={{ display: 'grid', gap: 12 }}>
+        {session && <>
+          <p>Your account has no workspace access. Ask an administrator to assign a workspace, then reload.</p>
+          <p style={{ margin: '12px 0', overflowWrap: 'anywhere' }}>Your user ID: <code>{session.uid}</code></p>
+          <button className="btn-primary" onClick={signOut}>Sign out</button>
+        </>}
+        {!session && authClient && <form onSubmit={submit} style={{ display: 'grid', gap: 12 }}>
+          {register && <label>Name<input className="chat-input" style={{ width: '100%' }} autoComplete="name" required value={name} onChange={event => setName(event.target.value)} /></label>}
           <label>Email<input className="chat-input" style={{ width: '100%' }} type="email" autoComplete="username" required value={email} onChange={event => setEmail(event.target.value)} /></label>
-          <label>Password<input className="chat-input" style={{ width: '100%' }} type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} /></label>
-          <button className="btn-primary" disabled={busy} type="submit">{busy ? 'Signing in…' : 'Sign in'}</button>
+          <label>Password<input className="chat-input" style={{ width: '100%' }} type="password" minLength={register ? 8 : undefined} autoComplete={register ? 'new-password' : 'current-password'} required value={password} onChange={event => setPassword(event.target.value)} /></label>
+          <button className="btn-primary" disabled={busy} type="submit">{busy ? 'Please wait…' : register ? 'Create account' : 'Sign in'}</button>
+          <button className="topic-chip" disabled={busy} type="button" onClick={() => { setRegister(!register); setError(''); setNotice('') }}>{register ? 'Already have an account? Sign in' : 'Create an account'}</button>
         </form>}
       </section>
     </main>
