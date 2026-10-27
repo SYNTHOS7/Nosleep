@@ -1,6 +1,6 @@
 # AegisGraph — current architecture and flowcharts
 
-AegisGraph turns documents, NVD/STIX/KEV catalogs and scanner reports into cited workspace evidence. Optional Ollama mode now runs real local extraction and semantic embeddings; the hash/rule demo remains available in a separate database. Neon and Neo4j await live connection checks. Remediation execution is not implemented. Investigation evidence can also be downloaded locally as revision-checked text and JSON reports.
+AegisGraph turns documents, NVD/STIX/KEV catalogs and scanner reports into cited workspace evidence. Optional Ollama mode now runs real local extraction and semantic embeddings; the hash/rule demo remains available in a separate database. Neon and Neo4j await live connection checks. Remediation execution is not implemented. Investigation evidence can also be downloaded locally as revision-checked text and JSON reports. Analyst-supplied asset inventory now supports transparent route review ordering with missing-context flags.
 
 Solid boxes: implemented. Dashed boxes: configured or planned; live verification may still be pending.
 
@@ -58,7 +58,7 @@ flowchart LR
 
 ## LangGraph investigation workflow
 
-LangGraph coordinates evidence retrieval, conflict review and potential-route tracing. Retrieval can now use real local Ollama embeddings and previously model-extracted facts. The workflow itself remains deterministic and read-only, with no generated commands or durable agent session. Analyst review supports fresh TXT/JSON downloads with quote-span and workspace-revision validation; generated reports are not stored as durable agent sessions.
+LangGraph coordinates evidence retrieval, conflict review and potential-route tracing. Retrieval can now use real local Ollama embeddings and previously model-extracted facts. The workflow itself remains deterministic and read-only, with no generated commands or durable agent session. Analyst review supports fresh TXT/JSON downloads with quote-span and workspace-revision validation; generated reports are not stored as durable agent sessions. A separate asset-context view prioritizes supported routes using unverified analyst criticality/exposure; it does not alter source facts or certify exploitability.
 
 ```mermaid
 flowchart LR
@@ -70,6 +70,7 @@ flowchart LR
     human["Analyst inspects source quotes"]
     model["Optional local Ollama models"]
     report["Download checked TXT or JSON report"]
+    assets["Analyst asset context and review order"]
     entity --> gather
     gather --> trace
     trace --> review
@@ -77,6 +78,7 @@ flowchart LR
     review --> human
     model --> gather
     human --> report
+    trace --> assets
 ```
 
 ## Document lifecycle and restart recovery

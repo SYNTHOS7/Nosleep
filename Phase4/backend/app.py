@@ -47,6 +47,7 @@ from backend.services.lifecycle_service import get_lifecycle_service
 from backend.services.query_service import get_query_service
 from backend.services.topic_service import get_topic_service
 from backend.storage.graph_store import get_graph_store
+from backend.services.asset_service import AssetInput
 
 @asynccontextmanager
 async def lifespan(application):
@@ -194,6 +195,42 @@ def get_workspace_audit(ws: str, limit: int = Query(100, ge=1, le=500)):
     from backend.storage.vector_store import get_vector_store
     persistence = getattr(get_vector_store(), "persistence", None)
     return {"workspace_id": ws, "events": persistence.list_audit(ws, limit) if persistence else []}
+
+
+@app.get("/v1/workspaces/{ws}/assets")
+def list_asset_inventory(ws: str):
+    from backend.services.asset_service import repository
+    assets = sorted(repository().list_assets(ws), key=lambda item: item["name"].casefold())
+    names = {name.casefold() for name in get_graph_store().entities.get(ws, {})}
+    return {"workspace_id": ws, "assets": [{**asset, "graph_match": asset["name"].casefold() in names} for asset in assets]}
+
+
+@app.put("/v1/workspaces/{ws}/assets")
+def save_asset_inventory(ws: str, value: AssetInput, request: Request):
+    from backend.services.asset_service import save_asset, AssetConflictError
+    try:
+        return save_asset(ws, value, request.state.principal.uid)
+    except AssetConflictError as error:
+        raise HTTPException(409, str(error)) from None
+
+
+@app.delete("/v1/workspaces/{ws}/assets/{asset_id}")
+def delete_asset_inventory(ws: str, asset_id: str, expected_version: int = Query(..., ge=1, le=2147483646),
+                           expected_token: str = Query(..., pattern=r"^[0-9a-f]{32}$")):
+    from backend.services.asset_service import repository
+    if not re.fullmatch(r"asset-[0-9a-f]{24}", asset_id):
+        raise HTTPException(400, "Invalid asset identifier")
+    if not repository().delete_asset(ws, asset_id, expected_version, expected_token):
+        raise HTTPException(409, "Asset changed or was removed. Refresh before deleting.")
+    return {"deleted": True}
+
+
+@app.get("/v1/workspaces/{ws}/route-assessment")
+def review_route_priority(ws: str, entry_point: str = Query(..., min_length=1, max_length=160)):
+    from backend.services.asset_service import assess_routes
+    if not entry_point.strip():
+        raise HTTPException(400, "Enter an entry asset or CVE name")
+    return assess_routes(ws, entry_point.strip())
 
 
 @app.post("/v1/database/configure")

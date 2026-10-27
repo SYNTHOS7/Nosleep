@@ -29,6 +29,8 @@ Scanner report adapters (Trivy, OSV, SARIF), a deterministic LangGraph investiga
 
 Investigation TXT/JSON downloads are implemented with workspace read permissions, source-span revalidation and document-revision consistency checks. See docs/REPORT_EXPORTS.md.
 
+Persistent analyst asset context and review-order-v1 route triage are implemented. Context is explicitly unverified and never becomes an exploitability score. See docs/ASSET_INVENTORY.md.
+
 ## 1. Project Mission & Pivot Summary
 
 ### What This System Is

@@ -19,6 +19,7 @@ class LocalStore:
             conn.execute("CREATE TABLE IF NOT EXISTS topic_state (workspace_id TEXT PRIMARY KEY, payload TEXT NOT NULL)")
             conn.execute("CREATE TABLE IF NOT EXISTS audit_events (id TEXT PRIMARY KEY, workspace_id TEXT, timestamp REAL NOT NULL, payload TEXT NOT NULL)")
             conn.execute("CREATE INDEX IF NOT EXISTS audit_workspace_time ON audit_events(workspace_id,timestamp)")
+            conn.execute("CREATE TABLE IF NOT EXISTS assets (workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, version INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(workspace_id,asset_id))")
 
     @contextmanager
     def connection(self):
@@ -75,6 +76,23 @@ class LocalStore:
     def list_audit(self, workspace, limit=100):
         with self.connection() as conn:
             return [json.loads(row[0]) for row in conn.execute("SELECT payload FROM audit_events WHERE workspace_id=? ORDER BY timestamp DESC LIMIT ?", (workspace, min(max(limit, 1), 500)))]
+
+    def list_assets(self, workspace):
+        with self.connection() as conn:
+            return [json.loads(row[0]) for row in conn.execute("SELECT payload FROM assets WHERE workspace_id=? ORDER BY asset_id", (workspace,))]
+
+    def write_asset(self, workspace, record, expected):
+        with self.connection() as conn:
+            if expected == 0:
+                result = conn.execute("INSERT OR IGNORE INTO assets VALUES (?,?,?,?)", (workspace, record["id"], record["version"], json.dumps(record)))
+            else:
+                result = conn.execute("UPDATE assets SET version=?,payload=? WHERE workspace_id=? AND asset_id=? AND version=? AND json_extract(payload,'$.revision_token')=?",
+                    (record["version"], json.dumps(record), workspace, record["id"], expected, record["revision_token"]))
+            return result.rowcount == 1
+
+    def delete_asset(self, workspace, identifier, expected, token):
+        with self.connection() as conn:
+            return conn.execute("DELETE FROM assets WHERE workspace_id=? AND asset_id=? AND version=? AND json_extract(payload,'$.revision_token')=?", (workspace, identifier, expected, token)).rowcount == 1
 
 
 class LocalVectorStore:

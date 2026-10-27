@@ -116,6 +116,24 @@ class NeonStore:
         with self.connection() as conn:
             return [row[0] for row in conn.execute("SELECT payload FROM aegis.audit_events WHERE workspace_id=%s ORDER BY timestamp DESC LIMIT %s", (workspace, min(max(limit, 1), 500)))]
 
+    def list_assets(self, workspace):
+        with self.connection() as conn:
+            return [row[0] for row in conn.execute("SELECT payload FROM aegis.assets WHERE workspace_id=%s ORDER BY asset_id", (workspace,))]
+
+    def write_asset(self, workspace, record, expected):
+        with self.connection() as conn:
+            if expected == 0:
+                result = conn.execute("INSERT INTO aegis.assets(workspace_id,asset_id,version,payload) VALUES (%s,%s,%s,%s::jsonb) ON CONFLICT DO NOTHING",
+                    (workspace, record["id"], record["version"], json.dumps(record)))
+            else:
+                result = conn.execute("UPDATE aegis.assets SET version=%s,payload=%s::jsonb WHERE workspace_id=%s AND asset_id=%s AND version=%s AND payload->>'revision_token'=%s",
+                    (record["version"], json.dumps(record), workspace, record["id"], expected, record["revision_token"]))
+            return result.rowcount == 1
+
+    def delete_asset(self, workspace, identifier, expected, token):
+        with self.connection() as conn:
+            return conn.execute("DELETE FROM aegis.assets WHERE workspace_id=%s AND asset_id=%s AND version=%s AND payload->>'revision_token'=%s", (workspace, identifier, expected, token)).rowcount == 1
+
     def set_access(self, user_id, workspace, role, platform_admin=None):
         if role not in {"viewer", "editor", "admin", "remove"}:
             raise ValueError("Invalid workspace role")

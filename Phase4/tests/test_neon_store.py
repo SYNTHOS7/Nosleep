@@ -12,6 +12,7 @@ class Database:
     def __init__(self):
         self.documents, self.vectors, self.users, self.roles = {}, {}, {}, {}
         self.topics, self.audit = {}, {}
+        self.assets = {}
         self.fail_vectors = False
         self.calls = []
         self.rollbacks = 0
@@ -23,18 +24,38 @@ class Connection:
     def __init__(self, db):
         self.db, self.result = db, []
     def __enter__(self):
-        self.snapshot = copy.deepcopy((self.db.documents,self.db.vectors,self.db.users,self.db.roles,self.db.topics,self.db.audit))
+        self.snapshot = copy.deepcopy((self.db.documents,self.db.vectors,self.db.users,self.db.roles,self.db.topics,self.db.audit,self.db.assets))
         return self
     def __exit__(self, kind, value, trace):
         if kind:
-            self.db.documents,self.db.vectors,self.db.users,self.db.roles,self.db.topics,self.db.audit = self.snapshot
+            self.db.documents,self.db.vectors,self.db.users,self.db.roles,self.db.topics,self.db.audit,self.db.assets = self.snapshot
             self.db.rollbacks += 1
     def cursor(self, name=None):
         return Cursor(self)
     def execute(self, statement, params=()):
         self.db.calls.append((statement, params))
         sql = ' '.join(statement.lower().split())
-        if sql.startswith('insert into aegis.topic_state'):
+        self.rowcount = 0
+        if sql.startswith('insert into aegis.assets'):
+            ws, identifier, version, payload = params
+            if (ws,identifier) not in self.db.assets:
+                self.db.assets[ws,identifier] = json.loads(payload)
+                self.rowcount = 1
+        elif sql.startswith('update aegis.assets'):
+            version,payload,ws,identifier,expected,token = params
+            current = self.db.assets.get((ws,identifier))
+            if current and current['version'] == expected and current['revision_token'] == token:
+                self.db.assets[ws,identifier] = json.loads(payload)
+                self.rowcount = 1
+        elif sql.startswith('delete from aegis.assets'):
+            ws,identifier,expected,token = params
+            current = self.db.assets.get((ws,identifier))
+            if current and current['version'] == expected and current['revision_token'] == token:
+                del self.db.assets[ws,identifier]
+                self.rowcount = 1
+        elif sql.startswith('select payload from aegis.assets'):
+            self.result = [(value,) for (ws,identifier),value in sorted(self.db.assets.items()) if ws == params[0]]
+        elif sql.startswith('insert into aegis.topic_state'):
             self.db.topics[params[0]] = json.loads(params[1])
         elif sql.startswith('select workspace_id,payload from aegis.topic_state'):
             self.result = list(self.db.topics.items())
@@ -201,3 +222,16 @@ def test_neon_topic_and_audit_storage_contracts():
     store.record_audit({'id': 'event', 'workspace_id': 'cyber', 'timestamp': 1, 'status': 202})
     assert store.list_audit('cyber')[0]['id'] == 'event'
     assert store.list_audit('other') == []
+
+
+def test_neon_assets_use_atomic_versions_and_workspace_scopes():
+    from backend.services.asset_service import AssetInput, AssetConflictError, save_asset
+    db = Database()
+    store = NeonStore(db.connect)
+    record = save_asset('a', AssetInput(name='Gateway'), 'analyst', store)
+    assert store.list_assets('a')[0]['name'] == 'Gateway' and store.list_assets('b') == []
+    edit = AssetInput(name='Gateway', exposure='internet', expected_version=1, expected_token=record['revision_token'])
+    updated = save_asset('a', edit, 'analyst', store)
+    with pytest.raises(AssetConflictError): save_asset('a', edit, 'stale', store)
+    assert not store.delete_asset('b', record['id'], 2, record['revision_token'])
+    assert store.delete_asset('a', record['id'], 2, record['revision_token'])

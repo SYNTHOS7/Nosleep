@@ -46,3 +46,11 @@ CREATE TABLE IF NOT EXISTS aegis.audit_events (
 );
 CREATE INDEX IF NOT EXISTS aegis_audit_workspace_time ON aegis.audit_events(workspace_id,timestamp);
 REVOKE ALL ON ALL TABLES IN SCHEMA aegis FROM PUBLIC;
+CREATE TABLE IF NOT EXISTS aegis.assets (
+    workspace_id text NOT NULL,
+    asset_id text NOT NULL,
+    version integer NOT NULL CHECK (version > 0),
+    payload jsonb NOT NULL,
+    PRIMARY KEY(workspace_id,asset_id)
+);
+REVOKE ALL ON aegis.assets FROM PUBLIC;

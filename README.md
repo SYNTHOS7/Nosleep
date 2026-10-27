@@ -107,6 +107,9 @@ receipt; check that operation before assuming the document is ready.
 Investigation results can be downloaded as text or JSON with exact citations and
 workspace revision checks. See [report exports](docs/REPORT_EXPORTS.md).
 
+Asset inventory and transparent route review ordering now work locally. Record
+analyst criticality/exposure in the workbench; see [asset inventory](docs/ASSET_INVENTORY.md).
+
 ## Main API routes
 
 | Method | Route | Purpose |

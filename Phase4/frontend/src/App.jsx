@@ -6,6 +6,7 @@ import ChatPanel from './components/ChatPanel'
 import GraphCanvas from './components/GraphCanvas'
 import InspectorModal from './components/InspectorModal'
 import DatabaseModal from './components/DatabaseModal'
+import AssetInventory from './components/AssetInventory'
 import {
   getWorkspaceGraph,
   getTopics,
@@ -345,6 +346,8 @@ export default function App({ session = { demo: true, workspaces: {} }, onSignOu
           {/* Active Tab Panel Content */}
           {!sidebarCollapsed && (
             <div className="left-panel-content">
+              <button className="topic-chip" id="tab-assets-btn" onClick={() => setActiveTab('assets')}>Asset inventory &amp; route priority</button>
+              {activeTab === 'assets' && <AssetInventory workspaceId={workspaceId} canWrite={canWrite} onSelectChunk={handleSelectChunk} />}
               {activeTab === 'chat' && (
                 <ChatPanel
                   workspaceId={workspaceId}
