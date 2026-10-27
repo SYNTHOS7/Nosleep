@@ -28,6 +28,7 @@ COPY run_app.py .
 COPY test_all_phases.py .
 COPY data/cyber_corpus/ data/cyber_corpus/
 COPY sql/ sql/
+COPY flowcharts.html .
 
 EXPOSE 8080
 

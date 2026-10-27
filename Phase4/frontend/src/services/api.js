@@ -57,7 +57,11 @@ export async function uploadDocument(workspaceId, { file, rawText, filename }) {
   }
 
   const isKev = file && (file.name === 'known_exploited_vulnerabilities.json' || file.name.endsWith('.kev.json'))
-  const route = isKev ? 'imports/cisa-kev' : 'documents'
+  const name = file?.name.toLowerCase() || ''
+  const scannerFormat = name.endsWith('.sarif') || name.endsWith('.sarif.json') ? 'sarif'
+    : name === 'trivy.json' || name.endsWith('.trivy.json') ? 'trivy'
+    : name === 'osv.json' || name.endsWith('.osv.json') ? 'osv' : null
+  const route = scannerFormat ? `imports/scanner?format=${scannerFormat}` : isKev ? 'imports/cisa-kev' : 'documents'
   const res = await apiFetch(`${BASE_URL}/v1/workspaces/${encodeURIComponent(workspaceId)}/${route}`, {
     method: 'POST',
     body: formData,
@@ -68,6 +72,12 @@ export async function uploadDocument(workspaceId, { file, rawText, filename }) {
     throw new Error(err.message || 'Upload failed')
   }
   return res.json() // MutationReceipt
+}
+
+export async function runInvestigation(workspaceId, entryPoint) {
+  const response = await apiFetch(`${BASE_URL}/v1/workspaces/${encodeURIComponent(workspaceId)}/investigation?entry_point=${encodeURIComponent(entryPoint)}`)
+  if (!response.ok) throw new Error('Investigation could not complete. Check your access and try again.')
+  return response.json()
 }
 
 export async function uploadDocumentsBatch(workspaceId, files) {

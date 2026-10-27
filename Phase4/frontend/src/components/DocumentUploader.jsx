@@ -28,6 +28,11 @@ export default function DocumentUploader({ workspaceId, onUploadComplete }) {
   const handleFilesUpload = async (fileList) => {
     if (!fileList || fileList.length === 0) return
     const files = Array.from(fileList)
+    if (files.length > 1 && files.some(file => /(?:\.sarif(?:\.json)?|\.trivy\.json|\.osv\.json|\/trivy\.json)$/i.test(file.name)
+      || ['trivy.json', 'osv.json', 'known_exploited_vulnerabilities.json'].includes(file.name.toLowerCase()))) {
+      setErrorMessage('Import scanner reports and KEV catalogs one file at a time.')
+      return
+    }
 
     setIsUploading(true)
     setErrorMessage('')
@@ -223,7 +228,7 @@ export default function DocumentUploader({ workspaceId, onUploadComplete }) {
               ref={fileInputRef}
               style={{ display: 'none' }}
               multiple
-              accept=".txt,.pdf,.md,.csv,.json,.zip"
+              accept=".txt,.pdf,.md,.csv,.json,.sarif,.zip"
               onChange={(e) => handleFilesUpload(e.target.files)}
               disabled={isUploading}
             />
@@ -249,6 +254,7 @@ export default function DocumentUploader({ workspaceId, onUploadComplete }) {
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                     Supports TXT, PDF, MD, CSV, JSON, or .ZIP bundles
                     <div>For CISA KEV import, upload one known_exploited_vulnerabilities.json or *.kev.json file.</div>
+                    <div>Scanner evidence: upload one trivy.json, osv.json or *.sarif file. Reports are imported; scans are not run.</div>
                   </div>
                 </>
               )}

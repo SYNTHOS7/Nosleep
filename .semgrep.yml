@@ -1,0 +1,23 @@
+rules:
+  - id: python-dynamic-code-execution
+    languages: [python]
+    severity: ERROR
+    message: Do not execute uploaded or dynamically constructed code.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+  - id: python-shell-command
+    languages: [python]
+    severity: ERROR
+    message: Use argument lists without shell=True.
+    pattern: subprocess.$METHOD(..., shell=True, ...)
+  - id: python-disabled-tls
+    languages: [python]
+    severity: ERROR
+    message: Keep certificate verification enabled.
+    pattern: $CLIENT.$METHOD(..., verify=False, ...)
+  - id: react-untrusted-html
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Render evidence as text rather than injected HTML.
+    pattern: <$TAG ... dangerouslySetInnerHTML={$VALUE} ... />

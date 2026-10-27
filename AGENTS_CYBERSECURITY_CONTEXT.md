@@ -26,6 +26,8 @@ Local development now supports VECTOR_BACKEND=local (SQLite extraction batches,
 graph/vector reconstruction on restart). start_local.ps1 runs the complete local
 demo without cloud services. See docs/LOCAL_VERIFICATION.md for measured evidence.
 
+Scanner report adapters (Trivy, OSV, SARIF), a deterministic LangGraph investigation workflow, and a fifth MCP tool are implemented. Repository checks are configured for Semgrep, Gitleaks and CodeQL. Canonical current diagrams are generated from docs/architecture.json into CYBERSECURITY_SYSTEM_FLOWCHARTS.md, the root architecture document and offline flowcharts.html. ZAP/Nuclei remain future integrations; live CI results and cloud services need verification.
+
 ## 1. Project Mission & Pivot Summary
 
 ### What This System Is

@@ -48,9 +48,16 @@ def sec_ingest_advisory(source_name: str, content: str, workspace_id: str = "ws-
 def create_server():
     from mcp.server.fastmcp import FastMCP
     server = FastMCP("AegisGraph AI")
-    for tool in (sec_trace_attack_path, sec_query_threat_intel, sec_find_conflicts, sec_ingest_advisory):
+    for tool in (sec_trace_attack_path, sec_query_threat_intel, sec_find_conflicts, sec_ingest_advisory, sec_investigate):
         server.tool()(tool)
     return server
+
+
+def sec_investigate(entry_point: str, workspace_id: str = "ws-default") -> dict:
+    """Run the read-only LangGraph evidence workflow; no scanner or remediation commands execute."""
+    if not 1 <= len(entry_point.strip()) <= 200:
+        raise ValueError("Provide a CVE or entity name up to 200 characters")
+    return _call("GET", f"/v1/workspaces/{quote(workspace_id, safe='')}/investigation", params={"entry_point": entry_point})
 
 
 if __name__ == "__main__":

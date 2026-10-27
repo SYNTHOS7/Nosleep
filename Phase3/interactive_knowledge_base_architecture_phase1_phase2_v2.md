@@ -1,3 +1,5 @@
+> Historical phase specification. For current implementation and upstream integrations, see [the current architecture diagrams](../CYBERSECURITY_SYSTEM_FLOWCHARTS.md).
+
 # Interactive Knowledge Base — Architecture (Generic KG MVP)
 
 **Revision:** 2 — generic knowledge graph first; Claim-node model deferred  

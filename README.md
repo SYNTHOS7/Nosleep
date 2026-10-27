@@ -96,7 +96,7 @@ python -m backend.mcp_server
 
 Set AEGISGRAPH_API_URL to your API URL (default http://localhost:8000).
 The stdio server exposes sec_trace_attack_path, sec_query_threat_intel,
-sec_find_conflicts and sec_ingest_advisory. Advisory ingestion returns an operation
+sec_find_conflicts, sec_ingest_advisory and sec_investigate. Advisory ingestion returns an operation
 receipt; check that operation before assuming the document is ready.
 
 ## Main API routes
@@ -145,6 +145,11 @@ persistent disk or object storage. Interrupted jobs resume when their checkpoint
 and source files remain available.
 
 ## Offline intelligence import and optional graph projection
+
+Scanner imports now accept Trivy, OSV and SARIF reports; the Reasoner includes a
+LangGraph investigation control. See [integration details](docs/INTEGRATIONS.md)
+for supported fields, security checks and verification boundaries. The current
+[offline flowcharts](flowcharts.html) are also available at /architecture.
 
 Upload one saved `known_exploited_vulnerabilities.json` or `*.kev.json` file in
 the Corpus panel to import a CISA KEV-shaped snapshot. Required fields, dates,

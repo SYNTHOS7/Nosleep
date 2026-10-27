@@ -79,6 +79,13 @@ def get_auth_config():
     return {"mode": auth_mode(), "demo": auth_mode() == "demo"}
 
 
+@app.get("/architecture")
+def architecture_view():
+    from fastapi.responses import FileResponse
+    from pathlib import Path
+    return FileResponse(Path(__file__).resolve().parents[2] / "flowcharts.html", media_type="text/html")
+
+
 @app.get("/v1/auth/me")
 def get_current_user(request: Request):
     principal = request.state.principal
@@ -290,6 +297,37 @@ async def import_cisa_kev(ws: str, file: UploadFile = File(...)):
     manager.executor.submit(get_lifecycle_service().process_operation, op)
     return MutationReceipt(status="accepted", operation_id=op.id, document_id=op.document_id,
                            workspace_id=ws, accepted_at=op.accepted_at, retry_after=1)
+
+
+@app.post("/v1/workspaces/{ws}/imports/scanner", response_model=MutationReceipt, status_code=202)
+async def import_scanner_report(ws: str, format: str = Query(..., pattern="^(trivy|osv|sarif)$"), file: UploadFile = File(...)):
+    from backend.ingestion.scanner_reports import normalize_report
+    content = await file.read(5 * 1024 * 1024 + 1)
+    try:
+        report = normalize_report(content, format)
+    except (ValueError, UnicodeError, TypeError, AttributeError, KeyError, RecursionError):
+        raise HTTPException(400, "Invalid or unsupported report. Use Trivy vulnerability JSON, OSV JSON or SARIF 2.1.0 with located findings; maximum 5 MiB and 2000 findings. Secret-scanner reports are not accepted.") from None
+    path = upload_path(ws, f"scanner-{format}.txt")
+    with open(path, "w", encoding="utf-8") as stream:
+        stream.write(report["text"])
+    manager = get_operation_manager()
+    try:
+        op = manager.create_operation(ws, report["document_id"], OperationType.ADD, path, "txt")
+    except RuntimeError:
+        raise HTTPException(409, "This report is already being imported. Wait for its operation to finish.") from None
+    op.metrics.update({"import_format": "scanner-report", "scanner_format": format, "finding_count": report["count"]})
+    manager.save_checkpoint(op)
+    manager.executor.submit(get_lifecycle_service().process_operation, op)
+    return MutationReceipt(status="accepted", operation_id=op.id, document_id=op.document_id,
+                           workspace_id=ws, accepted_at=op.accepted_at, retry_after=1)
+
+
+@app.get("/v1/workspaces/{ws}/investigation")
+def run_investigation(ws: str, entry_point: str = Query(..., min_length=1, max_length=200)):
+    if not entry_point.strip():
+        raise HTTPException(400, "Enter a CVE identifier or entity name.")
+    from backend.services.investigation_service import investigate
+    return investigate(ws, entry_point)
 
 
 @app.get(

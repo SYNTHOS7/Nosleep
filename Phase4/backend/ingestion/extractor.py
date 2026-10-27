@@ -154,6 +154,9 @@ For every extracted relation:
 
 def extract_chunk(chunk: Chunk, use_cache: bool = True) -> CandidateGraph:
     """Extract grounded assertions, or index explicitly typed catalog source data."""
+    if chunk.metadata.get("source_format") == "scanner-report":
+        from backend.ingestion.scanner_reports import extract_scanner_chunk
+        return extract_scanner_chunk(chunk)
     # Catalog fields are source data, not prose assertions. Index explicit CVE
     # identifiers without inventing attack edges from JSON headings or metadata.
     if chunk.metadata.get("source_format") == "cisa-kev":

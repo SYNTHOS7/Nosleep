@@ -1,12 +1,27 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ConflictAlert from './ConflictAlert'
+import { runInvestigation } from '../services/api'
 
 /**
  * Chat and grounded query panel.
  * Displays questions, suggested queries, grounded answers, citations, limitations, and conflict alerts.
  */
-export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSelectChunk, onLoadDemo, isLoadingDemo, canWrite = true }) {
+export default function ChatPanel({ workspaceId, onRunQuery, isQuerying, queryResponse, onSelectChunk, onLoadDemo, isLoadingDemo, canWrite = true }) {
   const [queryText, setQueryText] = useState('')
+  const [investigation, setInvestigation] = useState(null)
+  const [isInvestigating, setIsInvestigating] = useState(false)
+  const [investigationError, setInvestigationError] = useState('')
+  const generation = useRef(0)
+  useEffect(() => { generation.current++; setInvestigation(null); setInvestigationError(''); setIsInvestigating(false) }, [workspaceId])
+
+  const investigate = async () => {
+    const current = ++generation.current
+    setIsInvestigating(true)
+    setInvestigationError('')
+    try { const result = await runInvestigation(workspaceId, queryText.trim()); if (current === generation.current) setInvestigation(result) }
+    catch (error) { if (current === generation.current) setInvestigationError(error.message) }
+    finally { if (current === generation.current) setIsInvestigating(false) }
+  }
 
   const suggestedQueries = [
     'What is the blast radius of CVE-2024-4577?',
@@ -75,6 +90,26 @@ export default function ChatPanel({ onRunQuery, isQuerying, queryResponse, onSel
           {isQuerying ? 'Reasoning...' : 'Ask'}
         </button>
       </form>
+
+      <button className="topic-chip" disabled={!queryText.trim() || isInvestigating || isQuerying}
+        onClick={investigate} id="investigate-btn">
+        {isInvestigating ? 'Gathering evidence…' : 'Investigate this CVE or entity'}
+      </button>
+      {investigationError && <p role="alert">{investigationError}</p>}
+      {investigation && <section className="answer-box" aria-label="Investigation review">
+        <strong>Investigation · {investigation.review.status === 'insufficient_evidence' ? 'More evidence needed' : 'Ready for your review'}</strong>
+        <ol>
+          <li>Gathered {investigation.evidence.source_chunks.length} cited passages.</li>
+          <li>Checked {investigation.evidence.conflicts.length} opposing claim pairs.</li>
+          <li>Found {investigation.paths.paths.length} potential routes.</li>
+        </ol>
+        <p>{investigation.review.finding}</p>
+        <p style={{fontSize:'0.75rem',color:'var(--accent-amber)'}}>{investigation.review.limitations}</p>
+        {investigation.evidence.source_chunks.map(source => <button className="topic-chip"
+          key={`${source.chunk_id}-${source.start_char}`} onClick={() => onSelectChunk?.(source)}>
+          Inspect {source.source_name} · page {source.page_number}
+        </button>)}
+      </section>}
 
       {/* Query Response View */}
       {queryResponse && (

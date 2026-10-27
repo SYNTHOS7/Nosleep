@@ -347,6 +347,7 @@ export default function App({ session = { demo: true, workspaces: {} }, onSignOu
             <div className="left-panel-content">
               {activeTab === 'chat' && (
                 <ChatPanel
+                  workspaceId={workspaceId}
                   onRunQuery={handleRunQuery}
                   isQuerying={isQuerying}
                   queryResponse={queryResponse}

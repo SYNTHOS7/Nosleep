@@ -93,11 +93,11 @@ def build_batch(operation: Operation) -> ExtractionBatch:
 
     with metrics.time_stage("chunk_cache"):
         chunks = chunk_source(parsed, doc, revision=operation.new_revision)
-        if operation.metrics.get("import_format") == "cisa-kev":
-            doc.metadata["source_format"] = "cisa-kev"
+        if operation.metrics.get("import_format") in {"cisa-kev", "scanner-report"}:
+            doc.metadata["source_format"] = operation.metrics["import_format"]
             doc.metadata["publisher_verified"] = False
             for chunk in chunks:
-                chunk.metadata["source_format"] = "cisa-kev"
+                chunk.metadata["source_format"] = operation.metrics["import_format"]
 
     metrics.chunk_count = len(chunks)
 
