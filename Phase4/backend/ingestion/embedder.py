@@ -3,6 +3,7 @@
 import hashlib
 import math
 import re
+import os
 from functools import lru_cache
 from typing import List, Literal
 import numpy as np
@@ -22,7 +23,7 @@ class EmbeddingValidationError(Exception):
 
 def embed_texts(texts: List[str], purpose: Literal["document", "query"]) -> List[List[float]]:
     """
-    Generates batch embeddings using the pinned multilingual model.
+    Generates hash or explicitly configured local Ollama embeddings.
     Validates vector length, NaN values, and rejects zero-vectors.
     Supports Hindi and English semantic vector spaces.
     """
@@ -33,7 +34,16 @@ def embed_texts(texts: List[str], purpose: Literal["document", "query"]) -> List
     prefixed_texts = [f"{prefix}{t}" for t in texts]
 
     # Generate embeddings
-    raw_vectors = _generate_multilingual_vectors(prefixed_texts)
+    provider = os.environ.get("EMBEDDING_PROVIDER", "hash")
+    if provider == "ollama":
+        from backend.ingestion.local_ai import embed
+        raw_vectors = embed(prefixed_texts, purpose)
+    elif provider == "hash":
+        raw_vectors = _generate_multilingual_vectors(prefixed_texts)
+    else:
+        raise EmbeddingValidationError("EMBEDDING_PROVIDER must be hash or ollama")
+    if len(raw_vectors) != len(texts):
+        raise EmbeddingValidationError("Embedding count does not match input count")
 
     # Strict validation of every vector
     validated_vectors: List[List[float]] = []

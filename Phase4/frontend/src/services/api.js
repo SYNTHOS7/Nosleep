@@ -61,7 +61,8 @@ export async function uploadDocument(workspaceId, { file, rawText, filename }) {
   const scannerFormat = name.endsWith('.sarif') || name.endsWith('.sarif.json') ? 'sarif'
     : name === 'trivy.json' || name.endsWith('.trivy.json') ? 'trivy'
     : name === 'osv.json' || name.endsWith('.osv.json') ? 'osv' : null
-  const route = scannerFormat ? `imports/scanner?format=${scannerFormat}` : isKev ? 'imports/cisa-kev' : 'documents'
+  const intelFormat = name.endsWith('.nvd.json') ? 'nvd' : name.endsWith('.stix.json') ? 'stix' : null
+  const route = intelFormat ? `imports/intel?format=${intelFormat}` : scannerFormat ? `imports/scanner?format=${scannerFormat}` : isKev ? 'imports/cisa-kev' : 'documents'
   const res = await apiFetch(`${BASE_URL}/v1/workspaces/${encodeURIComponent(workspaceId)}/${route}`, {
     method: 'POST',
     body: formData,

@@ -43,7 +43,7 @@ Local evidence: a checksummed official Gitleaks executable scanned all committed
 - [ZAP](https://github.com/zaproxy/zaproxy): future localhost web/API security testing. Not installed or run here.
 - [Nuclei](https://github.com/projectdiscovery/nuclei): future checks against explicitly authorized assets. Not installed or run here.
 
-Use each upstream tool under its published license. This repository contains adapters and references, not copied scanner engines. Real AI models, live database verification, authorized active scanning and direct Neo4j traversal remain separate work.
+Use each upstream tool under its published license. This repository contains adapters and references, not copied scanner engines. Optional real local AI extraction and embeddings are now implemented; see LOCAL_AI.md. Live database verification, hosted model serving, authorized active scanning and direct Neo4j traversal remain separate work.
 
 ## Updating diagrams
 

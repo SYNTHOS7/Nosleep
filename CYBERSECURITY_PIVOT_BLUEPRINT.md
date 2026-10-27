@@ -7,9 +7,9 @@ AegisGraph helps analysts inspect source evidence, opposing security claims, sca
 - React workspace with document library, themes, cited answers and graph views.
 - FastAPI workspace authorization, upload bounds, request limits and metadata-only audit history.
 - Local SQLite or Neon extraction/vector persistence; topic restoration and disk-backed job recovery.
-- Offline CISA KEV-shaped catalog import with unverified publisher identity.
+- Offline CISA KEV, NVD 2.0 and STIX bundle imports with unverified publisher identity.
 - Trivy vulnerability JSON, OSV JSON and located SARIF 2.1.0 report imports. CodeQL and Semgrep reports use SARIF. Imported observations retain exact normalized-source quotes and do not become affirmative exploit routes.
-- LangGraph deterministic investigation: gather evidence and conflicts, trace potential routes, prepare analyst review. No AI model, active scanner or remediation execution is attached.
+- LangGraph deterministic investigation: gather evidence and conflicts, trace potential routes, prepare analyst review. Optional real local Ollama extraction and semantic embeddings are implemented. No active scanner or remediation execution is attached.
 - Optional Neo4j graph projection; queries still traverse the embedded graph.
 - Repository security workflows for CodeQL, Semgrep and redacted Gitleaks checks. CI results require verification after push. Gitleaks ran locally; Semgrep's Windows socket error blocked its local scan.
 
@@ -19,7 +19,7 @@ Start ./start_local.ps1 and load the synthetic cyber demo. Ask for the CVE blast
 
 ## Remaining
 
-Connect and verify Vercel, Render, Neon Auth/database and optional Neo4j. Add actual model providers and learned embeddings, direct Neo4j-backed traversal, hosted upload/checkpoint object storage and multi-instance synchronization. ZAP localhost security testing and Nuclei checks against authorized assets are future integrations. No automatic remediation is available.
+Connect and verify Vercel, Render, Neon Auth/database and optional Neo4j. Verify hosted model deployment, add direct Neo4j-backed traversal, hosted upload/checkpoint object storage and multi-instance synchronization. ZAP localhost security testing and Nuclei checks against authorized assets are future integrations. No automatic remediation is available.
 
 ## Canonical diagrams
 

@@ -39,7 +39,9 @@ class OperationManager:
         self.storage_dir = storage_dir
         os.makedirs(self.storage_dir, exist_ok=True)
         if max_workers is None:
-            max_workers = min(64, max(16, (os.cpu_count() or 4) * 8))
+            max_workers = int(os.environ.get("INGEST_WORKERS", min(64, max(16, (os.cpu_count() or 4) * 8))))
+        if not 1 <= max_workers <= 64:
+            raise ValueError("INGEST_WORKERS must be between 1 and 64")
         self.executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="ingest-op")
         self.active_operations: Dict[str, Operation] = {}
         self.staged_batches: Dict[str, ExtractionBatch] = {}

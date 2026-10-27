@@ -19,8 +19,7 @@ transactional extraction/vector persistence, database-native cosine search,
 startup graph reconstruction, verified JWT login and live workspace roles.
 Live Neon integration remains pending account configuration. Direct Neo4j traversal,
 multi-instance cache synchronization and hosted object storage remain unfinished. Optional Neo4j derived graph writes, durable themes, disk-backed upload/job recovery, offline KEV import and request audit/limits are implemented; live graph verification is pending.
-Extraction and embeddings are deterministic; do not describe them as an LLM or
-learned semantic embeddings. Historical diagrams below contain planned features.
+Default demo extraction and embeddings remain deterministic. Optional loopback-only Ollama extraction and learned embeddings are implemented and tested locally; use start_local_ai.ps1 with a separate embedding-profile-checked database. See docs/LOCAL_AI.md. Offline NVD and STIX imports are implemented. Historical diagrams below contain planned features.
 
 Local development now supports VECTOR_BACKEND=local (SQLite extraction batches,
 graph/vector reconstruction on restart). start_local.ps1 runs the complete local

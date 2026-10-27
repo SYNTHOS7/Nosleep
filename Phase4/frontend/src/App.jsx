@@ -251,7 +251,7 @@ export default function App({ session = { demo: true, workspaces: {} }, onSignOu
               ●
             </span>
             <span>
-              DB: {dbStatus?.vector_backend === 'neon' ? 'Neon' : dbStatus?.vector_backend === 'local' ? 'Local saved' : 'Memory'} + Embedded graph
+              DB: {dbStatus?.vector_backend === 'neon' ? 'Neon' : dbStatus?.vector_backend === 'local' ? 'Local saved' : 'Memory'} + Embedded graph · {dbStatus?.ai?.embedding_provider === 'ollama' ? 'Local AI' : 'Rule demo'}
             </span>
             <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>⚙</span>
           </div>

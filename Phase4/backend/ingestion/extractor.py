@@ -45,7 +45,7 @@ RELATION_FALLBACK = "RELATED_TO"
 ALLOWED_POLARITIES = {"AFFIRMATIVE", "NEGATIVE"}
 ALLOWED_MODALITIES = {"CERTAIN", "CONDITIONAL", "POSSIBLE"}
 
-PROMPT_VERSION = "2026-10-27-cyber-v4"
+PROMPT_VERSION = "2026-10-27-cyber-v5-local-ai"
 CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "cache")
 
 
@@ -116,6 +116,13 @@ def build_cache_key(chunk: Chunk) -> str:
     and frozen prompt/schema versions.
     """
     hasher = hashlib.sha256()
+    hasher.update(f"{chunk.workspace_id}:{chunk.id}:{chunk.revision}".encode())
+    provider = os.environ.get("EXTRACTOR_PROVIDER", "rules")
+    if provider == "ollama":
+        from backend.ingestion.local_ai import extraction_profile
+        hasher.update(extraction_profile().encode())
+    elif provider != "rules":
+        raise ExtractionError("EXTRACTOR_PROVIDER must be rules or ollama")
     hasher.update(chunk.text.encode("utf-8"))
     hasher.update(str(chunk.page_number).encode("utf-8"))
     hasher.update(PROMPT_VERSION.encode("utf-8"))
@@ -154,6 +161,9 @@ For every extracted relation:
 
 def extract_chunk(chunk: Chunk, use_cache: bool = True) -> CandidateGraph:
     """Extract grounded assertions, or index explicitly typed catalog source data."""
+    if chunk.metadata.get("source_format") == "threat-catalog":
+        from backend.ingestion.threat_catalogs import extract_identifiers
+        return extract_identifiers(chunk)
     if chunk.metadata.get("source_format") == "scanner-report":
         from backend.ingestion.scanner_reports import extract_scanner_chunk
         return extract_scanner_chunk(chunk)
@@ -174,14 +184,18 @@ def extract_chunk(chunk: Chunk, use_cache: bool = True) -> CandidateGraph:
             return cached
 
     # Attempt extraction with 2 transient retries and 1 formatting repair
-    max_retries = 2
+    max_retries = 0 if os.environ.get("EXTRACTOR_PROVIDER") == "ollama" else 2
     attempts = 0
     raw_output = None
     warnings_list: List[str] = []
 
     while attempts <= max_retries:
         try:
-            raw_output = _run_extraction_adapter(chunk.text)
+            if os.environ.get("EXTRACTOR_PROVIDER", "rules") == "ollama":
+                from backend.ingestion.local_ai import extract
+                raw_output = extract(chunk.text)
+            else:
+                raw_output = _run_extraction_adapter(chunk.text)
             break
         except Exception as e:
             attempts += 1
@@ -316,7 +330,7 @@ def _parse_and_validate_extraction(
             exact_quote=exact_quote,
             char_start=char_start,
             char_end=char_end,
-            extraction_method="neo4j-graphrag-adapter",
+            extraction_method="ollama-grounded-extraction" if os.environ.get("EXTRACTOR_PROVIDER") == "ollama" else "deterministic-rule-extractor",
         )
 
         validated_relations.append(

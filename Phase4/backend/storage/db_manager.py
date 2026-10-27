@@ -203,6 +203,8 @@ class DatabaseManager:
                 "directory": os.path.abspath("./data/operations"),
             },
             "vector_backend": os.environ.get("VECTOR_BACKEND", "in_memory"),
+            "ai": {"embedding_provider": os.environ.get("EMBEDDING_PROVIDER", "hash"),
+                   "extraction_provider": os.environ.get("EXTRACTOR_PROVIDER", "rules")},
             "local": {
                 "configured": os.environ.get("VECTOR_BACKEND") == "local",
                 "backend": "sqlite_batches_in_memory_cosine",

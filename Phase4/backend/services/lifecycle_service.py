@@ -35,6 +35,8 @@ class LifecycleService:
         self.persistence = getattr(self.vector_store, "persistence", None)
         if self.persistence:
             for batch in self.persistence.load_batches():
+                from backend.ingestion.local_ai import assert_batch_profile
+                assert_batch_profile(batch)
                 self.graph_store.publish_batch(batch)
                 self.vector_store.cache_vectors(batch.workspace_id, batch.vectors)
             if hasattr(self.persistence, "load_topics"):
@@ -51,6 +53,9 @@ class LifecycleService:
         doc_id = op.document_id
 
         try:
+            from backend.ingestion.local_ai import assert_workspace_profile
+            if op.operation_type != OperationType.DELETE:
+                assert_workspace_profile(self.graph_store, ws)
             if op.operation_type == OperationType.DELETE:
                 chunk_ids = [cid for cid, ch in self.graph_store.chunks.get(ws, {}).items() if ch.document_id == doc_id]
                 if self.persistence:

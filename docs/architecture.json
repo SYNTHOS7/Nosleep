@@ -1,73 +1,562 @@
 {
-  "summary": "AegisGraph turns uploaded documents, KEV catalogs and scanner reports into cited workspace evidence. Local SQLite works without accounts; Neon and the optional Neo4j projection await live connection checks. LangGraph organizes a deterministic read-only investigation. Real AI models and automatic remediation are not implemented.",
+  "summary": "AegisGraph turns documents, NVD/STIX/KEV catalogs and scanner reports into cited workspace evidence. Optional Ollama mode now runs real local extraction and semantic embeddings; the hash/rule demo remains available in a separate database. Neon and Neo4j await live connection checks. Remediation execution is not implemented.",
   "diagrams": [
-    {"id":"system","title":"System architecture","description":"FastAPI enforces workspace roles. SQLite or Neon stores extraction batches, topics and request audit events. Queries traverse the embedded graph; Neo4j is an optional derived copy, not the active query engine.","nodes":[
-      {"id":"docs","label":"Documents, KEV and scanner reports","x":0,"y":0},
-      {"id":"api","label":"FastAPI and workspace permissions","x":1,"y":0},
-      {"id":"pipeline","label":"Normalize, chunk and cite evidence","x":2,"y":0},
-      {"id":"store","label":"SQLite local or Neon storage","x":3,"y":0},
-      {"id":"graph","label":"Embedded evidence graph","x":2,"y":1},
-      {"id":"vectors","label":"Local cosine or Neon pgvector","x":3,"y":1},
-      {"id":"ui","label":"React workspace and MCP tools","x":0,"y":1},
-      {"id":"investigate","label":"LangGraph investigation","x":1,"y":1},
-      {"id":"neo4j","label":"Optional Neo4j graph projection","x":3,"y":2,"status":"pending"},
-      {"id":"cloud","label":"Vercel and Render connections","x":0,"y":2,"status":"pending"}],
-      "edges":[["docs","api"],["api","pipeline"],["pipeline","store"],["store","graph"],["store","vectors"],["graph","investigate"],["investigate","ui"],["graph","neo4j"],["cloud","api"]]},
-    {"id":"scanner","title":"Scanner report and source flow","description":"Trivy vulnerability JSON, OSV JSON and SARIF 2.1.0 are accepted through file upload. SARIF supports located CodeQL/Semgrep results. Selected fields become quoted observations; raw snippets and network requests are omitted. Secret-scanner SARIF is rejected. No scanner is executed by the import endpoint.","nodes":[
-      {"id":"report","label":"Trivy, OSV or SARIF report","x":0,"y":0},
-      {"id":"validate","label":"Validate size, shape and fields","x":1,"y":0},
-      {"id":"normalize","label":"Normalize selected fields","x":2,"y":0},
-      {"id":"snapshot","label":"Deduplicated report snapshot","x":3,"y":0},
-      {"id":"quotes","label":"Exact chunk offsets and quotes","x":3,"y":1},
-      {"id":"observations","label":"Artifact, package and finding links","x":2,"y":1},
-      {"id":"inspect","label":"Inspect evidence in the UI","x":1,"y":1},
-      {"id":"reason","label":"Exploitability requires more evidence","x":0,"y":1}],
-      "edges":[["report","validate"],["validate","normalize"],["normalize","snapshot"],["snapshot","quotes"],["quotes","observations"],["observations","inspect"],["inspect","reason"]]},
-    {"id":"investigation","title":"LangGraph investigation workflow","description":"The installed LangGraph engine runs three deterministic nodes for each request. It uses existing cited retrieval and path traversal. Review is advisory: no scanner, shell or remediation command is available. Durable multi-turn agent sessions and model-driven decisions are future work.","nodes":[
-      {"id":"entity","label":"CVE or entity selected by analyst","x":0,"y":0},
-      {"id":"gather","label":"Gather cited evidence and conflicts","x":1,"y":0},
-      {"id":"trace","label":"Trace supported potential routes","x":2,"y":0},
-      {"id":"review","label":"Prepare analyst review","x":3,"y":0},
-      {"id":"empty","label":"Insufficient evidence result","x":1,"y":1},
-      {"id":"human","label":"Analyst inspects source quotes","x":3,"y":1},
-      {"id":"model","label":"Real AI model integration later","x":2,"y":2,"status":"pending"}],
-      "edges":[["entity","gather"],["gather","trace"],["trace","review"],["gather","empty"],["review","human"],["model","gather"]]},
-    {"id":"recovery","title":"Document lifecycle and restart recovery","description":"Sources and atomic operation checkpoints stay on disk. Completed batches, themes and audit metadata persist in SQLite/Neon. Restart reconstructs the graph and resumes nonterminal jobs whose source files remain available. Hosted disks/object storage still need configuration.","nodes":[
-      {"id":"source","label":"Unique retained source file","x":0,"y":0},
-      {"id":"accepted","label":"Atomic accepted checkpoint","x":1,"y":0},
-      {"id":"batch","label":"Build and commit extraction batch","x":2,"y":0},
-      {"id":"complete","label":"Graph cache and completed receipt","x":3,"y":0},
-      {"id":"restart","label":"Backend restart","x":0,"y":1},
-      {"id":"restore","label":"Restore documents and themes","x":1,"y":1},
-      {"id":"resume","label":"Resume unfinished operations","x":2,"y":1},
-      {"id":"reconcile","label":"Reconcile optional Neo4j copy","x":3,"y":1,"status":"pending"}],
-      "edges":[["source","accepted"],["accepted","batch"],["batch","complete"],["restart","restore"],["restore","resume"],["resume","batch"],["restore","reconcile"]]},
-    {"id":"security","title":"Repository security and runtime boundaries","description":"GitHub workflows are configured for Semgrep rules, redacted Gitleaks history scans and CodeQL analysis. Gitleaks ran locally with no leaks; Semgrep local execution is blocked by its Windows socket error. CI results must be checked after push. Runtime controls enforce roles, upload limits, per-process rate limits and metadata-only audits.","nodes":[
-      {"id":"commit","label":"Pull request or main push","x":0,"y":0},
-      {"id":"semgrep","label":"Semgrep code rules in Linux CI","x":1,"y":0,"status":"pending"},
-      {"id":"gitleaks","label":"Gitleaks redacted history scan","x":1,"y":1},
-      {"id":"codeql","label":"CodeQL Python and JavaScript","x":1,"y":2,"status":"pending"},
-      {"id":"review","label":"Review findings before release","x":2,"y":1},
-      {"id":"runtime","label":"Roles, limits and request audit","x":3,"y":1}],
-      "edges":[["commit","semgrep"],["commit","gitleaks"],["commit","codeql"],["semgrep","review"],["gitleaks","review"],["codeql","review"],["review","runtime"]]},
-    {"id":"roadmap","title":"Connection and integration boundaries","description":"Report imports and local investigations work without scanner accounts or model keys. ZAP and Nuclei have not been integrated or run. Any future active scanning needs explicit authorized targets. Cloud connections, real models and direct Neo4j traversal remain separate work.","nodes":[
-      {"id":"local","label":"Local reports and investigations","x":0,"y":0},
-      {"id":"neon","label":"Connect Neon DB and Auth","x":1,"y":0,"status":"pending"},
-      {"id":"hosts","label":"Connect Vercel and Render","x":2,"y":0,"status":"pending"},
-      {"id":"neo","label":"Verify Neo4j projection live","x":3,"y":0,"status":"pending"},
-      {"id":"zap","label":"ZAP localhost testing later","x":1,"y":1,"status":"pending"},
-      {"id":"nuclei","label":"Nuclei authorized checks later","x":2,"y":1,"status":"pending"},
-      {"id":"models","label":"Real models and graph traversal","x":3,"y":1,"status":"pending"}],
-      "edges":[["local","neon"],["neon","hosts"],["hosts","neo"],["local","zap"],["zap","nuclei"],["neo","models"]]}
+    {
+      "id": "system",
+      "title": "System architecture",
+      "description": "FastAPI enforces workspace roles. SQLite or Neon stores extraction batches, topics and request audit events. Queries traverse the embedded graph; Neo4j is an optional derived copy, not the active query engine. Ollama mode is loopback-only and rejects mixed embedding model profiles; it does not require cloud credentials.",
+      "nodes": [
+        {
+          "id": "docs",
+          "label": "Documents, KEV and scanner reports",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "api",
+          "label": "FastAPI and workspace permissions",
+          "x": 1,
+          "y": 0
+        },
+        {
+          "id": "pipeline",
+          "label": "Rules or local Ollama extraction",
+          "x": 2,
+          "y": 0
+        },
+        {
+          "id": "store",
+          "label": "SQLite local or Neon storage",
+          "x": 3,
+          "y": 0
+        },
+        {
+          "id": "graph",
+          "label": "Embedded evidence graph",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "id": "vectors",
+          "label": "Hash or learned local embeddings",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": "ui",
+          "label": "React workspace and MCP tools",
+          "x": 0,
+          "y": 1
+        },
+        {
+          "id": "investigate",
+          "label": "LangGraph investigation",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "id": "neo4j",
+          "label": "Optional Neo4j graph projection",
+          "x": 3,
+          "y": 2,
+          "status": "pending"
+        },
+        {
+          "id": "cloud",
+          "label": "Vercel and Render connections",
+          "x": 0,
+          "y": 2,
+          "status": "pending"
+        }
+      ],
+      "edges": [
+        [
+          "docs",
+          "api"
+        ],
+        [
+          "api",
+          "pipeline"
+        ],
+        [
+          "pipeline",
+          "store"
+        ],
+        [
+          "store",
+          "graph"
+        ],
+        [
+          "store",
+          "vectors"
+        ],
+        [
+          "graph",
+          "investigate"
+        ],
+        [
+          "investigate",
+          "ui"
+        ],
+        [
+          "graph",
+          "neo4j"
+        ],
+        [
+          "cloud",
+          "api"
+        ]
+      ]
+    },
+    {
+      "id": "scanner",
+      "title": "Scanner report and source flow",
+      "description": "Trivy vulnerability JSON, OSV JSON and SARIF 2.1.0 are accepted through file upload. SARIF supports located CodeQL/Semgrep results. Selected fields become quoted observations; raw snippets and network requests are omitted. Secret-scanner SARIF is rejected. No scanner is executed by the import endpoint.",
+      "nodes": [
+        {
+          "id": "report",
+          "label": "Trivy, OSV or SARIF report",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "validate",
+          "label": "Validate size, shape and fields",
+          "x": 1,
+          "y": 0
+        },
+        {
+          "id": "normalize",
+          "label": "Normalize selected fields",
+          "x": 2,
+          "y": 0
+        },
+        {
+          "id": "snapshot",
+          "label": "Deduplicated report snapshot",
+          "x": 3,
+          "y": 0
+        },
+        {
+          "id": "quotes",
+          "label": "Exact chunk offsets and quotes",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": "observations",
+          "label": "Artifact, package and finding links",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "id": "inspect",
+          "label": "Inspect evidence in the UI",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "id": "reason",
+          "label": "Exploitability requires more evidence",
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "edges": [
+        [
+          "report",
+          "validate"
+        ],
+        [
+          "validate",
+          "normalize"
+        ],
+        [
+          "normalize",
+          "snapshot"
+        ],
+        [
+          "snapshot",
+          "quotes"
+        ],
+        [
+          "quotes",
+          "observations"
+        ],
+        [
+          "observations",
+          "inspect"
+        ],
+        [
+          "inspect",
+          "reason"
+        ]
+      ]
+    },
+    {
+      "id": "investigation",
+      "title": "LangGraph investigation workflow",
+      "description": "LangGraph coordinates evidence retrieval, conflict review and potential-route tracing. Retrieval can now use real local Ollama embeddings and previously model-extracted facts. The workflow itself remains deterministic and read-only, with no generated commands or durable agent session.",
+      "nodes": [
+        {
+          "id": "entity",
+          "label": "CVE or entity selected by analyst",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "gather",
+          "label": "Gather cited evidence and conflicts",
+          "x": 1,
+          "y": 0
+        },
+        {
+          "id": "trace",
+          "label": "Trace supported potential routes",
+          "x": 2,
+          "y": 0
+        },
+        {
+          "id": "review",
+          "label": "Prepare analyst review",
+          "x": 3,
+          "y": 0
+        },
+        {
+          "id": "empty",
+          "label": "Insufficient evidence result",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "id": "human",
+          "label": "Analyst inspects source quotes",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": "model",
+          "label": "Optional local Ollama models",
+          "x": 2,
+          "y": 2,
+          "status": "implemented"
+        }
+      ],
+      "edges": [
+        [
+          "entity",
+          "gather"
+        ],
+        [
+          "gather",
+          "trace"
+        ],
+        [
+          "trace",
+          "review"
+        ],
+        [
+          "gather",
+          "empty"
+        ],
+        [
+          "review",
+          "human"
+        ],
+        [
+          "model",
+          "gather"
+        ]
+      ]
+    },
+    {
+      "id": "recovery",
+      "title": "Document lifecycle and restart recovery",
+      "description": "Sources and atomic operation checkpoints stay on disk. Completed batches, themes and audit metadata persist in SQLite/Neon. Restart reconstructs the graph and resumes nonterminal jobs whose source files remain available. Hosted disks/object storage still need configuration.",
+      "nodes": [
+        {
+          "id": "source",
+          "label": "Unique retained source file",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "accepted",
+          "label": "Atomic accepted checkpoint",
+          "x": 1,
+          "y": 0
+        },
+        {
+          "id": "batch",
+          "label": "Build and commit extraction batch",
+          "x": 2,
+          "y": 0
+        },
+        {
+          "id": "complete",
+          "label": "Graph cache and completed receipt",
+          "x": 3,
+          "y": 0
+        },
+        {
+          "id": "restart",
+          "label": "Backend restart",
+          "x": 0,
+          "y": 1
+        },
+        {
+          "id": "restore",
+          "label": "Restore documents and themes",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "id": "resume",
+          "label": "Resume unfinished operations",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "id": "reconcile",
+          "label": "Reconcile optional Neo4j copy",
+          "x": 3,
+          "y": 1,
+          "status": "pending"
+        }
+      ],
+      "edges": [
+        [
+          "source",
+          "accepted"
+        ],
+        [
+          "accepted",
+          "batch"
+        ],
+        [
+          "batch",
+          "complete"
+        ],
+        [
+          "restart",
+          "restore"
+        ],
+        [
+          "restore",
+          "resume"
+        ],
+        [
+          "resume",
+          "batch"
+        ],
+        [
+          "restore",
+          "reconcile"
+        ]
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Repository security and runtime boundaries",
+      "description": "GitHub workflows are configured for Semgrep rules, redacted Gitleaks history scans and CodeQL analysis. Gitleaks ran locally with no leaks; Semgrep local execution is blocked by its Windows socket error. CI results must be checked after push. Runtime controls enforce roles, upload limits, per-process rate limits and metadata-only audits.",
+      "nodes": [
+        {
+          "id": "commit",
+          "label": "Pull request or main push",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "semgrep",
+          "label": "Semgrep code rules in Linux CI",
+          "x": 1,
+          "y": 0,
+          "status": "pending"
+        },
+        {
+          "id": "gitleaks",
+          "label": "Gitleaks redacted history scan",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "id": "codeql",
+          "label": "CodeQL Python and JavaScript",
+          "x": 1,
+          "y": 2,
+          "status": "pending"
+        },
+        {
+          "id": "review",
+          "label": "Review findings before release",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "id": "runtime",
+          "label": "Roles, limits and request audit",
+          "x": 3,
+          "y": 1
+        }
+      ],
+      "edges": [
+        [
+          "commit",
+          "semgrep"
+        ],
+        [
+          "commit",
+          "gitleaks"
+        ],
+        [
+          "commit",
+          "codeql"
+        ],
+        [
+          "semgrep",
+          "review"
+        ],
+        [
+          "gitleaks",
+          "review"
+        ],
+        [
+          "codeql",
+          "review"
+        ],
+        [
+          "review",
+          "runtime"
+        ]
+      ]
+    },
+    {
+      "id": "roadmap",
+      "title": "Connection and integration boundaries",
+      "description": "Local model inference and offline NVD/STIX/KEV/scanner imports work without cloud accounts. ZAP and Nuclei remain future integrations. Hosted services, real Neo4j-backed queries and distributed synchronization need later work.",
+      "nodes": [
+        {
+          "id": "local",
+          "label": "Local reports and investigations",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "neon",
+          "label": "Connect Neon DB and Auth",
+          "x": 1,
+          "y": 0,
+          "status": "pending"
+        },
+        {
+          "id": "hosts",
+          "label": "Connect Vercel and Render",
+          "x": 2,
+          "y": 0,
+          "status": "pending"
+        },
+        {
+          "id": "neo",
+          "label": "Verify Neo4j projection live",
+          "x": 3,
+          "y": 0,
+          "status": "pending"
+        },
+        {
+          "id": "zap",
+          "label": "ZAP localhost testing later",
+          "x": 1,
+          "y": 1,
+          "status": "pending"
+        },
+        {
+          "id": "nuclei",
+          "label": "Nuclei authorized checks later",
+          "x": 2,
+          "y": 1,
+          "status": "pending"
+        },
+        {
+          "id": "models",
+          "label": "Direct Neo4j traversal later",
+          "x": 3,
+          "y": 1,
+          "status": "pending"
+        }
+      ],
+      "edges": [
+        [
+          "local",
+          "neon"
+        ],
+        [
+          "neon",
+          "hosts"
+        ],
+        [
+          "hosts",
+          "neo"
+        ],
+        [
+          "local",
+          "zap"
+        ],
+        [
+          "zap",
+          "nuclei"
+        ],
+        [
+          "neo",
+          "models"
+        ]
+      ]
+    }
   ],
   "projects": [
-    {"name":"LangGraph","url":"https://github.com/langchain-ai/langgraph","usage":"Installed Python dependency for the deterministic three-step investigation workflow; no LLM or durable agent sessions yet."},
-    {"name":"Trivy","url":"https://github.com/aquasecurity/trivy","usage":"Offline vulnerability JSON adapter implemented. Scanner execution and misconfiguration imports are not integrated."},
-    {"name":"OSV-Scanner","url":"https://github.com/google/osv-scanner","usage":"Offline dependency report adapter implemented. OSV scanning itself is external."},
-    {"name":"Semgrep","url":"https://github.com/semgrep/semgrep","usage":"SARIF report import, local rules and pinned CI setup implemented. Local Windows RPC failure prevents a passing scan claim."},
-    {"name":"CodeQL","url":"https://github.com/github/codeql","usage":"SARIF report import and GitHub workflow configured; GitHub code-scanning availability and CI results remain to be verified."},
-    {"name":"Gitleaks","url":"https://github.com/gitleaks/gitleaks","usage":"Checksummed CLI verified locally; full committed history scan passed. Pinned redacted CI scan configured. Secret reports are not ingested."},
-    {"name":"ZAP","url":"https://github.com/zaproxy/zaproxy","usage":"Future localhost web-security testing; not installed or run in this integration."},
-    {"name":"Nuclei","url":"https://github.com/projectdiscovery/nuclei","usage":"Future authorized asset checks; no scan execution or report adapter implemented."}
+    {
+      "name": "LangGraph",
+      "url": "https://github.com/langchain-ai/langgraph",
+      "usage": "Installed LangGraph workflow; optional real Ollama extraction and semantic embeddings supply its evidence. No model-driven remediation or durable agent sessions."
+    },
+    {
+      "name": "Trivy",
+      "url": "https://github.com/aquasecurity/trivy",
+      "usage": "Offline vulnerability JSON adapter implemented. Scanner execution and misconfiguration imports are not integrated."
+    },
+    {
+      "name": "OSV-Scanner",
+      "url": "https://github.com/google/osv-scanner",
+      "usage": "Offline dependency report adapter implemented. OSV scanning itself is external."
+    },
+    {
+      "name": "Semgrep",
+      "url": "https://github.com/semgrep/semgrep",
+      "usage": "SARIF report import, local rules and pinned CI setup implemented. Local Windows RPC failure prevents a passing scan claim."
+    },
+    {
+      "name": "CodeQL",
+      "url": "https://github.com/github/codeql",
+      "usage": "SARIF report import and GitHub workflow configured; GitHub code-scanning availability and CI results remain to be verified."
+    },
+    {
+      "name": "Gitleaks",
+      "url": "https://github.com/gitleaks/gitleaks",
+      "usage": "Checksummed CLI verified locally; full committed history scan passed. Pinned redacted CI scan configured. Secret reports are not ingested."
+    },
+    {
+      "name": "ZAP",
+      "url": "https://github.com/zaproxy/zaproxy",
+      "usage": "Future localhost web-security testing; not installed or run in this integration."
+    },
+    {
+      "name": "Nuclei",
+      "url": "https://github.com/projectdiscovery/nuclei",
+      "usage": "Future authorized asset checks; no scan execution or report adapter implemented."
+    },
+    {
+      "name": "Ollama",
+      "url": "https://github.com/ollama/ollama",
+      "usage": "Loopback-only adapter for installed local qwen2.5-coder and nomic-embed-text models. Real extraction and semantic embeddings verified; no cloud fallback or model downloads."
+    }
   ]
 }

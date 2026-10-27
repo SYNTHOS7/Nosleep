@@ -52,6 +52,8 @@ class QueryService:
 
     def query(self, request: QueryRequest) -> QueryResponse:
         ws = request.workspace_id
+        from backend.ingestion.local_ai import assert_workspace_profile
+        assert_workspace_profile(self.graph_store, ws)
         raw_query = request.query.strip()
         is_hindi = bool(HINDI_PATTERN.search(raw_query))
 

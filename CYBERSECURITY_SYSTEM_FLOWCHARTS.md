@@ -1,21 +1,21 @@
 # AegisGraph — current architecture and flowcharts
 
-AegisGraph turns uploaded documents, KEV catalogs and scanner reports into cited workspace evidence. Local SQLite works without accounts; Neon and the optional Neo4j projection await live connection checks. LangGraph organizes a deterministic read-only investigation. Real AI models and automatic remediation are not implemented.
+AegisGraph turns documents, NVD/STIX/KEV catalogs and scanner reports into cited workspace evidence. Optional Ollama mode now runs real local extraction and semantic embeddings; the hash/rule demo remains available in a separate database. Neon and Neo4j await live connection checks. Remediation execution is not implemented.
 
 Solid boxes: implemented. Dashed boxes: configured or planned; live verification may still be pending.
 
 ## System architecture
 
-FastAPI enforces workspace roles. SQLite or Neon stores extraction batches, topics and request audit events. Queries traverse the embedded graph; Neo4j is an optional derived copy, not the active query engine.
+FastAPI enforces workspace roles. SQLite or Neon stores extraction batches, topics and request audit events. Queries traverse the embedded graph; Neo4j is an optional derived copy, not the active query engine. Ollama mode is loopback-only and rejects mixed embedding model profiles; it does not require cloud credentials.
 
 ```mermaid
 flowchart LR
     docs["Documents, KEV and scanner reports"]
     api["FastAPI and workspace permissions"]
-    pipeline["Normalize, chunk and cite evidence"]
+    pipeline["Rules or local Ollama extraction"]
     store["SQLite local or Neon storage"]
     graph["Embedded evidence graph"]
-    vectors["Local cosine or Neon pgvector"]
+    vectors["Hash or learned local embeddings"]
     ui["React workspace and MCP tools"]
     investigate["LangGraph investigation"]
     neo4j["Optional Neo4j graph projection"]
@@ -58,7 +58,7 @@ flowchart LR
 
 ## LangGraph investigation workflow
 
-The installed LangGraph engine runs three deterministic nodes for each request. It uses existing cited retrieval and path traversal. Review is advisory: no scanner, shell or remediation command is available. Durable multi-turn agent sessions and model-driven decisions are future work.
+LangGraph coordinates evidence retrieval, conflict review and potential-route tracing. Retrieval can now use real local Ollama embeddings and previously model-extracted facts. The workflow itself remains deterministic and read-only, with no generated commands or durable agent session.
 
 ```mermaid
 flowchart LR
@@ -68,8 +68,7 @@ flowchart LR
     review["Prepare analyst review"]
     empty["Insufficient evidence result"]
     human["Analyst inspects source quotes"]
-    model["Real AI model integration later"]
-    style model stroke-dasharray: 5 5,fill:#263344
+    model["Optional local Ollama models"]
     entity --> gather
     gather --> trace
     trace --> review
@@ -127,7 +126,7 @@ flowchart LR
 
 ## Connection and integration boundaries
 
-Report imports and local investigations work without scanner accounts or model keys. ZAP and Nuclei have not been integrated or run. Any future active scanning needs explicit authorized targets. Cloud connections, real models and direct Neo4j traversal remain separate work.
+Local model inference and offline NVD/STIX/KEV/scanner imports work without cloud accounts. ZAP and Nuclei remain future integrations. Hosted services, real Neo4j-backed queries and distributed synchronization need later work.
 
 ```mermaid
 flowchart LR
@@ -142,7 +141,7 @@ flowchart LR
     style zap stroke-dasharray: 5 5,fill:#263344
     nuclei["Nuclei authorized checks later"]
     style nuclei stroke-dasharray: 5 5,fill:#263344
-    models["Real models and graph traversal"]
+    models["Direct Neo4j traversal later"]
     style models stroke-dasharray: 5 5,fill:#263344
     local --> neon
     neon --> hosts
@@ -154,7 +153,7 @@ flowchart LR
 
 ## Upstream projects
 
-- [LangGraph](https://github.com/langchain-ai/langgraph): Installed Python dependency for the deterministic three-step investigation workflow; no LLM or durable agent sessions yet.
+- [LangGraph](https://github.com/langchain-ai/langgraph): Installed LangGraph workflow; optional real Ollama extraction and semantic embeddings supply its evidence. No model-driven remediation or durable agent sessions.
 - [Trivy](https://github.com/aquasecurity/trivy): Offline vulnerability JSON adapter implemented. Scanner execution and misconfiguration imports are not integrated.
 - [OSV-Scanner](https://github.com/google/osv-scanner): Offline dependency report adapter implemented. OSV scanning itself is external.
 - [Semgrep](https://github.com/semgrep/semgrep): SARIF report import, local rules and pinned CI setup implemented. Local Windows RPC failure prevents a passing scan claim.
@@ -162,3 +161,4 @@ flowchart LR
 - [Gitleaks](https://github.com/gitleaks/gitleaks): Checksummed CLI verified locally; full committed history scan passed. Pinned redacted CI scan configured. Secret reports are not ingested.
 - [ZAP](https://github.com/zaproxy/zaproxy): Future localhost web-security testing; not installed or run in this integration.
 - [Nuclei](https://github.com/projectdiscovery/nuclei): Future authorized asset checks; no scan execution or report adapter implemented.
+- [Ollama](https://github.com/ollama/ollama): Loopback-only adapter for installed local qwen2.5-coder and nomic-embed-text models. Real extraction and semantic embeddings verified; no cloud fallback or model downloads.

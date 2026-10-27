@@ -93,7 +93,7 @@ def build_batch(operation: Operation) -> ExtractionBatch:
 
     with metrics.time_stage("chunk_cache"):
         chunks = chunk_source(parsed, doc, revision=operation.new_revision)
-        if operation.metrics.get("import_format") in {"cisa-kev", "scanner-report"}:
+        if operation.metrics.get("import_format") in {"cisa-kev", "scanner-report", "threat-catalog"}:
             doc.metadata["source_format"] = operation.metrics["import_format"]
             doc.metadata["publisher_verified"] = False
             for chunk in chunks:
@@ -138,6 +138,8 @@ def build_batch(operation: Operation) -> ExtractionBatch:
     op_manager.save_checkpoint(operation)
 
     vectors_map: Dict[str, List[float]] = {}
+    from backend.ingestion.local_ai import embedding_profile, LocalAIError
+    profile = embedding_profile()
     if chunks:
         chunk_texts = [c.text for c in chunks]
         with metrics.time_stage("embeddings"):
@@ -154,6 +156,10 @@ def build_batch(operation: Operation) -> ExtractionBatch:
                 op_manager.save_checkpoint(operation)
                 raise
 
+    if embedding_profile() != profile:
+        raise LocalAIError("Embedding model changed during ingestion; previous revision retained.")
+    doc.metadata["embedding_profile"] = profile
+    doc.metadata["extraction_provider"] = os.environ.get("EXTRACTOR_PROVIDER", "rules")
     # 5. Build ExtractionBatch
     operation.status = OperationStatus.VALIDATING
     op_manager.save_checkpoint(operation)

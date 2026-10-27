@@ -144,6 +144,14 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+from backend.ingestion.local_ai import LocalAIError
+
+
+@app.exception_handler(LocalAIError)
+async def local_ai_exception_handler(request: Request, error: LocalAIError):
+    return JSONResponse(status_code=503, content={"error_code": "LOCAL_AI_UNAVAILABLE", "message": str(error)})
+
+
 @app.get("/health", response_model=HealthResponse)
 def get_health() -> HealthResponse:
     """Component readiness and pinned versions with no secrets exposed."""
@@ -157,8 +165,11 @@ def get_health() -> HealthResponse:
             "graph_store": {"status": "ready", "type": db_status["active_mode"]},
             "vector_store": {"status": "ready", "dimension": 768, "backend": db_status["vector_backend"], "chroma": db_status["chromadb"]["status"]},
             "unstructured_parser": {"status": "ready", "fallback": "pypdf_local"},
-            "kg_builder": {"status": "ready", "adapter": "deterministic-rule-extractor"},
-            "embedder": {"status": "ready", "model": "deterministic-word-hash", "learned_semantic_embeddings": False},
+            "kg_builder": {"status": "configured" if os.environ.get("EXTRACTOR_PROVIDER") == "ollama" else "ready",
+                           "adapter": "ollama-grounded-extraction" if os.environ.get("EXTRACTOR_PROVIDER") == "ollama" else "deterministic-rule-extractor"},
+            "embedder": {"status": "configured" if os.environ.get("EMBEDDING_PROVIDER") == "ollama" else "ready",
+                         "model": os.environ.get("OLLAMA_EMBED_MODEL", "nomic-embed-text:latest") if os.environ.get("EMBEDDING_PROVIDER") == "ollama" else "deterministic-word-hash",
+                         "learned_semantic_embeddings": os.environ.get("EMBEDDING_PROVIDER") == "ollama"},
         },
         pinned_versions={
             "python": "3.11.16",
@@ -328,6 +339,28 @@ def run_investigation(ws: str, entry_point: str = Query(..., min_length=1, max_l
         raise HTTPException(400, "Enter a CVE identifier or entity name.")
     from backend.services.investigation_service import investigate
     return investigate(ws, entry_point)
+
+
+@app.post("/v1/workspaces/{ws}/imports/intel", response_model=MutationReceipt, status_code=202)
+async def import_threat_catalog(ws: str, format: str = Query(..., pattern="^(nvd|stix)$"), file: UploadFile = File(...)):
+    from backend.ingestion.threat_catalogs import normalize_catalog
+    try:
+        catalog = normalize_catalog(await file.read(5 * 1024 * 1024 + 1), format)
+    except (ValueError, TypeError, AttributeError, KeyError, RecursionError):
+        raise HTTPException(400, "Invalid NVD 2.0 response or STIX 2.x bundle. Maximum 5 MiB and 5000 records.") from None
+    path = upload_path(ws, f"{format}-catalog.txt")
+    with open(path, "w", encoding="utf-8") as stream:
+        stream.write(catalog["text"])
+    manager = get_operation_manager()
+    try:
+        op = manager.create_operation(ws, catalog["document_id"], OperationType.ADD, path, "txt")
+    except RuntimeError:
+        raise HTTPException(409, "This catalog is already being imported.") from None
+    op.metrics.update({"import_format": "threat-catalog", "catalog_format": format, "record_count": catalog["count"]})
+    manager.save_checkpoint(op)
+    manager.executor.submit(get_lifecycle_service().process_operation, op)
+    return MutationReceipt(status="accepted", operation_id=op.id, document_id=op.document_id,
+                           workspace_id=ws, accepted_at=op.accepted_at, retry_after=1)
 
 
 @app.get(

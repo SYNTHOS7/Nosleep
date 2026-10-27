@@ -45,6 +45,11 @@ Neon schema setup, Vercel routing, Render settings, MCP setup and remaining boun
 
 ## Run locally
 
+For real local extraction and semantic embeddings, run `./start_local_ai.ps1`.
+It uses installed Ollama models, a separate database and port 8004. See
+[local AI setup and boundaries](docs/LOCAL_AI.md). NVD and STIX file imports are also supported.
+
+
 On Windows, `./start_local.ps1` starts the complete app at http://localhost:8000
 with SQLite persistence and no cloud connections. Completed documents, source
 evidence and vectors survive restarts. This is a local demo with no login;
