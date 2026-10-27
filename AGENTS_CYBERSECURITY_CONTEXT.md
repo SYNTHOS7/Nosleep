@@ -27,6 +27,8 @@ demo without cloud services. See docs/LOCAL_VERIFICATION.md for measured evidenc
 
 Scanner report adapters (Trivy, OSV, SARIF), a deterministic LangGraph investigation workflow, and a fifth MCP tool are implemented. Repository checks are configured for Semgrep, Gitleaks and CodeQL. Canonical current diagrams are generated from docs/architecture.json into CYBERSECURITY_SYSTEM_FLOWCHARTS.md, the root architecture document and offline flowcharts.html. ZAP/Nuclei remain future integrations; live CI results and cloud services need verification.
 
+Investigation TXT/JSON downloads are implemented with workspace read permissions, source-span revalidation and document-revision consistency checks. See docs/REPORT_EXPORTS.md.
+
 ## 1. Project Mission & Pivot Summary
 
 ### What This System Is

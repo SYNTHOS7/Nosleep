@@ -104,6 +104,9 @@ The stdio server exposes sec_trace_attack_path, sec_query_threat_intel,
 sec_find_conflicts, sec_ingest_advisory and sec_investigate. Advisory ingestion returns an operation
 receipt; check that operation before assuming the document is ready.
 
+Investigation results can be downloaded as text or JSON with exact citations and
+workspace revision checks. See [report exports](docs/REPORT_EXPORTS.md).
+
 ## Main API routes
 
 | Method | Route | Purpose |

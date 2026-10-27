@@ -1,6 +1,6 @@
 # AegisGraph — current architecture and flowcharts
 
-AegisGraph turns documents, NVD/STIX/KEV catalogs and scanner reports into cited workspace evidence. Optional Ollama mode now runs real local extraction and semantic embeddings; the hash/rule demo remains available in a separate database. Neon and Neo4j await live connection checks. Remediation execution is not implemented.
+AegisGraph turns documents, NVD/STIX/KEV catalogs and scanner reports into cited workspace evidence. Optional Ollama mode now runs real local extraction and semantic embeddings; the hash/rule demo remains available in a separate database. Neon and Neo4j await live connection checks. Remediation execution is not implemented. Investigation evidence can also be downloaded locally as revision-checked text and JSON reports.
 
 Solid boxes: implemented. Dashed boxes: configured or planned; live verification may still be pending.
 
@@ -58,7 +58,7 @@ flowchart LR
 
 ## LangGraph investigation workflow
 
-LangGraph coordinates evidence retrieval, conflict review and potential-route tracing. Retrieval can now use real local Ollama embeddings and previously model-extracted facts. The workflow itself remains deterministic and read-only, with no generated commands or durable agent session.
+LangGraph coordinates evidence retrieval, conflict review and potential-route tracing. Retrieval can now use real local Ollama embeddings and previously model-extracted facts. The workflow itself remains deterministic and read-only, with no generated commands or durable agent session. Analyst review supports fresh TXT/JSON downloads with quote-span and workspace-revision validation; generated reports are not stored as durable agent sessions.
 
 ```mermaid
 flowchart LR
@@ -69,12 +69,14 @@ flowchart LR
     empty["Insufficient evidence result"]
     human["Analyst inspects source quotes"]
     model["Optional local Ollama models"]
+    report["Download checked TXT or JSON report"]
     entity --> gather
     gather --> trace
     trace --> review
     gather --> empty
     review --> human
     model --> gather
+    human --> report
 ```
 
 ## Document lifecycle and restart recovery

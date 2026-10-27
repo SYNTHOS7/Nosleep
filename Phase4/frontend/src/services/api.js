@@ -81,6 +81,15 @@ export async function runInvestigation(workspaceId, entryPoint) {
   return response.json()
 }
 
+export async function downloadInvestigationReport(workspaceId, entryPoint, format = 'txt') {
+  const response = await apiFetch(`${BASE_URL}/v1/workspaces/${encodeURIComponent(workspaceId)}/investigation/report?entry_point=${encodeURIComponent(entryPoint)}&format=${format}`)
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}))
+    throw new Error(error.message || 'Report could not be generated. Run the investigation again.')
+  }
+  return response.blob()
+}
+
 export async function uploadDocumentsBatch(workspaceId, files) {
   const formData = new FormData()
   for (const f of files) {

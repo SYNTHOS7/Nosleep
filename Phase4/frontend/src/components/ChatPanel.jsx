@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ConflictAlert from './ConflictAlert'
-import { runInvestigation } from '../services/api'
+import { runInvestigation, downloadInvestigationReport } from '../services/api'
 
 /**
  * Chat and grounded query panel.
@@ -11,6 +11,7 @@ export default function ChatPanel({ workspaceId, onRunQuery, isQuerying, queryRe
   const [investigation, setInvestigation] = useState(null)
   const [isInvestigating, setIsInvestigating] = useState(false)
   const [investigationError, setInvestigationError] = useState('')
+  const [isExporting, setIsExporting] = useState(false)
   const generation = useRef(0)
   useEffect(() => { generation.current++; setInvestigation(null); setInvestigationError(''); setIsInvestigating(false) }, [workspaceId])
 
@@ -21,6 +22,23 @@ export default function ChatPanel({ workspaceId, onRunQuery, isQuerying, queryRe
     try { const result = await runInvestigation(workspaceId, queryText.trim()); if (current === generation.current) setInvestigation(result) }
     catch (error) { if (current === generation.current) setInvestigationError(error.message) }
     finally { if (current === generation.current) setIsInvestigating(false) }
+  }
+
+  const exportReport = async format => {
+    const current = generation.current
+    setIsExporting(true)
+    setInvestigationError('')
+    try {
+      const blob = await downloadInvestigationReport(workspaceId, investigation.entry_point, format)
+      if (current !== generation.current) return
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `aegisgraph-investigation.${format}`
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch (error) { if (current === generation.current) setInvestigationError(error.message) }
+    finally { setIsExporting(false) }
   }
 
   const suggestedQueries = [
@@ -104,6 +122,13 @@ export default function ChatPanel({ workspaceId, onRunQuery, isQuerying, queryRe
           <li>Found {investigation.paths.paths.length} potential routes.</li>
         </ol>
         <p>{investigation.review.finding}</p>
+        <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
+          <button className="topic-chip" disabled={isExporting || isInvestigating} onClick={() => exportReport('txt')}>
+            {isExporting ? 'Preparing report…' : 'Download report'}
+          </button>
+          <button className="topic-chip" disabled={isExporting || isInvestigating} onClick={() => exportReport('json')}>Download JSON</button>
+        </div>
+        <p style={{fontSize:'0.75rem',color:'var(--text-muted)'}}>Downloads contain source data from this workspace and use a fresh investigation snapshot.</p>
         <p style={{fontSize:'0.75rem',color:'var(--accent-amber)'}}>{investigation.review.limitations}</p>
         {investigation.evidence.source_chunks.map(source => <button className="topic-chip"
           key={`${source.chunk_id}-${source.start_char}`} onClick={() => onSelectChunk?.(source)}>

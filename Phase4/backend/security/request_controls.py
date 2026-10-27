@@ -37,7 +37,8 @@ def controls_enabled():
 
 
 def audit(request, status):
-    if not controls_enabled() or (request.method == "GET" and status < 400):
+    is_report = request.url.path.endswith('/investigation/report')
+    if not controls_enabled() or (request.method == "GET" and status < 400 and not is_report):
         return
     from backend.storage.vector_store import get_vector_store
     persistence = getattr(get_vector_store(), "persistence", None)

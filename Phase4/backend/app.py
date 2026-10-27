@@ -341,6 +341,24 @@ def run_investigation(ws: str, entry_point: str = Query(..., min_length=1, max_l
     return investigate(ws, entry_point)
 
 
+@app.get("/v1/workspaces/{ws}/investigation/report")
+def download_investigation_report(ws: str, entry_point: str = Query(..., min_length=1, max_length=200),
+                                  format: str = Query("txt", pattern="^(txt|json)$")):
+    from backend.services.investigation_reports import build_report, render_text, ReportChangedError
+    from fastapi.responses import Response
+    import json
+    if not entry_point.strip():
+        raise HTTPException(400, "Enter a CVE identifier or entity name.")
+    try:
+        report = build_report(ws, entry_point.strip())
+    except ReportChangedError as error:
+        raise HTTPException(409, str(error)) from None
+    content = json.dumps(report, ensure_ascii=False, indent=2) if format == "json" else render_text(report)
+    return Response(content=content, media_type="application/json" if format == "json" else "text/plain",
+                    headers={"Content-Disposition": f'attachment; filename="aegisgraph-investigation.{format}"',
+                             "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
+
+
 @app.post("/v1/workspaces/{ws}/imports/intel", response_model=MutationReceipt, status_code=202)
 async def import_threat_catalog(ws: str, format: str = Query(..., pattern="^(nvd|stix)$"), file: UploadFile = File(...)):
     from backend.ingestion.threat_catalogs import normalize_catalog

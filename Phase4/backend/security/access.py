@@ -6,6 +6,7 @@ import re
 from fastapi import HTTPException, Request
 from fastapi.routing import APIRoute
 from fastapi.exceptions import RequestValidationError
+from backend.ingestion.local_ai import LocalAIError
 from starlette.concurrency import run_in_threadpool
 
 ROLES = {"viewer": 0, "editor": 1, "admin": 2}
@@ -142,6 +143,9 @@ class ProtectedRoute(APIRoute):
                 response = await handler(request)
             except RequestValidationError:
                 await run_in_threadpool(audit, request, 422)
+                raise
+            except LocalAIError:
+                await run_in_threadpool(audit, request, 503)
                 raise
             except HTTPException as error:
                 await run_in_threadpool(audit, request, error.status_code)
