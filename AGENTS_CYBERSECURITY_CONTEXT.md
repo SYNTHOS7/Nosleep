@@ -17,8 +17,8 @@ See docs/HOSTED_SETUP.md and docs/AUTHENTICATION.md for the current setup.
 Implemented: cited cyber extraction and attack paths, synthetic demo, MCP tools,
 transactional extraction/vector persistence, database-native cosine search,
 startup graph reconstruction, verified JWT login and live workspace roles.
-Live Neon integration remains pending account configuration. Neo4j write-through,
-multi-instance cache synchronization and durable original uploads remain unfinished.
+Live Neon integration remains pending account configuration. Direct Neo4j traversal,
+multi-instance cache synchronization and hosted object storage remain unfinished. Optional Neo4j derived graph writes, durable themes, disk-backed upload/job recovery, offline KEV import and request audit/limits are implemented; live graph verification is pending.
 Extraction and embeddings are deterministic; do not describe them as an LLM or
 learned semantic embeddings. Historical diagrams below contain planned features.
 

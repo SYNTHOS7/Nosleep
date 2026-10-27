@@ -373,6 +373,16 @@ class GraphStore:
             self._ensure_workspace(topic.workspace_id)
             self.topics[topic.workspace_id][topic.id] = topic
 
+    def replace_topics(self, workspace, topics, assignments):
+        """Replace a discovery snapshot; ignore stale memberships after edit/delete recovery."""
+        if any(t.workspace_id != workspace for t in topics):
+            raise ValueError("Topic workspace mismatch")
+        with self._lock:
+            self._ensure_workspace(workspace)
+            self.topics[workspace] = {t.id: t for t in topics}
+            self.topic_assignments[workspace] = [a for a in assignments
+                if a.topic_id in self.topics[workspace] and a.chunk_id in self.chunks[workspace]]
+
     def assign_topic(self, workspace_id: str, assignment: TopicAssignment) -> None:
         with self._lock:
             self._ensure_workspace(workspace_id)

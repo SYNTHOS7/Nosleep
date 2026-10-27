@@ -4,7 +4,7 @@ import json
 import math
 import os
 
-from backend.contracts.models import ExtractionBatch
+from backend.contracts.models import ExtractionBatch, Topic, TopicAssignment
 
 
 def vector_literal(vector):
@@ -89,6 +89,32 @@ class NeonStore:
                 return {}
             rows = conn.execute("SELECT workspace_id,role FROM aegis.memberships WHERE user_id=%s", (user_id,)).fetchall()
             return {"platform_admin": user[0], "disabled": user[1], "workspaces": dict(rows)}
+
+    def save_topics(self, workspace, topics, assignments):
+        if any(t.workspace_id != workspace for t in topics):
+            raise ValueError("Topic workspace mismatch")
+        payload = json.dumps({"topics": [t.model_dump() for t in topics],
+                              "assignments": [a.model_dump() for a in assignments]})
+        with self.connection() as conn:
+            conn.execute("""INSERT INTO aegis.topic_state(workspace_id,payload) VALUES (%s,%s::jsonb)
+                ON CONFLICT(workspace_id) DO UPDATE SET payload=EXCLUDED.payload""", (workspace, payload))
+
+    def load_topics(self):
+        with self.connection() as conn:
+            for workspace, data in conn.execute("SELECT workspace_id,payload FROM aegis.topic_state"):
+                topics = [Topic.model_validate(t) for t in data["topics"]]
+                if any(t.workspace_id != workspace for t in topics):
+                    raise ValueError("Topic workspace mismatch")
+                yield workspace, topics, [TopicAssignment.model_validate(a) for a in data["assignments"]]
+
+    def record_audit(self, event):
+        with self.connection() as conn:
+            conn.execute("INSERT INTO aegis.audit_events(id,workspace_id,timestamp,payload) VALUES (%s,%s,%s,%s::jsonb)",
+                         (event["id"], event["workspace_id"], event["timestamp"], json.dumps(event)))
+
+    def list_audit(self, workspace, limit=100):
+        with self.connection() as conn:
+            return [row[0] for row in conn.execute("SELECT payload FROM aegis.audit_events WHERE workspace_id=%s ORDER BY timestamp DESC LIMIT %s", (workspace, min(max(limit, 1), 500)))]
 
     def set_access(self, user_id, workspace, role, platform_admin=None):
         if role not in {"viewer", "editor", "admin", "remove"}:

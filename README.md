@@ -32,7 +32,7 @@ account-specific Neon project IDs are committed.
 | Durable hosted data | Neon PostgreSQL when VECTOR_BACKEND=neon |
 | Search | 768-dimensional pgvector cosine search in PostgreSQL |
 | Active graph | Embedded graph reconstructed from persisted extraction batches |
-| Neo4j | Existing optional adapter; current ingestion write-through is pending |
+| Neo4j | Optional evidence graph projection; application traversal stays embedded |
 | Local mode | In-memory graph and vectors; existing Chroma compatibility retained |
 
 Supabase is not needed. Neon mode disables Chroma. The current extraction and
@@ -48,7 +48,7 @@ Neon schema setup, Vercel routing, Render settings, MCP setup and remaining boun
 On Windows, `./start_local.ps1` starts the complete app at http://localhost:8000
 with SQLite persistence and no cloud connections. Completed documents, source
 evidence and vectors survive restarts. This is a local demo with no login;
-topics must be rediscovered after a restart. The local database stays out of Git.
+themes, audit history and saved jobs also recover on restart. The local database stays out of Git.
 For other shells, set `VECTOR_BACKEND=local`, `AUTH_MODE=demo`, and run the API.
 
 Python 3.11+:
@@ -139,8 +139,25 @@ private hosted use. Original upload retention, audit trails and rate limits rema
 future work. Build the frontend with Node 20.19+ or 22.12+.
 
 Completed extraction batches and evidence survive Neon-backed restarts.
-Original uploads, operation polling checkpoints and discovered topics remain local.
-In-flight uploads may need resubmission and topic discovery may need rerunning.
+Discovered topics and request audit records persist in SQLite/Neon. Upload files
+and operation checkpoints use local folders, so hosted recovery still needs a
+persistent disk or object storage. Interrupted jobs resume when their checkpoints
+and source files remain available.
+
+## Offline intelligence import and optional graph projection
+
+Upload one saved `known_exploited_vulnerabilities.json` or `*.kev.json` file in
+the Corpus panel to import a CISA KEV-shaped snapshot. Required fields, dates,
+record count and unique CVE IDs are validated. Equivalent imports deduplicate;
+changed catalogs become separate snapshots. Quotes reference the normalized
+imported text; the original JSON is retained on local disk. Uploaded publisher
+identity is unverified. No links in uploaded data are fetched or executed.
+
+Optional Neo4j projection: configure NEO4J_* variables and set
+NEO4J_PROJECTION_ENABLED=true with durable local/Neon storage. Document changes,
+theme discovery and startup rebuild a scoped AegisManaged graph copy in Neo4j.
+Neon/SQLite remains authoritative and queries still use the embedded graph.
+Live Neo4j transactions require verification when you connect your account.
 
 ## Project references
 

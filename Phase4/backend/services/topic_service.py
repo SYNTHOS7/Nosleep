@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-import uuid
+import hashlib
+import re
+from collections import Counter
 from typing import Dict, List, Optional
 import numpy as np
 
@@ -31,7 +33,8 @@ class TopicService:
                     slug=top.slug,
                     description=top.description,
                     chunk_count=len(chunk_ids),
-                    entity_count=len(chunk_ids) * 2,  # approximate entity linkage
+                    entity_count=len({e.name for e in self.graph_store.entities.get(workspace_id, {}).values()
+                                      if e.source_chunk_id in chunk_ids}),
                 )
             )
         return TopicList(workspace_id=workspace_id, topics=views, total=len(views))
@@ -49,7 +52,9 @@ class TopicService:
         if not chunks_map:
             return []
 
-        chunks = list(chunks_map.values())
+        if not 1 <= k_clusters <= 50:
+            raise ValueError("Topic cluster count must be between 1 and 50")
+        chunks = sorted(chunks_map.values(), key=lambda chunk: chunk.id)
         if len(chunks) < k_clusters:
             k_clusters = max(1, len(chunks))
 
@@ -81,38 +86,22 @@ class TopicService:
                 clusters[c_idx].append(ch)
 
         created_topics: List[Topic] = []
+        assignments = []
 
         for c_idx, cluster_chunks in clusters.items():
             if not cluster_chunks:
                 continue
 
-            # Identify representative theme using Phase 3 medoid selection when vectors exist
-            theme_keyword = None
-            cluster_cids = [c.id for c in cluster_chunks if c.id in vectors_map]
-            if len(cluster_cids) >= 1:
-                try:
-                    from backend.topics.labeling import select_representative_chunks
-                    medoid_id, diverse_ids, centroid = select_representative_chunks(
-                        cluster_cids,
-                        [vectors_map[cid] for cid in cluster_cids],
-                    )
-                    medoid_chunk = chunks_map.get(medoid_id)
-                    if medoid_chunk:
-                        words = [w.strip(".,;:()[]\"'").capitalize() for w in medoid_chunk.text.split() if len(w) > 4]
-                        if words:
-                            theme_keyword = words[0]
-                except Exception:
-                    pass
-
-            if not theme_keyword:
-                sample_text = " ".join([c.text for c in cluster_chunks[:3]])
-                words = [w.strip(".,;:()[]\"'").capitalize() for w in sample_text.split() if len(w) > 4]
-                theme_keyword = words[0] if words else f"Theme-{c_idx+1}"
-
-            topic_id = f"topic-{uuid.uuid4().hex[:8]}"
-            label = f"{theme_keyword} Architecture & Operations"
-            slug = f"{theme_keyword.lower()}-ops"
-            description = f"Collection of knowledge related to {theme_keyword} and supporting system architecture."
+            # Labels come from corpus terms, never from generated security claims.
+            stop = {"synthetic", "demo", "fictional", "this", "that", "with", "from", "into", "does", "not", "the", "and", "are", "for", "source", "document"}
+            words = Counter(w.lower() for ch in cluster_chunks
+                            for w in re.findall(r"[A-Za-z][A-Za-z0-9_-]{3,}", re.sub(r"(?m)^SYNTHETIC DEMO:.*$", "", ch.text))
+                            if w.lower() not in stop)
+            keywords = [w for w, _ in sorted(words.items(), key=lambda pair: (-pair[1], pair[0]))[:3]]
+            label = " / ".join(keywords) or f"Theme {c_idx + 1}"
+            topic_id = "topic-" + hashlib.sha256("|".join(sorted(ch.id for ch in cluster_chunks)).encode()).hexdigest()[:16]
+            slug = topic_id
+            description = f"Corpus terms: {label}. Grouped by deterministic vector similarity."
 
             topic = Topic(
                 id=topic_id,
@@ -120,21 +109,25 @@ class TopicService:
                 label=label,
                 slug=slug,
                 description=description,
-                discovery_method="VectorClustering+MedoidExtraction",
+                discovery_method="VectorClustering+CorpusTerms",
             )
-            self.graph_store.register_topic(topic)
             created_topics.append(topic)
 
             # Assign chunks to topic
             for ch in cluster_chunks:
-                self.graph_store.assign_topic(
-                    workspace_id,
-                    TopicAssignment(
+                assignments.append(TopicAssignment(
                         topic_id=topic_id,
                         chunk_id=ch.id,
-                        confidence=0.92,
-                    ),
-                )
+                        confidence=1.0,
+                        method="cluster_membership",
+                    ))
+
+        from backend.services.lifecycle_service import get_lifecycle_service
+        persistence = get_lifecycle_service().persistence
+        if persistence and hasattr(persistence, "save_topics"):
+            persistence.save_topics(workspace_id, created_topics, assignments)
+        self.graph_store.replace_topics(workspace_id, created_topics, assignments)
+        get_lifecycle_service().sync_graph(workspace_id)
 
         return created_topics
 

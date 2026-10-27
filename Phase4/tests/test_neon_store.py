@@ -11,6 +11,7 @@ from test_cyber_and_hosted_storage import publish
 class Database:
     def __init__(self):
         self.documents, self.vectors, self.users, self.roles = {}, {}, {}, {}
+        self.topics, self.audit = {}, {}
         self.fail_vectors = False
         self.calls = []
         self.rollbacks = 0
@@ -22,18 +23,27 @@ class Connection:
     def __init__(self, db):
         self.db, self.result = db, []
     def __enter__(self):
-        self.snapshot = copy.deepcopy((self.db.documents,self.db.vectors,self.db.users,self.db.roles))
+        self.snapshot = copy.deepcopy((self.db.documents,self.db.vectors,self.db.users,self.db.roles,self.db.topics,self.db.audit))
         return self
     def __exit__(self, kind, value, trace):
         if kind:
-            self.db.documents,self.db.vectors,self.db.users,self.db.roles = self.snapshot
+            self.db.documents,self.db.vectors,self.db.users,self.db.roles,self.db.topics,self.db.audit = self.snapshot
             self.db.rollbacks += 1
     def cursor(self, name=None):
         return Cursor(self)
     def execute(self, statement, params=()):
         self.db.calls.append((statement, params))
         sql = ' '.join(statement.lower().split())
-        if sql.startswith('insert into aegis.documents'):
+        if sql.startswith('insert into aegis.topic_state'):
+            self.db.topics[params[0]] = json.loads(params[1])
+        elif sql.startswith('select workspace_id,payload from aegis.topic_state'):
+            self.result = list(self.db.topics.items())
+        elif sql.startswith('insert into aegis.audit_events'):
+            self.db.audit[params[0]] = json.loads(params[3])
+        elif sql.startswith('select payload from aegis.audit_events'):
+            self.result = [(event,) for event in sorted(self.db.audit.values(), key=lambda e: -e['timestamp'])
+                           if event['workspace_id'] == params[0]][:params[1]]
+        elif sql.startswith('insert into aegis.documents'):
             ws, doc, payload = params
             self.db.documents[ws,doc] = json.loads(payload)
         elif sql.startswith('delete from aegis.vectors'):
@@ -79,6 +89,8 @@ class Connection:
         return self
     def fetchall(self):
         return list(self.result)
+    def __iter__(self):
+        return iter(self.result)
     def fetchone(self):
         return self.result[0] if self.result else None
 
@@ -176,3 +188,16 @@ def test_invalid_vector_is_rejected_before_publication():
     for vector in ([],[0.0]*768):
         with pytest.raises(ValueError):
             vector_literal(vector)
+
+
+def test_neon_topic_and_audit_storage_contracts():
+    from backend.contracts.models import Topic, TopicAssignment
+    db = Database()
+    store = NeonStore(db.connect)
+    topic = Topic(id='topic', workspace_id='cyber', label='Gateway', slug='gateway', description='Corpus terms')
+    store.save_topics('cyber', [topic], [TopicAssignment(topic_id='topic', chunk_id='chunk')])
+    workspace, topics, assignments = next(store.load_topics())
+    assert workspace == 'cyber' and topics[0].id == 'topic' and assignments[0].chunk_id == 'chunk'
+    store.record_audit({'id': 'event', 'workspace_id': 'cyber', 'timestamp': 1, 'status': 202})
+    assert store.list_audit('cyber')[0]['id'] == 'event'
+    assert store.list_audit('other') == []

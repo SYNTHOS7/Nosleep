@@ -248,6 +248,7 @@ export default function DocumentUploader({ workspaceId, onUploadComplete }) {
                   <div><strong>Click or drop 1 to 500+ files here</strong></div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                     Supports TXT, PDF, MD, CSV, JSON, or .ZIP bundles
+                    <div>For CISA KEV import, upload one known_exploited_vulnerabilities.json or *.kev.json file.</div>
                   </div>
                 </>
               )}

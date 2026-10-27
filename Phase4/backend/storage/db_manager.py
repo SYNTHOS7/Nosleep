@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import threading
 from typing import Any, Dict, Optional
 
 logger = logging.getLogger("database_manager")
@@ -45,6 +46,9 @@ class DatabaseManager:
         self.neo4j_repo = None
         self.neo4j_status = "unconfigured"
         self.neo4j_error = None
+        self._projection_lock = threading.RLock()
+        self.projection_status = "disabled"
+        self._pending_graph_workspaces = set()
 
         if os.environ.get("VECTOR_BACKEND") != "neon" and os.environ.get("CHROMA_MIRROR_ENABLED", "false").lower() == "true":
             self._init_chroma()
@@ -69,12 +73,17 @@ class DatabaseManager:
 
     def _init_neo4j(self) -> None:
         """Tests and connects to Neo4j if valid credentials are provided."""
+        if self.neo4j_driver:
+            self.neo4j_driver.close()
+            self.neo4j_driver = None
+        self.neo4j_repo = None
         uri = (self.neo4j_uri or "").strip()
         if not uri or "example.databases.neo4j.io" in uri or not self.neo4j_password:
             self.neo4j_status = "in_memory_fallback"
             self.neo4j_error = "Neo4j credentials not configured; using high-performance embedded transactional graph engine."
             return
 
+        driver = None
         try:
             from neo4j import GraphDatabase
             driver = GraphDatabase.driver(
@@ -89,21 +98,15 @@ class DatabaseManager:
             self.neo4j_status = "connected"
             self.neo4j_error = None
 
-            from backend.storage.neo4j import Neo4jGraphRepository
-            self.neo4j_repo = Neo4jGraphRepository(
-                uri=uri,
-                user=self.neo4j_user,
-                password=self.neo4j_password,
-                database=self.neo4j_database,
-                driver=driver,
-            )
             logger.info(f"Successfully connected to Neo4j at {_mask_uri(uri)}")
         except Exception as e:
+            if driver:
+                driver.close()
             self.neo4j_status = "connection_failed"
-            self.neo4j_error = f"Failed to connect to Neo4j at {_mask_uri(uri)}: {e}"
+            self.neo4j_error = "Neo4j connection failed. Check server-side credentials and network access."
             self.neo4j_driver = None
             self.neo4j_repo = None
-            logger.warning(f"Neo4j connection error: {e}. Falling back to in-memory graph engine.")
+            logger.warning("Neo4j connection failed. Retaining the embedded graph engine.")
 
     def configure_neo4j(self, uri: str, username: str, password: str, database: str = "neo4j") -> Dict[str, Any]:
         """Configures or updates Neo4j credentials dynamically at runtime."""
@@ -112,7 +115,37 @@ class DatabaseManager:
         self.neo4j_password = password
         self.neo4j_database = database
         self._init_neo4j()
+        if self.neo4j_driver:
+            from backend.storage.graph_store import get_graph_store
+            self.sync_graph(get_graph_store())
         return self.get_status()
+
+    def sync_graph(self, graph_store, workspace=None):
+        """Reconcile a derived graph; outages never discard authoritative documents."""
+        if os.environ.get("NEO4J_PROJECTION_ENABLED", "false").lower() != "true":
+            return
+        if os.environ.get("VECTOR_BACKEND") not in {"local", "neon"}:
+            self.projection_status = "requires_durable_storage"
+            return
+        if not self.neo4j_driver:
+            self.projection_status = "pending_connection"
+            return
+        from backend.storage.neo4j_projection import Neo4jProjection, snapshot_workspace
+        with self._projection_lock:
+            try:
+                projection = Neo4jProjection(self.neo4j_driver, self.neo4j_database)
+                if workspace is not None:
+                    self._pending_graph_workspaces.add(workspace)
+                else:
+                    self._pending_graph_workspaces.update(set(graph_store.documents) | set(projection.workspaces()))
+                for ws in sorted(self._pending_graph_workspaces):
+                    nodes, edges = snapshot_workspace(graph_store, ws)
+                    projection.replace_workspace(ws, nodes, edges)
+                    self._pending_graph_workspaces.discard(ws)
+                self.projection_status = "synchronized"
+            except Exception:
+                self.projection_status = "pending_retry"
+                logger.warning("Neo4j projection failed; retained authoritative data. Retry reconciliation after connectivity returns.")
 
     def sync_vectors_to_chroma(self, workspace_id: str, vectors_map: Dict[str, list[float]]) -> None:
         """Persists vectors asynchronously into the persistent ChromaDB collection."""
@@ -154,6 +187,7 @@ class DatabaseManager:
                 "database": self.neo4j_database,
                 "error_or_info": self.neo4j_error or "Connection verified; ingestion and traversal still use the embedded graph.",
                 "ingestion_active": False,
+                "projection_status": self.projection_status,
             },
             "chromadb": {
                 "configured": self.chroma_status != "disabled",

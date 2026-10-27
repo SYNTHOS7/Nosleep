@@ -5,6 +5,7 @@ import re
 
 from fastapi import HTTPException, Request
 from fastapi.routing import APIRoute
+from fastapi.exceptions import RequestValidationError
 from starlette.concurrency import run_in_threadpool
 
 ROLES = {"viewer": 0, "editor": 1, "admin": 2}
@@ -80,9 +81,15 @@ class ProtectedRoute(APIRoute):
                 if path == "/v1/database/configure":
                     raise HTTPException(403, "Database administration requires authenticated mode.")
                 request.state.principal = Principal("local-demo", "", {})
+                from backend.security.request_controls import limiter, controls_enabled
+                if controls_enabled():
+                    limiter.check(request.client.host if request.client else "local", request.method != "GET" and path != "/v1/query")
                 return await original(request)
             principal = await run_in_threadpool(authenticate, request.headers.get("authorization"))
             request.state.principal = principal
+            from backend.security.request_controls import limiter, controls_enabled
+            if controls_enabled():
+                limiter.check(principal.uid, request.method != "GET" and path != "/v1/query")
             if path.startswith("/v1/database/"):
                 if not principal.platform_admin:
                     raise HTTPException(403, "Platform administrator access is required.")
@@ -116,6 +123,8 @@ class ProtectedRoute(APIRoute):
                 if not workspace:
                     raise HTTPException(400, "A workspace is required.")
                 require_workspace(principal, workspace, write)
+                if path.endswith("/audit") and not principal.platform_admin and principal.workspaces.get(workspace) != "admin":
+                    raise HTTPException(403, "Workspace administrator access is required.")
                 if path.endswith("/operations/batch-status"):
                     from backend.ingestion.operations import get_operation_manager
                     for operation_id in request.query_params.get("operation_ids", "").split(","):
@@ -127,4 +136,19 @@ class ProtectedRoute(APIRoute):
                                 raise HTTPException(403, "Operation belongs to a different workspace.")
             return await original(request)
 
-        return handler
+        async def audited_handler(request):
+            from backend.security.request_controls import audit
+            try:
+                response = await handler(request)
+            except RequestValidationError:
+                await run_in_threadpool(audit, request, 422)
+                raise
+            except HTTPException as error:
+                await run_in_threadpool(audit, request, error.status_code)
+                raise
+            except Exception:
+                await run_in_threadpool(audit, request, 500)
+                raise
+            await run_in_threadpool(audit, request, response.status_code)
+            return response
+        return audited_handler

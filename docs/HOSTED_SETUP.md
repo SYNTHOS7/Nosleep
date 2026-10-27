@@ -28,7 +28,7 @@ CHROMA_MIRROR_ENABLED=false
 CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app
 ```
 
-Keep one API instance: the active graph and topic cache are local to that process. Completed batches and their vectors are published atomically in PostgreSQL; edits replace old vectors and deletes cascade. Startup restores the active graph from saved batches. Vector queries run in PostgreSQL with workspace and optional topic filters. Original upload files, operation checkpoints and discovered topics still need separate durable storage for full restart recovery.
+Keep one API instance: the active graph and topic cache are local to that process. Completed batches and their vectors are published atomically in PostgreSQL; edits replace old vectors and deletes cascade. Startup restores the active graph from saved batches. Vector queries run in PostgreSQL with workspace and optional topic filters. Themes and request audit events are also saved in PostgreSQL. Original upload files and operation checkpoints need a persistent disk or object storage on hosted services; local mode keeps them in data folders.
 
 ## 3. Vercel frontend
 
@@ -61,4 +61,4 @@ MCP: from Phase4 run `python -m backend.mcp_server`, with AEGISGRAPH_API_URL and
 
 Run `python test_all_phases.py`, and `npm run test:auth` in the frontend. Storage tests use a transaction-aware database double; JWT tests verify real Ed25519 signatures with a mocked key endpoint. A live Neon project still needs schema, sign-up/login, upload/search/edit/delete, restart recovery and role revocation checks.
 
-Neo4j remains an optional connection adapter; ingestion write-through is not implemented. Extraction and embeddings remain deterministic rules/hash vectors. Audit trails, rate limits, multi-instance synchronization and original-upload object storage are unfinished. Existing Firebase data is not automatically migrated or deleted.
+Set NEO4J_PROJECTION_ENABLED=true with durable storage to copy the evidence graph into Neo4j after document/theme changes and startup. Only AegisManaged nodes are replaced, scoped per workspace; use a dedicated database. Neo4j/SQLite is not a distributed transaction: authoritative data survives projection failure and is reconciled on a subsequent mutation or restart. Application queries still traverse the embedded graph. Live projection verification is pending. Extraction and embeddings remain deterministic rules/hash vectors. Metadata-only request audit history and single-process request limits are implemented. Multi-instance synchronization, tamper-proof audit retention and original-upload object storage are unfinished. Configure READ_REQUESTS_PER_MINUTE and WRITE_REQUESTS_PER_MINUTE as needed; defaults are 180 and 30. Existing Firebase data is not automatically migrated or deleted.

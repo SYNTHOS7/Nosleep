@@ -3,6 +3,9 @@
 import json
 import os
 import time
+import uuid
+import tempfile
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable, Dict, Optional
 
@@ -13,7 +16,20 @@ from backend.contracts.models import (
     OperationType,
 )
 
-OPERATIONS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "operations")
+OPERATIONS_DIR = os.environ.get("OPERATIONS_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "operations"))
+
+
+def atomic_json_write(path, payload):
+    """Readers see the previous complete checkpoint or the next complete checkpoint."""
+    fd, temporary = tempfile.mkstemp(prefix=".checkpoint-", dir=os.path.dirname(path))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            stream.write(payload)
+            stream.flush()
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 class OperationManager:
@@ -40,7 +56,7 @@ class OperationManager:
         new_revision: int = 1,
     ) -> Operation:
         """Creates a new durable operation and saves initial checkpoint."""
-        op_id = f"op-{operation_type.value.lower()}-{document_id[:8]}-{int(time.time()*1000)}"
+        op_id = f"op-{operation_type.value.lower()}-{document_id[:8]}-{uuid.uuid4().hex}"
 
         # Enforce: one operation owns one document at a time
         if document_id in self.document_locks:
@@ -92,19 +108,10 @@ class OperationManager:
             return
 
         path = operation.checkpoint_path or self._get_checkpoint_path(operation.id)
-        try:
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(operation.model_dump_json())
-        except Exception:
-            pass
-
         if batch is not None:
             batch_path = os.path.join(os.path.dirname(path), "staged_batch.json")
-            try:
-                with open(batch_path, "w", encoding="utf-8") as f:
-                    f.write(batch.model_dump_json())
-            except Exception:
-                pass
+            atomic_json_write(batch_path, batch.model_dump_json())
+        atomic_json_write(path, operation.model_dump_json())
 
 
     def load_checkpoint(self, operation_id: str) -> Optional[Operation]:
@@ -146,13 +153,13 @@ class OperationManager:
                 try:
                     with open(checkpoint_file, "r", encoding="utf-8") as f:
                         op = Operation.model_validate(json.load(f))
-                    if op.status not in [OperationStatus.STAGED, OperationStatus.COMPLETED, OperationStatus.FAILED]:
+                    if op.status not in [OperationStatus.COMPLETED, OperationStatus.FAILED]:
                         # Resume non-terminal operation
                         self.active_operations[op.id] = op
                         self.document_locks[op.document_id] = op.id
                         self.executor.submit(resume_handler, op.id)
                 except Exception:
-                    pass
+                    logging.getLogger(__name__).warning("Skipped an unreadable operation checkpoint during recovery.")
 
     def release_lock(self, document_id: str):
         self.document_locks.pop(document_id, None)

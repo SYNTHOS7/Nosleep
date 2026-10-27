@@ -1,11 +1,19 @@
-# Local build verification — October 27
+# Local feature build and verification — October 27
 
-Added a local-only SQLite persistence mode using VECTOR_BACKEND=local. Completed extraction batches include source chunks, extracted graph assertions and vectors. They commit atomically and rebuild the embedded graph and cosine index on restart. start_local.ps1 starts this mode with cloud connections disabled and a loopback-only listener.
+The local application now supports saved themes, stable discovery snapshots, persistent original upload files, atomic operation checkpoints, automatic interrupted-job recovery, offline CISA KEV-shaped catalog import, metadata-only audit history, and bounded request throttling.
 
-Verified with a real SQLite database and HTTP server: loaded all six synthetic cyber documents; stopped and restarted the API process; recovered six documents and five potential attack paths; checked every returned route quote against its restored source chunk. Browser workspace loading and the cited blast-radius query worked after restart, with no captured browser warnings/errors. Screenshot: .test-temp/local-durability-proof.png (local, excluded from Git).
+Verified with a running localhost API and real SQLite: created an accepted operation before starting the server; startup resumed it and published its document. Discovered two themes and imported a synthetic KEV fixture through HTTP. Restarted the process again: eight documents, the same two theme IDs, and both request audit events recovered. Imported publisher authenticity is explicitly unverified; the fixture is not real threat intelligence. Catalog imports index CVE identifiers and source text without inferring attack edges from JSON fields or metadata.
 
-Five new regression tests cover restart recovery and workspace/topic filtering, edit/delete recovery, failed-write rollback, lifecycle startup restoration, and truthful health reporting. The required python test_all_phases.py run passed all four phases. Frontend production build and all three auth SDK checks passed.
+The Neo4j projection adapter writes all scoped nodes and evidence-bearing links in one managed transaction, replacing only AegisManaged nodes for that workspace. It receives all content and predicates as parameters. Local recording-driver checks verify transaction calls, parameterization, provenance and failure behavior; they do not execute Cypher against Neo4j. Live Neo4j integration is still pending. Writes retry on subsequent mutations or restart; operators can reconnect through authenticated configuration. Neon/SQLite remains authoritative and application queries still use the embedded graph.
 
-Corrected health labels to identify rule extraction and word-hash embeddings. A verified Neo4j connection no longer claims it is the active ingestion graph. The UI distinguishes saved local storage from temporary memory.
+Themes and request audit events have SQLite and Neon persistence adapters. Rerun the explicit Neon schema setup when connecting an existing database. Original upload files and operation checkpoints remain disk-backed: hosted services need persistent storage. Audit persistence failure is logged, not transactionally coupled to document writes. This is request history, not a tamper-proof compliance audit. Limits are per process and actor (local demo uses the peer address); they are not distributed or a replacement for platform-level abuse controls.
 
-Remaining: live Neon/Neo4j integration checks, active Neo4j ingestion/traversal, real model providers, durable original uploads and topics, multi-instance cache synchronization, audit trails and rate limits. SQLite mode is for a single local process and uses unauthenticated demo access; it is not a hosted authorization replacement.
+The required unified four-phase suite, frontend build and three auth SDK checks passed. New regression coverage includes restart and rollback behavior, theme scoping, validation failure audit status, audit privacy/admin access, rate-limit expiry/bounds, feed validation/deduplication, and safe graph projection contracts. The optional live Neo4j test remains skipped without credentials.
+
+To run: ./start_local.ps1. For the checked preview, open http://127.0.0.1:8003 and choose workspace local-proof. Local sources, databases and proof artifacts are excluded from Git.
+
+Still unfinished: real AI providers/learned embeddings, direct Neo4j-backed application traversal, live cloud verification, hosted upload/checkpoint object storage, cross-instance synchronization, additional NVD/MITRE/STIX import formats, and environment-aware exploit/remediation reasoning.
+
+Implementation references: https://neo4j.com/docs/python-manual/current/transactions/ and https://github.com/cisagov/kev-data/blob/develop/known_exploited_vulnerabilities_schema.json.
+
+Browser proof: .test-temp/complete-local-build.png shows eight restored documents and two saved themes; no captured console warnings/errors.

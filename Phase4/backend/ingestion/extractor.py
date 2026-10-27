@@ -153,11 +153,17 @@ For every extracted relation:
 
 
 def extract_chunk(chunk: Chunk, use_cache: bool = True) -> CandidateGraph:
-    """
-    Extracts entities and relations from a chunk.
-    Intercepts extraction output before graph write.
-    Validates exact quote evidence and applies formatting repair / transient retries.
-    """
+    """Extract grounded assertions, or index explicitly typed catalog source data."""
+    # Catalog fields are source data, not prose assertions. Index explicit CVE
+    # identifiers without inventing attack edges from JSON headings or metadata.
+    if chunk.metadata.get("source_format") == "cisa-kev":
+        cves = sorted(set(re.findall(r"CVE-[0-9]{4}-[0-9]{4,19}", chunk.text)))
+        entities = [Entity(id="kev-" + hashlib.sha256(cve.encode()).hexdigest()[:16],
+                           name=cve, label="Vulnerability", source_chunk_id=chunk.id)
+                    for cve in cves]
+        return CandidateGraph(chunk_id=chunk.id, entities=entities,
+                              warnings=["Catalog import is searchable source data; publisher identity is unverified and attack edges are not inferred."],
+                              is_empty=not entities)
     cache_key = build_cache_key(chunk)
     if use_cache:
         cached = _cache.get(cache_key)

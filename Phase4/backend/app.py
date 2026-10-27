@@ -8,6 +8,7 @@ import tempfile
 import time
 import uuid
 import re
+from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
 from fastapi import (
@@ -47,15 +48,28 @@ from backend.services.query_service import get_query_service
 from backend.services.topic_service import get_topic_service
 from backend.storage.graph_store import get_graph_store
 
+@asynccontextmanager
+async def lifespan(application):
+    if os.environ.get("VECTOR_BACKEND") in {"local", "neon"}:
+        service = get_lifecycle_service()
+        get_operation_manager().recover_on_restart(service.resume_operation)
+        from backend.storage.db_manager import get_db_manager
+        get_db_manager().sync_graph(service.graph_store)
+    yield
+
+
 app = FastAPI(
     title="AegisGraph AI API",
     version="1.0.0",
+    lifespan=lifespan,
     description="Person 4 FastAPI backend providing document lifecycle, grounded query answering, topics, and graph slices.",
 )
 
 from backend.security.access import ProtectedRoute, auth_mode
 auth_mode()  # Reject unsafe storage/auth combinations at startup.
 app.router.route_class = ProtectedRoute
+
+
 from backend.security.upload_limits import UploadLimitMiddleware
 app.add_middleware(UploadLimitMiddleware)
 
@@ -80,8 +94,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "kb_uploads")
+UPLOAD_DIR = os.environ.get("UPLOAD_DIR", os.path.join(os.path.dirname(__file__), "..", "..", "data", "uploads"))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+def upload_path(workspace, filename):
+    """Unique source paths prevent cross-workspace/document uploads overwriting each other."""
+    directory = os.path.join(UPLOAD_DIR, workspace, uuid.uuid4().hex)
+    os.makedirs(directory, exist_ok=True)
+    return os.path.join(directory, safe_filename(filename))
 
 
 def safe_filename(name):
@@ -96,6 +117,7 @@ def safe_filename(name):
 async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
+        headers=exc.headers,
         content=ErrorResponse(
             error_code=f"HTTP_{exc.status_code}",
             message=str(exc.detail),
@@ -149,6 +171,13 @@ def get_database_status_endpoint():
     return get_db_manager().get_status()
 
 
+@app.get("/v1/workspaces/{ws}/audit")
+def get_workspace_audit(ws: str, limit: int = Query(100, ge=1, le=500)):
+    from backend.storage.vector_store import get_vector_store
+    persistence = getattr(get_vector_store(), "persistence", None)
+    return {"workspace_id": ws, "events": persistence.list_audit(ws, limit) if persistence else []}
+
+
 @app.post("/v1/database/configure")
 async def configure_database_endpoint(request: Request):
     """Allows runtime configuration and connectivity testing of Neo4j credentials."""
@@ -200,12 +229,12 @@ async def upload_document(
         fname = safe_filename(file.filename or "upload.txt")
         ext = os.path.splitext(fname)[1].lower()
         source_type = "pdf" if ext == ".pdf" else "txt"
-        file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_{fname}")
+        file_path = upload_path(ws, fname)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     elif raw_text:
         fname = safe_filename(filename or "pasted_source.txt")
-        file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_{fname}")
+        file_path = upload_path(ws, fname)
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(raw_text)
     else:
@@ -238,6 +267,29 @@ async def upload_document(
         accepted_at=op.accepted_at,
         retry_after=1,
     )
+
+
+@app.post("/v1/workspaces/{ws}/imports/cisa-kev", response_model=MutationReceipt, status_code=202)
+async def import_cisa_kev(ws: str, file: UploadFile = File(...)):
+    """Validate an uploaded catalog and ingest a cited, normalized snapshot without network access."""
+    from backend.ingestion.cisa_kev import normalize_catalog
+    content = await file.read(5 * 1024 * 1024 + 1)
+    try:
+        catalog = normalize_catalog(content)
+    except (ValueError, RecursionError):
+        raise HTTPException(400, "Invalid CISA KEV catalog. Check its required fields, dates, count, unique CVE IDs and 5 MiB limit.") from None
+    path = upload_path(ws, "cisa-kev-snapshot.txt")
+    with open(path, "w", encoding="utf-8") as stream:
+        stream.write(catalog["text"])
+    with open(os.path.join(os.path.dirname(path), "original-catalog.json"), "wb") as stream:
+        stream.write(content)
+    manager = get_operation_manager()
+    op = manager.create_operation(ws, catalog["document_id"], OperationType.ADD, path, "txt")
+    op.metrics.update({"import_format": "cisa-kev", "record_count": catalog["count"], "catalog_sha256": catalog["sha256"]})
+    manager.save_checkpoint(op)
+    manager.executor.submit(get_lifecycle_service().process_operation, op)
+    return MutationReceipt(status="accepted", operation_id=op.id, document_id=op.document_id,
+                           workspace_id=ws, accepted_at=op.accepted_at, retry_after=1)
 
 
 @app.get(
@@ -336,7 +388,7 @@ async def upload_documents_batch(
         # Handle individual file
         doc_id = f"doc-{uuid.uuid4().hex[:12]}"
         source_type = "pdf" if ext == ".pdf" else "txt"
-        file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_{fname}")
+        file_path = upload_path(ws, fname)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(upload.file, buffer)
 
@@ -436,12 +488,12 @@ async def edit_document(
         fname = safe_filename(file.filename or current_doc.source_name)
         ext = os.path.splitext(fname)[1].lower()
         source_type = "pdf" if ext == ".pdf" else "txt"
-        file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_rev{expected_revision_id+1}_{fname}")
+        file_path = upload_path(ws, fname)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     elif raw_text:
         fname = safe_filename(filename or current_doc.source_name)
-        file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_rev{expected_revision_id+1}_{fname}")
+        file_path = upload_path(ws, fname)
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(raw_text)
     else:
@@ -556,7 +608,7 @@ def list_topics(workspace_id: str = Query(...)) -> TopicList:
 
 
 @app.post("/v1/topics/discover", response_model=TopicList)
-def discover_topics(workspace_id: str = Query(...), k: int = 3) -> TopicList:
+def discover_topics(workspace_id: str = Query(...), k: int = Query(3, ge=1, le=50)) -> TopicList:
     """Triggers topic discovery and clustering for workspace."""
     topic_service = get_topic_service()
     topic_service.discover_and_freeze_topics(workspace_id, k_clusters=k)

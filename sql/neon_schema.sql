@@ -34,4 +34,15 @@ CREATE TABLE IF NOT EXISTS aegis.memberships (
     role text NOT NULL CHECK (role IN ('viewer', 'editor', 'admin')),
     PRIMARY KEY(user_id, workspace_id)
 );
+CREATE TABLE IF NOT EXISTS aegis.topic_state (
+    workspace_id text PRIMARY KEY,
+    payload jsonb NOT NULL
+);
+CREATE TABLE IF NOT EXISTS aegis.audit_events (
+    id text PRIMARY KEY,
+    workspace_id text,
+    timestamp double precision NOT NULL,
+    payload jsonb NOT NULL
+);
+CREATE INDEX IF NOT EXISTS aegis_audit_workspace_time ON aegis.audit_events(workspace_id,timestamp);
 REVOKE ALL ON ALL TABLES IN SCHEMA aegis FROM PUBLIC;

@@ -4,7 +4,8 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-from backend.contracts.models import ExtractionBatch
+from backend.contracts.models import ExtractionBatch, Topic, TopicAssignment
+import json
 
 
 class LocalStore:
@@ -15,6 +16,9 @@ class LocalStore:
             conn.execute("""CREATE TABLE IF NOT EXISTS documents (
                 workspace_id TEXT NOT NULL, document_id TEXT NOT NULL, batch TEXT NOT NULL,
                 PRIMARY KEY (workspace_id, document_id))""")
+            conn.execute("CREATE TABLE IF NOT EXISTS topic_state (workspace_id TEXT PRIMARY KEY, payload TEXT NOT NULL)")
+            conn.execute("CREATE TABLE IF NOT EXISTS audit_events (id TEXT PRIMARY KEY, workspace_id TEXT, timestamp REAL NOT NULL, payload TEXT NOT NULL)")
+            conn.execute("CREATE INDEX IF NOT EXISTS audit_workspace_time ON audit_events(workspace_id,timestamp)")
 
     @contextmanager
     def connection(self):
@@ -45,6 +49,32 @@ class LocalStore:
     def delete_document(self, workspace_id, document_id):
         with self.connection() as conn:
             conn.execute("DELETE FROM documents WHERE workspace_id=? AND document_id=?", (workspace_id, document_id))
+
+    def save_topics(self, workspace, topics, assignments):
+        if any(t.workspace_id != workspace for t in topics):
+            raise ValueError("Topic workspace mismatch")
+        payload = json.dumps({"topics": [t.model_dump() for t in topics],
+                              "assignments": [a.model_dump() for a in assignments]})
+        with self.connection() as conn:
+            conn.execute("INSERT INTO topic_state VALUES (?,?) ON CONFLICT(workspace_id) DO UPDATE SET payload=excluded.payload",
+                         (workspace, payload))
+
+    def load_topics(self):
+        with self.connection() as conn:
+            for workspace, payload in conn.execute("SELECT workspace_id,payload FROM topic_state"):
+                data = json.loads(payload)
+                topics = [Topic.model_validate(t) for t in data["topics"]]
+                if any(t.workspace_id != workspace for t in topics):
+                    raise ValueError("Topic workspace mismatch")
+                yield workspace, topics, [TopicAssignment.model_validate(a) for a in data["assignments"]]
+
+    def record_audit(self, event):
+        with self.connection() as conn:
+            conn.execute("INSERT INTO audit_events VALUES (?,?,?,?)", (event["id"], event["workspace_id"], event["timestamp"], json.dumps(event)))
+
+    def list_audit(self, workspace, limit=100):
+        with self.connection() as conn:
+            return [json.loads(row[0]) for row in conn.execute("SELECT payload FROM audit_events WHERE workspace_id=? ORDER BY timestamp DESC LIMIT ?", (workspace, min(max(limit, 1), 500)))]
 
 
 class LocalVectorStore:

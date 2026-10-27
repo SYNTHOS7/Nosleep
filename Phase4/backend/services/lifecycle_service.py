@@ -37,6 +37,9 @@ class LifecycleService:
             for batch in self.persistence.load_batches():
                 self.graph_store.publish_batch(batch)
                 self.vector_store.cache_vectors(batch.workspace_id, batch.vectors)
+            if hasattr(self.persistence, "load_topics"):
+                for workspace, topics, assignments in self.persistence.load_topics():
+                    self.graph_store.replace_topics(workspace, topics, assignments)
 
     def process_operation(self, op: Operation) -> Operation:
         """
@@ -60,6 +63,9 @@ class LifecycleService:
                         self.vector_store._vectors.get(ws, {}).pop(cid, None)
                 else:
                     self.vector_store.remove_chunks(ws, chunk_ids)
+
+                self.save_topics(ws)
+                self.sync_graph(ws)
 
                 op.status = OperationStatus.COMPLETED
                 op.ready_at = time.time()
@@ -173,6 +179,8 @@ class LifecycleService:
                 except Exception:
                     pass
 
+            self.save_topics(ws)
+            self.sync_graph(ws)
             # Mark completed
             op.status = OperationStatus.COMPLETED
             op.ready_at = time.time()
@@ -193,9 +201,34 @@ class LifecycleService:
             op.error_message = str(e)
             op.ready_at = time.time()
             op.stage_timings["total"] = op.ready_at - start_time
-            self.op_manager.save_checkpoint(op)
-            self.op_manager.release_lock(doc_id)
+            try:
+                self.op_manager.save_checkpoint(op)
+            finally:
+                self.op_manager.release_lock(doc_id)
             raise
+
+    def save_topics(self, workspace):
+        if self.persistence and hasattr(self.persistence, "save_topics"):
+            self.persistence.save_topics(workspace, self.graph_store.get_topics(workspace),
+                                         self.graph_store.topic_assignments.get(workspace, []))
+
+    def sync_graph(self, workspace):
+        from backend.storage.db_manager import get_db_manager
+        get_db_manager().sync_graph(self.graph_store, workspace)
+
+    def resume_operation(self, operation_id):
+        op = self.op_manager.load_checkpoint(operation_id)
+        if not op:
+            return
+        current = self.graph_store.get_document(op.workspace_id, op.document_id)
+        if op.operation_type == OperationType.EDIT and current and current.revision >= op.new_revision:
+            # The document commit may have succeeded before its completion checkpoint.
+            op.status = OperationStatus.COMPLETED
+            op.metrics["recovered_committed_revision"] = True
+            self.op_manager.save_checkpoint(op)
+            self.op_manager.release_lock(op.document_id)
+            return
+        self.process_operation(op)
 
 
 _default_lifecycle_service = LifecycleService()

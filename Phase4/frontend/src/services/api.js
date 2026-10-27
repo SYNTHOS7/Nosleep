@@ -56,7 +56,9 @@ export async function uploadDocument(workspaceId, { file, rawText, filename }) {
     formData.append('filename', filename)
   }
 
-  const res = await apiFetch(`${BASE_URL}/v1/workspaces/${workspaceId}/documents`, {
+  const isKev = file && (file.name === 'known_exploited_vulnerabilities.json' || file.name.endsWith('.kev.json'))
+  const route = isKev ? 'imports/cisa-kev' : 'documents'
+  const res = await apiFetch(`${BASE_URL}/v1/workspaces/${encodeURIComponent(workspaceId)}/${route}`, {
     method: 'POST',
     body: formData,
   })
