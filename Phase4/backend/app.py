@@ -128,8 +128,8 @@ def get_health() -> HealthResponse:
             "graph_store": {"status": "ready", "type": db_status["active_mode"]},
             "vector_store": {"status": "ready", "dimension": 768, "backend": db_status["vector_backend"], "chroma": db_status["chromadb"]["status"]},
             "unstructured_parser": {"status": "ready", "fallback": "pypdf_local"},
-            "kg_builder": {"status": "ready", "adapter": "neo4j-graphrag-adapter"},
-            "embedder": {"status": "ready", "model": "paraphrase-multilingual-mpnet-base-v2"},
+            "kg_builder": {"status": "ready", "adapter": "deterministic-rule-extractor"},
+            "embedder": {"status": "ready", "model": "deterministic-word-hash", "learned_semantic_embeddings": False},
         },
         pinned_versions={
             "python": "3.11.16",

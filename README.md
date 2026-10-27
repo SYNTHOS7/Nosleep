@@ -45,6 +45,12 @@ Neon schema setup, Vercel routing, Render settings, MCP setup and remaining boun
 
 ## Run locally
 
+On Windows, `./start_local.ps1` starts the complete app at http://localhost:8000
+with SQLite persistence and no cloud connections. Completed documents, source
+evidence and vectors survive restarts. This is a local demo with no login;
+topics must be rediscovered after a restart. The local database stays out of Git.
+For other shells, set `VECTOR_BACKEND=local`, `AUTH_MODE=demo`, and run the API.
+
 Python 3.11+:
 
 ```bash

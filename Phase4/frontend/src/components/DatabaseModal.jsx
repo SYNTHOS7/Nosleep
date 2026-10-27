@@ -3,6 +3,7 @@ import { configureDatabase } from '../services/api'
 
 export default function DatabaseModal({ dbStatus, onClose, onRefresh, canConfigure = false }) {
   const usesNeon = dbStatus?.vector_backend === 'neon'
+  const usesLocal = dbStatus?.vector_backend === 'local'
   const [uri, setUri] = useState(dbStatus?.neo4j?.uri === 'none' ? '' : dbStatus?.neo4j?.uri || '')
   const [username, setUsername] = useState('neo4j')
   const [password, setPassword] = useState('')
@@ -63,10 +64,10 @@ export default function DatabaseModal({ dbStatus, onClose, onRefresh, canConfigu
               </span>
             </div>
             <p style={{ margin: '8px 0 4px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              {usesNeon ? dbStatus?.neon?.error_or_info : dbStatus?.chromadb?.error_or_info}
+              {usesNeon ? dbStatus?.neon?.error_or_info : usesLocal ? dbStatus?.local?.error_or_info : 'Session memory only; documents are lost when the backend restarts.'}
             </p>
             <div style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-              {usesNeon ? 'Hosted documents and database vector search' : 'Local persistence'} | Embedding Dim: 768
+              {usesNeon ? 'Hosted documents and database vector search' : usesLocal ? 'SQLite document storage and local cosine search' : 'In-memory cosine search'} | Embedding Dim: 768
             </div>
           </div>
 

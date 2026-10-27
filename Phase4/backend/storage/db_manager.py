@@ -146,13 +146,14 @@ class DatabaseManager:
 
         return {
             "status": "healthy",
-            "active_mode": "neo4j_aura" if self.neo4j_status == "connected" else "embedded_transactional",
+            "active_mode": "embedded_transactional",
             "neo4j": {
                 "configured": bool(self.neo4j_uri and "example" not in self.neo4j_uri),
                 "status": self.neo4j_status,
                 "uri": _mask_uri(self.neo4j_uri) if self.neo4j_uri else "none",
                 "database": self.neo4j_database,
-                "error_or_info": self.neo4j_error or "Neo4j connection is verified and active.",
+                "error_or_info": self.neo4j_error or "Connection verified; ingestion and traversal still use the embedded graph.",
+                "ingestion_active": False,
             },
             "chromadb": {
                 "configured": self.chroma_status != "disabled",
@@ -168,6 +169,11 @@ class DatabaseManager:
                 "directory": os.path.abspath("./data/operations"),
             },
             "vector_backend": os.environ.get("VECTOR_BACKEND", "in_memory"),
+            "local": {
+                "configured": os.environ.get("VECTOR_BACKEND") == "local",
+                "backend": "sqlite_batches_in_memory_cosine",
+                "error_or_info": "Completed documents and evidence are saved locally; graph and search rebuild on startup.",
+            },
             "neon": {
                 "configured": os.environ.get("VECTOR_BACKEND") == "neon",
                 "status": "initialized" if os.environ.get("VECTOR_BACKEND") == "neon" else "disabled",

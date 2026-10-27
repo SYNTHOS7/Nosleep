@@ -81,8 +81,11 @@ if _vector_backend == "neon":
     _default_vector_store = NeonVectorStore()
 elif _vector_backend == "in_memory":
     _default_vector_store = VectorStore()
+elif _vector_backend == "local":
+    from backend.storage.local_store import LocalVectorStore
+    _default_vector_store = LocalVectorStore()
 else:
-    raise ValueError("VECTOR_BACKEND must be in_memory or neon")
+    raise ValueError("VECTOR_BACKEND must be in_memory, local or neon")
 
 
 def get_vector_store() -> VectorStore:

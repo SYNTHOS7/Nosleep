@@ -21,6 +21,11 @@ Live Neon integration remains pending account configuration. Neo4j write-through
 multi-instance cache synchronization and durable original uploads remain unfinished.
 Extraction and embeddings are deterministic; do not describe them as an LLM or
 learned semantic embeddings. Historical diagrams below contain planned features.
+
+Local development now supports VECTOR_BACKEND=local (SQLite extraction batches,
+graph/vector reconstruction on restart). start_local.ps1 runs the complete local
+demo without cloud services. See docs/LOCAL_VERIFICATION.md for measured evidence.
+
 ## 1. Project Mission & Pivot Summary
 
 ### What This System Is
