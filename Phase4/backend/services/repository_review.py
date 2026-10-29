@@ -146,11 +146,14 @@ def analyze(data, origin='uploaded ZIP', commit=None):
                 if re.search(r'\bdangerouslySetInnerHTML\s*=', text):
                     add(path, line, 'raw-html', 'Raw HTML rendering requires review', 'Render text normally or sanitize HTML with a maintained sanitizer; trace the input source.', 'Raw HTML rendering')
     findings = list({item['id']: item for item in findings}.values())
+    from backend.services.source_architecture import build_architecture
+    architecture = build_architecture(files, findings)
     return {'id': uuid.uuid4().hex, 'created_at': datetime.now(timezone.utc).isoformat(),
             'origin': origin, 'commit': commit, 'archive_sha256': hashlib.sha256(data).hexdigest(),
             'ruleset': RULESET, 'files_analyzed': len(files), 'files_skipped': len(skipped),
             'source_manifest': {path: hashlib.sha256(text.encode()).hexdigest() for path, text in sorted(files.items())},
             'parse_errors': parse_errors, 'entry_candidates': entries[:500], 'findings': findings,
+            'architecture': architecture,
             'limitations': ['Five narrow source rules only; not a full security audit.',
                            'No dependency, secret, taint, cross-file call graph or runtime analysis.',
                            'Routes are candidates; no connection to findings or exploit path is inferred.',

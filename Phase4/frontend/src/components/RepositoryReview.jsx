@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { apiFetch } from '../services/api'
+import RepositoryArchitecture from './RepositoryArchitecture'
 
 const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
 
@@ -72,10 +73,13 @@ export default function RepositoryReview({ workspaceId, canWrite }) {
       <p>{current.files_analyzed} source files analyzed · {current.files_skipped} skipped · {current.parse_errors.length} Python parsing failures.</p>
       <p>Source: {current.origin} · Version: {current.commit || current.archive_sha256}</p>
       <button onClick={download}>Download review JSON</button>
+      <RepositoryArchitecture key={current.id} review={current} />
       {current.findings.length === 0 && <p>No matching patterns were found within the supported rules. Other weaknesses may exist.</p>}
-      {current.findings.map(f => <article key={f.id} className="repo-finding">
+      {current.findings.map(f => <article key={f.id} id={`finding-${f.id}`} className="repo-finding">
         <small>NEEDS HUMAN REVIEW · {f.rule}</small><h3>{f.title}</h3>
         <p><strong>Evidence location:</strong> {f.file}:{f.line}</p>
+        {f.containing_functions?.length > 0 && <p><strong>Containing functions:</strong> {f.containing_functions.join(', ')}. Code containment does not establish attacker input flow.</p>}
+        {f.route_declarations?.length > 0 && <p>This operation appears inside a function with a route declaration. Verify exposure, access controls and whether request input reaches it.</p>}
         {current.commit && <a target="_blank" rel="noopener noreferrer" href={`${current.origin}/blob/${current.commit}/${f.file.split('/').map(encodeURIComponent).join('/')}#L${f.line}`}>Inspect code at this commit</a>}
         <ol className="repo-story">{f.story.map(step => <li key={step}>{step}</li>)}</ol>
         <p><strong>What to change:</strong> {f.fix}</p>

@@ -1551,3 +1551,8 @@ body {
 .repository-mode .graph-workspace { display: none; }
 .repository-mode .repo-review { max-width: 960px; margin: 0 auto; }
 .repository-mode .repo-review form { max-width: 640px; }
+.repo-architecture { margin: 24px 0; padding: 18px; border: 1px solid #62758b; border-radius: 8px; background: #142333; }
+.repo-map-scroll { overflow-x: auto; margin: 16px 0; border: 1px solid #62758b; border-radius: 6px; padding: 12px; }
+.repo-map-scroll svg { display: block; width: 100%; min-width: 740px; }
+.repo-architecture li { overflow-wrap: anywhere; margin: 8px 0; }
+.repo-finding:target { outline: 2px solid #e4b96b; outline-offset: 4px; }
