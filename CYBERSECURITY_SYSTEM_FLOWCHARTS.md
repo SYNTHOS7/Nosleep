@@ -1,12 +1,12 @@
 # AegisGraph — current architecture and flowcharts
 
-AegisGraph turns documents, NVD/STIX/KEV catalogs and scanner reports into cited workspace evidence. Optional Ollama mode now runs real local extraction and semantic embeddings; the hash/rule demo remains available in a separate database. Neon and Neo4j await live connection checks. Remediation execution is not implemented. Investigation evidence can also be downloaded locally as revision-checked text and JSON reports. Analyst-supplied asset inventory now supports transparent route review ordering with missing-context flags.
+AegisGraph turns documents, NVD/STIX/KEV catalogs and scanner reports into cited workspace evidence. Optional Ollama mode now runs real local extraction and semantic embeddings; the hash/rule demo remains available in a separate database. Neon and Neo4j await live connection checks. Remediation execution is not implemented. Investigation evidence can also be downloaded locally as revision-checked text and JSON reports. Analyst-supplied asset inventory now supports transparent route review ordering with missing-context flags. Repository review imports bounded public GitHub commit snapshots or ZIPs, applies five passive source rules and persists workspace review/comparison records. It does not establish exploit paths. Feature scope is frozen; hardening remains.
 
 Solid boxes: implemented. Dashed boxes: configured or planned; live verification may still be pending.
 
 ## System architecture
 
-FastAPI enforces workspace roles. SQLite or Neon stores extraction batches, topics and request audit events. Queries traverse the embedded graph; Neo4j is an optional derived copy, not the active query engine. Ollama mode is loopback-only and rejects mixed embedding model profiles; it does not require cloud credentials.
+FastAPI enforces workspace roles. SQLite or Neon stores extraction batches, topics and request audit events. Queries traverse the embedded graph; Neo4j is an optional derived copy, not the active query engine. Ollama mode is loopback-only and rejects mixed embedding model profiles; it does not require cloud credentials. Repository review is a separate passive source-analysis branch with SQLite/Neon persistence; it does not inject unproven code edges into the graph.
 
 ```mermaid
 flowchart LR
@@ -22,6 +22,8 @@ flowchart LR
     style neo4j stroke-dasharray: 5 5,fill:#263344
     cloud["Vercel and Render connections"]
     style cloud stroke-dasharray: 5 5,fill:#263344
+    repository_source["Public GitHub commit or source ZIP"]
+    source_review["Passive rules and review comparison"]
     docs --> api
     api --> pipeline
     pipeline --> store
@@ -31,6 +33,9 @@ flowchart LR
     investigate --> ui
     graph --> neo4j
     cloud --> api
+    repository_source --> source_review
+    source_review --> store
+    source_review --> ui
 ```
 
 ## Scanner report and source flow

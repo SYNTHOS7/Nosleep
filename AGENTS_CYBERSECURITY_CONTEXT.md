@@ -31,6 +31,10 @@ Investigation TXT/JSON downloads are implemented with workspace read permissions
 
 Persistent analyst asset context and review-order-v1 route triage are implemented. Context is explicitly unverified and never becomes an exploitability score. See docs/ASSET_INVENTORY.md.
 
+## Feature freeze (October 29)
+
+Repository source review is the final feature addition. See docs/REPOSITORY_REVIEW.md for supported rules and limitations. Further work must focus on correctness, usability, security and production readiness; do not add product features without explicit user scope approval.
+
 ## 1. Project Mission & Pivot Summary
 
 ### What This System Is

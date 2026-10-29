@@ -197,6 +197,39 @@ def get_workspace_audit(ws: str, limit: int = Query(100, ge=1, le=500)):
     return {"workspace_id": ws, "events": persistence.list_audit(ws, limit) if persistence else []}
 
 
+@app.get("/v1/workspaces/{ws}/repository-reviews")
+def repository_reviews(ws: str):
+    from backend.services.repository_review import list_reviews
+    return {"reviews": list_reviews(ws)}
+
+
+@app.post("/v1/workspaces/{ws}/repository-reviews")
+def create_repository_review(ws: str, github_url: str = Form(""), file: UploadFile | None = File(None)):
+    from backend.services.repository_review import github_snapshot, analyze, save, MAX_ARCHIVE
+    try:
+        if bool(github_url) == bool(file):
+            raise ValueError("Provide either a public GitHub URL or a repository ZIP")
+        if file:
+            data, origin, commit = file.file.read(MAX_ARCHIVE + 1), 'uploaded ZIP', None
+        else:
+            data, origin, commit = github_snapshot(github_url.strip())
+        return save(ws, analyze(data, origin, commit))
+    except ValueError as error:
+        raise HTTPException(400, str(error)) from None
+
+
+@app.get("/v1/workspaces/{ws}/repository-comparison")
+def repository_comparison(ws: str, before: str, after: str):
+    from backend.services.repository_review import list_reviews, compare
+    records = {item['id']: item for item in list_reviews(ws)}
+    if before not in records or after not in records:
+        raise HTTPException(404, "Review not found in recent workspace history")
+    try:
+        return compare(records[before], records[after])
+    except ValueError as error:
+        raise HTTPException(400, str(error)) from None
+
+
 @app.get("/v1/workspaces/{ws}/assets")
 def list_asset_inventory(ws: str):
     from backend.services.asset_service import repository

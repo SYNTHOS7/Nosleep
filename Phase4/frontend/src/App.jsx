@@ -1,3 +1,4 @@
+import RepositoryReview from './components/RepositoryReview'
 import React, { useEffect, useState } from 'react'
 import DocumentUploader from './components/DocumentUploader'
 import DocumentList from './components/DocumentList'
@@ -275,7 +276,7 @@ export default function App({ session = { demo: true, workspaces: {} }, onSignOu
       </header>
 
       {/* Main Split-Screen Workspace */}
-      <div className="split-screen">
+      <div className={`split-screen ${activeTab === 'repository' ? 'repository-mode' : ''}`}>
         {/* Left Workbench Panel */}
         <aside
           className={`left-panel ${sidebarCollapsed ? 'collapsed' : ''}`}
@@ -346,6 +347,8 @@ export default function App({ session = { demo: true, workspaces: {} }, onSignOu
           {/* Active Tab Panel Content */}
           {!sidebarCollapsed && (
             <div className="left-panel-content">
+              <button className="topic-chip" id="tab-repository-btn" onClick={() => setActiveTab('repository')}>Repository investigation</button>
+              {activeTab === 'repository' && <RepositoryReview workspaceId={workspaceId} canWrite={canWrite} />}
               <button className="topic-chip" id="tab-assets-btn" onClick={() => setActiveTab('assets')}>Asset inventory &amp; route priority</button>
               {activeTab === 'assets' && <AssetInventory workspaceId={workspaceId} canWrite={canWrite} onSelectChunk={handleSelectChunk} />}
               {activeTab === 'chat' && (

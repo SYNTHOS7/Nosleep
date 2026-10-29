@@ -54,3 +54,9 @@ CREATE TABLE IF NOT EXISTS aegis.assets (
     PRIMARY KEY(workspace_id,asset_id)
 );
 REVOKE ALL ON aegis.assets FROM PUBLIC;
+
+CREATE TABLE IF NOT EXISTS aegis.repository_reviews (
+ workspace_id text NOT NULL, id text NOT NULL, created_at timestamptz NOT NULL,
+ payload jsonb NOT NULL, PRIMARY KEY (workspace_id,id)
+);
+CREATE INDEX IF NOT EXISTS repository_reviews_workspace_time ON aegis.repository_reviews(workspace_id,created_at DESC);

@@ -19,6 +19,7 @@ class LocalStore:
             conn.execute("CREATE TABLE IF NOT EXISTS topic_state (workspace_id TEXT PRIMARY KEY, payload TEXT NOT NULL)")
             conn.execute("CREATE TABLE IF NOT EXISTS audit_events (id TEXT PRIMARY KEY, workspace_id TEXT, timestamp REAL NOT NULL, payload TEXT NOT NULL)")
             conn.execute("CREATE INDEX IF NOT EXISTS audit_workspace_time ON audit_events(workspace_id,timestamp)")
+            conn.execute("CREATE TABLE IF NOT EXISTS repository_reviews (workspace_id TEXT NOT NULL, id TEXT NOT NULL, created_at TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(workspace_id,id))")
             conn.execute("CREATE TABLE IF NOT EXISTS assets (workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, version INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(workspace_id,asset_id))")
 
     @contextmanager
@@ -93,6 +94,15 @@ class LocalStore:
     def delete_asset(self, workspace, identifier, expected, token):
         with self.connection() as conn:
             return conn.execute("DELETE FROM assets WHERE workspace_id=? AND asset_id=? AND version=? AND json_extract(payload,'$.revision_token')=?", (workspace, identifier, expected, token)).rowcount == 1
+
+
+    def save_repository_review(self, workspace, result):
+        with self.connection() as conn:
+            conn.execute("INSERT INTO repository_reviews VALUES (?,?,?,?)", (workspace, result['id'], result['created_at'], json.dumps(result)))
+
+    def list_repository_reviews(self, workspace):
+        with self.connection() as conn:
+            return [json.loads(row[0]) for row in conn.execute("SELECT payload FROM repository_reviews WHERE workspace_id=? ORDER BY created_at DESC LIMIT 20", (workspace,))]
 
 
 class LocalVectorStore:

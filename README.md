@@ -184,3 +184,8 @@ Live Neo4j transactions require verification when you connect your account.
 
 The older blueprint/flowcharts contain planned features; the setup guide and
 implementation notes above describe the current code.
+
+
+### Final feature scope — October 29
+
+Repository investigation supports public GitHub commit snapshots or bounded source ZIPs, five passive source rules, file/line evidence locations, persistent review history and rescan comparison. See [coverage and limitations](docs/REPOSITORY_REVIEW.md). Feature scope is now frozen: further work focuses on accuracy, fixes, usability, security and production readiness. This is a tested local prototype, not a production security certification.

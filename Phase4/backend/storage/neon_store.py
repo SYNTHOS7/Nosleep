@@ -149,6 +149,16 @@ class NeonStore:
                 conn.execute("UPDATE aegis.users SET platform_admin=%s WHERE user_id=%s", (platform_admin, user_id))
 
 
+    def save_repository_review(self, workspace, result):
+        with self.connection() as conn:
+            conn.execute("INSERT INTO aegis.repository_reviews(workspace_id,id,created_at,payload) VALUES (%s,%s,%s,%s::jsonb)", (workspace, result['id'], result['created_at'], json.dumps(result)))
+
+    def list_repository_reviews(self, workspace):
+        with self.connection() as conn:
+            rows = conn.execute("SELECT payload FROM aegis.repository_reviews WHERE workspace_id=%s ORDER BY created_at DESC LIMIT 20", (workspace,)).fetchall()
+            return [json.loads(row[0]) if isinstance(row[0], str) else row[0] for row in rows]
+
+
 class NeonVectorStore:
     def __init__(self, connection_factory=None):
         from backend.storage.vector_store import VectorStore

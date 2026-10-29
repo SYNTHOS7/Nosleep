@@ -1535,3 +1535,19 @@ body {
 }
 
 
+
+.repo-review { padding: 18px; line-height: 1.6; }
+.repo-review h2 { font-size: 1.3rem; }
+.repo-review label { display: grid; gap: 6px; margin: 14px 0; }
+.repo-review input, .repo-review select { width: 100%; padding: 9px; background: #182333; color: inherit; border: 1px solid #62758b; border-radius: 5px; }
+.repo-review button { margin: 6px 8px 6px 0; padding: 9px 12px; cursor: pointer; }
+.repo-review button:disabled { opacity: .6; cursor: wait; }
+.repo-finding { border-left: 3px solid #e4b96b; padding: 12px 16px; margin: 20px 0; background: rgba(98,117,139,.12); overflow-wrap: anywhere; }
+.repo-story { padding-left: 22px; }
+.repo-story li { padding: 5px 0; }
+.repo-review :focus-visible { outline: 2px solid #8dc9ee; outline-offset: 3px; }
+
+.repository-mode .left-panel:not(.collapsed) { width: 100%; min-width: 0; }
+.repository-mode .graph-workspace { display: none; }
+.repository-mode .repo-review { max-width: 960px; margin: 0 auto; }
+.repository-mode .repo-review form { max-width: 640px; }
