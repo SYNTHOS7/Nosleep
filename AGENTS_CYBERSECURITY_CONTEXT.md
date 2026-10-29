@@ -33,7 +33,7 @@ Persistent analyst asset context and review-order-v1 route triage are implemente
 
 ## Feature freeze (October 29)
 
-Repository source review is the final feature addition. Its clarified scope includes static source-import diagrams, cited route declaration candidates and per-component findings; runtime exploitability and whole-codebase semantic understanding are not established. See docs/REPOSITORY_REVIEW.md for supported rules and limitations. Further work must focus on correctness, usability, security and production readiness; do not add product features without explicit user scope approval.
+Repository source review is the final feature addition. Its clarified scope includes static source-import diagrams, cited route declaration candidates, per-component findings, and before/after line-range plus reverse-import change-impact review; runtime exploitability and whole-codebase semantic understanding are not established. See docs/REPOSITORY_REVIEW.md for supported rules and limitations. Further work must focus on correctness, usability, security and production readiness; do not add product features without explicit user scope approval.
 
 ## 1. Project Mission & Pivot Summary
 

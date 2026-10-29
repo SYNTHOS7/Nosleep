@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { apiFetch } from '../services/api'
 import RepositoryArchitecture from './RepositoryArchitecture'
+import ChangeImpact from './ChangeImpact'
 
 const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
 
@@ -67,7 +68,7 @@ export default function RepositoryReview({ workspaceId, canWrite }) {
     {error && <p role="alert">{error}</p>}
     {reviews.length > 0 && <label>Review history<select value={selected} onChange={e => { setSelected(e.target.value); setComparison(null) }}>{reviews.map(r => <option key={r.id} value={r.id}>{r.created_at} · {r.commit?.slice(0, 8) || r.archive_sha256.slice(0, 8)}</option>)}</select></label>}
     {reviews.length > 1 && <button onClick={compare} disabled={busy}>Compare latest two reviews</button>}
-    {comparison && <aside aria-label="Rescan comparison"><h3>What changed?</h3><p>{comparison.new.length} new · {comparison.still_present.length} still observed · {comparison.no_longer_observed.length} no longer observed.</p><p>{comparison.warning}</p></aside>}
+    {comparison && <aside aria-label="Rescan comparison"><h3>What changed?</h3><p>{comparison.new.length} new · {comparison.still_present.length} still observed · {comparison.no_longer_observed.length} no longer observed.</p><p>{comparison.warning}</p><ChangeImpact impact={comparison.change_impact} /></aside>}
     {current && <>
       <h3>{current.findings.length} findings to review</h3>
       <p>{current.files_analyzed} source files analyzed · {current.files_skipped} skipped · {current.parse_errors.length} Python parsing failures.</p>

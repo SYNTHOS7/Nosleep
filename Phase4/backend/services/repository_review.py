@@ -148,10 +148,12 @@ def analyze(data, origin='uploaded ZIP', commit=None):
     findings = list({item['id']: item for item in findings}.values())
     from backend.services.source_architecture import build_architecture
     architecture = build_architecture(files, findings)
+    from backend.services.change_impact import line_fingerprints
     return {'id': uuid.uuid4().hex, 'created_at': datetime.now(timezone.utc).isoformat(),
             'origin': origin, 'commit': commit, 'archive_sha256': hashlib.sha256(data).hexdigest(),
             'ruleset': RULESET, 'files_analyzed': len(files), 'files_skipped': len(skipped),
             'source_manifest': {path: hashlib.sha256(text.encode()).hexdigest() for path, text in sorted(files.items())},
+            'line_fingerprints': line_fingerprints(files),
             'parse_errors': parse_errors, 'entry_candidates': entries[:500], 'findings': findings,
             'architecture': architecture,
             'limitations': ['Five narrow source rules only; not a full security audit.',
@@ -180,5 +182,7 @@ def compare(before, after):
     if before['origin'] != after['origin'] or before['ruleset'] != after['ruleset']:
         raise ValueError('Compare the same repository origin and ruleset')
     old, new = {f['id'] for f in before['findings']}, {f['id'] for f in after['findings']}
+    from backend.services.change_impact import assess_change_impact
     return {'new': sorted(new-old), 'still_present': sorted(old & new), 'no_longer_observed': sorted(old-new),
+            'change_impact': assess_change_impact(before, after),
             'warning': 'No longer observed does not prove a fix; files may have been removed or excluded.'}
