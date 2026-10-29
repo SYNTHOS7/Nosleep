@@ -33,6 +33,8 @@ def github_snapshot(url):
     def read(url, maximum):
         with session.get(url, timeout=(10, 15), stream=True, allow_redirects=False,
                          headers={'Accept': 'application/vnd.github+json'}) as response:
+            if response.status_code in {403, 429} and (response.headers.get('X-RateLimit-Remaining') == '0' or response.status_code == 429):
+                raise ValueError("GitHub's public API rate limit has been reached. Try later or upload a repository ZIP.")
             if response.status_code != 200:
                 raise ValueError("GitHub could not provide this public repository. Check the URL or upload a ZIP.")
             result = bytearray()

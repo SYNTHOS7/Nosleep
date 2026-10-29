@@ -52,6 +52,22 @@ def test_github_url_rejected_before_network(url):
     with pytest.raises(ValueError): review.github_snapshot(url)
 
 
+def test_github_rate_limit_has_actionable_error(monkeypatch):
+    class Response:
+        status_code = 403
+        headers = {'X-RateLimit-Remaining': '0'}
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+    class Session:
+        def get(self, *args, **kwargs):
+            assert kwargs['allow_redirects'] is False
+            return Response()
+        def close(self): pass
+    monkeypatch.setattr(review.requests, 'Session', Session)
+    with pytest.raises(ValueError, match='rate limit.*ZIP'):
+        review.github_snapshot('https://github.com/pallets/itsdangerous')
+
+
 def test_api_roles_and_workspace_scope(monkeypatch, tmp_path):
     import backend.security.access as access
     from backend.app import app
