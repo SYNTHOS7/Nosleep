@@ -284,6 +284,8 @@ export default function App({ session = { demo: true, workspaces: {} }, onSignOu
         >
           {/* Workbench Tab Switcher Navigation */}
           <div className="workbench-nav">
+            <button className={`workbench-tab ${activeTab === 'repository' ? 'active' : ''}`} id="tab-repository-btn" title="Repository investigation" onClick={() => { setActiveTab('repository'); setSidebarCollapsed(false) }}><span className="tab-icon" aria-hidden="true">⌘</span>{!sidebarCollapsed && <span className="tab-title">Code review</span>}</button>
+            <button className={`workbench-tab ${activeTab === 'assets' ? 'active' : ''}`} id="tab-assets-btn" title="Asset inventory and route priority" onClick={() => { setActiveTab('assets'); setSidebarCollapsed(false) }}><span className="tab-icon" aria-hidden="true">◇</span>{!sidebarCollapsed && <span className="tab-title">Assets</span>}</button>
             <button
               className={`workbench-tab ${activeTab === 'chat' ? 'active' : ''}`}
               onClick={() => {
@@ -347,9 +349,7 @@ export default function App({ session = { demo: true, workspaces: {} }, onSignOu
           {/* Active Tab Panel Content */}
           {!sidebarCollapsed && (
             <div className="left-panel-content">
-              <button className="topic-chip" id="tab-repository-btn" onClick={() => setActiveTab('repository')}>Repository investigation</button>
               {activeTab === 'repository' && <RepositoryReview workspaceId={workspaceId} canWrite={canWrite} />}
-              <button className="topic-chip" id="tab-assets-btn" onClick={() => setActiveTab('assets')}>Asset inventory &amp; route priority</button>
               {activeTab === 'assets' && <AssetInventory workspaceId={workspaceId} canWrite={canWrite} onSelectChunk={handleSelectChunk} />}
               {activeTab === 'chat' && (
                 <ChatPanel

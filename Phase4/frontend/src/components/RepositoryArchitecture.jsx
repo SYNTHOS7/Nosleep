@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 
-export default function RepositoryArchitecture({ review }) {
+export default function RepositoryArchitecture({ review, onSelectFinding }) {
   const map = review.architecture
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState('')
@@ -59,11 +59,11 @@ export default function RepositoryArchitecture({ review }) {
         <ul>{[...incoming, ...outgoing].slice(0, 100).map((edge, i) => <li key={i}>{edge.source} → {edge.target} · declared at {edge.evidence.file}:{edge.evidence.line}</li>)}</ul>
         {incoming.length + outgoing.length > 100 && <p>First 100 shown; the full set is in the JSON export.</p>}
       </details>
-      <h4>Potential entry points in this file</h4>
+      <details><summary>Potential entry points in this file</summary>
       {map.routes.filter(route => route.file === focus.id).length === 0 ? <p>No supported route decorator detected. This does not rule out other entry points.</p> :
-        <ul>{map.routes.filter(route => route.file === focus.id).slice(0, 100).map(route => <li key={route.id}>{route.method} declaration · {route.function} · {route.file}:{route.line}. Exposure and access controls are unverified.</li>)}</ul>}
+        <ul>{map.routes.filter(route => route.file === focus.id).slice(0, 100).map(route => <li key={route.id}>{route.method} declaration · {route.function} · {route.file}:{route.line}. Exposure and access controls are unverified.</li>)}</ul>}</details>
       <h4>Security review for this component</h4>
-      {review.findings.filter(f => f.file === focus.id).length ? <ul>{review.findings.filter(f => f.file === focus.id).map(f => <li key={f.id}><a href={`#finding-${f.id}`}>{f.title} · line {f.line}</a></li>)}</ul> : <p>No matching findings within the current rules. This component has not been proven secure.</p>}
+      {review.findings.filter(f => f.file === focus.id).length ? <ul>{review.findings.filter(f => f.file === focus.id).map(f => <li key={f.id}><a href={`#finding-${f.id}`} onClick={onSelectFinding}>{f.title} · line {f.line}</a></li>)}</ul> : <p>No matching findings within the current rules. This component has not been proven secure.</p>}
     </>}
     <details><summary>What this map cannot establish</summary><p>{map.coverage}</p><p>{map.unresolved_import_count} external or unresolved import declarations; {map.parse_failures.length} Python files could not be mapped.</p><ul>{map.unknowns.map(text => <li key={text}>{text}</li>)}</ul></details>
   </section>

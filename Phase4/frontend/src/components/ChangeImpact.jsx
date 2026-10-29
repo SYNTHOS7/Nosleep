@@ -19,11 +19,12 @@ export default function ChangeImpact({ impact }) {
     </li>)}</ul>
     {impact.changed_files.length > 100 && <p>First 100 changed files shown.</p>}
     <details open={impact.affected_count > 0}><summary>Import locations to inspect ({impact.affected_count})</summary>
-      <ul>{impact.potentially_affected.map(item => <li key={item.file}>
-        <strong>{item.file}</strong> · {item.reason}: {item.changed_dependency}
+      <div>{impact.potentially_affected.map(item => <details key={item.file}>
+        <summary>{item.file} · {item.depth === 1 ? 'Direct connection' : 'Indirect connection'}</summary>
+        <p>{item.reason}: {item.changed_dependency}</p>
         <ul>{item.evidence_chain.map((edge, i) => <li key={i}>{edge.source} imports {edge.target} · {edge.evidence.file}:{edge.evidence.line} ({edge.snapshot} snapshot)</li>)}</ul>
         <p>{item.action}</p>
-      </li>)}</ul>
+      </details>)}</div>
       {impact.affected_list_truncated && <p>First 200 potentially affected files shown.</p>}
       {!impact.affected_count && <p>No importing files found within the static map. Dynamic or external consumers may still be affected.</p>}
     </details>
@@ -34,7 +35,6 @@ export default function ChangeImpact({ impact }) {
       <ul>{impact.route_candidates_to_retest.map(route => <li key={route.id}>{route.method} · {route.function} · {route.file}:{route.line} (after snapshot)</li>)}</ul>
       <p>Connected test files: {impact.connected_test_files.join(', ') || 'None identified from imports. Choose and run tests manually.'}</p>
     </details>
-    <ul>{impact.guidance.map(text => <li key={text}>{text}</li>)}</ul>
-    <p>{impact.limitations}</p>
+    <details><summary>How to use this review</summary><ul>{impact.guidance.map(text => <li key={text}>{text}</li>)}</ul><p>{impact.limitations}</p></details>
   </section>
 }
